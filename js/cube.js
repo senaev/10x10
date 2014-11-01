@@ -1,11 +1,15 @@
 //Cube class
-define(['data', 'cube'], function (d, Cube) {
+define(['data'], function (d) {
     function Cube(o) {
         var cube = this;
         this.x = o.x;
         this.y = o.y;
         this.field = o.field;
+        //указатель на игру, к которой кубик привязан
         this.app = o.app;
+        //понадобится дополнительно для дополнительных функций кубика
+        this.extra = {};
+        //направнение движения
         this.direction = (function (field) {
             if (field === "top") {
                 return "bottom";
@@ -24,6 +28,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
         })(this.field);
         this.color = d.colors[d.f.rand(0, d.levels[d.level].colorsCount - 1)];
+        //указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
             .addClass(this.color)
             .hover(
@@ -54,13 +59,13 @@ define(['data', 'cube'], function (d, Cube) {
             });
 
         this.toField();
-    }
+    };
 
     Cube.prototype.toField = function () {
         this.app.cubes._add(this);
         this.toState();
         this.app.container.append(this.$el);
-    }
+    };
     Cube.prototype.findFirstInLine = function () {
         var o = {field: this.field};
         if (o.field === "top" || o.field === "bottom") {
@@ -72,7 +77,7 @@ define(['data', 'cube'], function (d, Cube) {
             o.y = this.y;
         }
         return this.app.cubes._get(o);
-    }
+    };
     Cube.prototype.toState = function () {
         var left = this.x * d.oneWidth;
         var top = this.y * d.oneWidth;
@@ -94,6 +99,6 @@ define(['data', 'cube'], function (d, Cube) {
             left: left,
             top: top
         });
-    }
+    };
     return Cube;
 });

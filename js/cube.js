@@ -1,7 +1,11 @@
 //Cube class
 define(['data'], function (d) {
     function Cube(o) {
-        var cube = this;
+        var undefined,
+            cube,
+            color;
+
+        cube = this
         this.x = o.x;
         this.y = o.y;
         this.field = o.field;
@@ -27,7 +31,16 @@ define(['data'], function (d) {
                 return null;
             }
         })(this.field);
-        this.color = d.colors[d.f.rand(0, d.levels[d.level].colorsCount - 1)];
+
+        //задаем цвет кубика
+        if(o.color === undefined){
+            color = d.colors[d.f.rand(0, d.levels[d.level].colorsCount - 1)];
+        }
+        else{
+            color = o.color;
+        }
+        this.color = color;
+
         //указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
             .addClass(this.color)

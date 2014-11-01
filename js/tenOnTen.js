@@ -48,16 +48,13 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
             for (var number = 0, len = d.levels[d.level].cubesCount; number < len; number++) {
                 if (d.firstCubesPosition[number] !== undefined) {
                     var pos = d.firstCubesPosition[number];
-                    var cube = cubes._get({
-                        field: 'main',
-                        x: pos[0],
-                        y: pos[1]
-                    });
+                    var cube;
                     cube = new Cube({
                         x: pos[0],
                         y: pos[1],
                         field: 'main',
-                        app: tenOnTen
+                        app: tenOnTen,
+                        color: d.colors[number % d.levels[d.level].colorsCount]
                     });
                 }
                 else {

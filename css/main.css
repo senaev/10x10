@@ -1,0 +1,52 @@
+/*temporary*/
+
+.app-container {
+    display: block;
+    text-align: center;
+}
+
+/*game*/
+.tenOnTenContainer {
+    display: inline-block;
+}
+.tenOnTenContainer>.cube {
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    border-radius: 6px;
+    background: grey;
+    margin: 1px;
+}
+.tenOnTenContainer>.cube.firstInHoverLine{
+    opacity: 0.5;
+}
+.tenOnTenContainer>.cube.blue{
+    background-color: blue;
+}
+.tenOnTenContainer>.cube.green{
+    background-color: green;
+}
+.tenOnTenContainer>.cube.yellow{
+    background-color: goldenrod;
+}
+.tenOnTenContainer>.cube.red{
+    background-color: red;
+}
+.tenOnTenContainer>.cube.brown{
+    background-color: brown;
+}
+.tenOnTenContainer>.cube.pink{
+    background-color: pink;
+}
+.tenOnTenContainer>.cube.white{
+    background-color: lightgrey;
+}
+.tenOnTenContainer>.cube.purple{
+    background-color: purple;
+}
+.tenOnTenContainer>.cube.lightblue{
+    background-color: lightblue;
+}
+.tenOnTenContainer>.cube.orange{
+    background-color: orange;
+}

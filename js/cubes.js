@@ -21,21 +21,26 @@ define(['data'], function (d) {
     cubes._sideEach = function (func) {
         for (var key in d.fields) {
             if (d.fields[key] !== "main") {
-                for (var x = 0; x < d.cubesWidth; x++) {
-                    for (var y = 0; y < d.cubesWidth; y++) {
+                for (var y = 0; y < d.cubesWidth; y++) {
+                    for (var x = 0; x < d.cubesWidth; x++) {
                         func(cubes[d.fields[key]][x][y], d.fields[key], x, y);
                     }
                 }
             }
         }
     };
-    /*cubes._mainEach = function(func){
-     for (var x = 0; x < d.cubesWidth; x++) {
-     for (var y = 0; y < d.cubesWidth; y++) {
-     func( cubes["main"][x][y], "main", x, y );
-     }
-     }
-     };*/
+    cubes._mainEach = function (func) {
+        var i;
+        i = 0;
+        for (var y = 0; y < d.cubesWidth; y++) {
+            for (var x = 0; x < d.cubesWidth; x++) {
+                if(cubes["main"][x][y] !== null) {
+                    func(cubes["main"][x][y], "main", x, y, i);
+                    i++;
+                }
+            }
+        }
+    };
 
     return cubes;
 })

@@ -15,7 +15,7 @@ define(function () {
                 cubesCount: 5
             },
             "10": {
-                colorsCount: 5,
+                colorsCount: 10,
                 cubesCount: 10
             }
         },

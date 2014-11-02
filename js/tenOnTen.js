@@ -26,12 +26,25 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
         //Initialize container function
         (function () {
+            var background = '<div class="backgroungField">';
+            for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
+                background += '<div class="dCube"></div>';
+            }
+            background += '</div>';
+            var backgroundField = $(background).css({
+                height: d.oneWidth * d.cubesWidth,
+                width: d.oneWidth * d.cubesWidth,
+                padding: d.oneWidth * 3 + 3,
+                left: d.oneWidth * -3 - 3,
+                top: d.oneWidth * -3 - 3
+            });
             this.container.css({
                 height: d.oneWidth * d.cubesWidth,
                 width: d.oneWidth * d.cubesWidth,
                 margin: d.oneWidth * 3,
                 position: "relative"
-            }).addClass("tenOnTenContainer");
+            }).addClass("tenOnTenContainer")
+                .append(backgroundField);
         }).apply(this);
 
 
@@ -48,16 +61,13 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
             for (var number = 0, len = d.levels[d.level].cubesCount; number < len; number++) {
                 if (d.firstCubesPosition[number] !== undefined) {
                     var pos = d.firstCubesPosition[number];
-                    var cube = cubes._get({
-                        field: 'main',
-                        x: pos[0],
-                        y: pos[1]
-                    });
+                    var cube;
                     cube = new Cube({
                         x: pos[0],
                         y: pos[1],
                         field: 'main',
-                        app: tenOnTen
+                        app: tenOnTen,
+                        color: d.colors[number % d.levels[d.level].colorsCount]
                     });
                 }
                 else {

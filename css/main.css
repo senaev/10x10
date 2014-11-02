@@ -9,44 +9,84 @@
 .tenOnTenContainer {
     display: inline-block;
 }
-.tenOnTenContainer>.cube {
+.tenOnTenContainer>.backgroungField {
     position: absolute;
+    background-color: #999;
+    border-radius: 3px;
+}
+.tenOnTenContainer>.backgroungField>.dCube{
     height: 30px;
     width: 30px;
-    border-radius: 6px;
-    background: grey;
     margin: 1px;
+    background: #a0a0a0;
+    border-radius: 10px;
+    float: left;
 }
-.tenOnTenContainer>.cube.firstInHoverLine{
-    opacity: 0.5;
+.tenOnTenContainer>.cube {
+    position: absolute;
+    height: 28px;
+    width: 28px;
+    border-radius: 10px;
+    border-width: 1px;
+    border-style: solid;
+    /*background: grey;*/
+    margin-top: 1px;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    margin-left: 1px;
 }
+.tenOnTenContainer>.cube.firstInHoverLine, .tenOnTenContainer>.cube.dright{
+    background-image: url(../img/arrow.png);
+    background-repeat: no-repeat;
+    background-position: -2px;
+}
+.tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbotton{
+    background-position: -34px -2px;
+}
+.tenOnTenContainer>.cube.firstInHoverLine.fright, .tenOnTenContainer>.cube.dleft{
+    background-position: -66px -2px;
+}
+.tenOnTenContainer>.cube.firstInHoverLine.fbottom, .tenOnTenContainer>.cube.dtop{
+    background-position: -98px -2px;
+}
+
 .tenOnTenContainer>.cube.blue{
-    background-color: blue;
+    background-color: #4e7cff;
+    border-color: #7a9cff;
 }
 .tenOnTenContainer>.cube.green{
-    background-color: green;
+    background-color: #0e9f0e;
+    border-color: #12b012;
 }
 .tenOnTenContainer>.cube.yellow{
-    background-color: goldenrod;
+    background-color: #e7df00;
+    border-color: #fff600;
 }
 .tenOnTenContainer>.cube.red{
-    background-color: red;
+    background-color: #ff4949;
+    border-color: #ff6f6f;
 }
 .tenOnTenContainer>.cube.brown{
-    background-color: brown;
+    background-color: #df690a;
+    border-color: #ee710b;
 }
 .tenOnTenContainer>.cube.pink{
-    background-color: pink;
+    background-color: #ffc0cb;
+    border-color: #fed6dd;
 }
 .tenOnTenContainer>.cube.white{
-    background-color: lightgrey;
+    background-color: #ddd;
+    border-color: #e0e0e0;
 }
 .tenOnTenContainer>.cube.purple{
-    background-color: purple;
+    background-color: #ff46ff;
+    border-color: #fc69fc;
 }
 .tenOnTenContainer>.cube.lightblue{
-    background-color: lightblue;
+    background-color: #9bcada;
+    border-color: #add8e6;
 }
 .tenOnTenContainer>.cube.orange{
-    background-color: orange;
+    background-color: #ffb121;
+    border-color: #ffbb3f;
 }

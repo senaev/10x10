@@ -6,11 +6,13 @@ require.config({
         'cube': 'cube',
         'cubes': 'cubes',
         'data': 'data',
-        'movemap': 'moveMap'
+        'movemap': 'moveMap',
+        'transit': 'jquery.transit.min'
     }
 });
 
-require(['jquery', 'tenOnTen', 'cube', 'cubes', 'data'], function ($, TenOnTen, Cube, cubes, data) {
+require(['jquery', 'tenOnTen', 'transit'], function ($, TenOnTen) {
+    //console.log(transition)
     var tenOnTen = new TenOnTen({
         appContainer: "#app"
     });

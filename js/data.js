@@ -8,6 +8,8 @@ define(function () {
         oneWidth: 32,
         //список полей
         fields: ["main", "top", "right", "bottom", "left"],
+        //время одного шага анимации
+        animTime: 50,
         //распределение по уровням
         levels: {
             "1": {

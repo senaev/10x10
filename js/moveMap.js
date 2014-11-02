@@ -16,11 +16,11 @@ define(['data'], function (d) {
                 this.generateColorSheme();
             }
 
-            mainMask = this.generateMainMask({
+            this.mainMask = this.generateMainMask({
                 startCube: startCube,
                 cubes: cubes
             });
-            console.log(mainMask);
+            this.animate({startCube: startCube});
         };
         //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
         this.generateJSONMask = function (o) {
@@ -268,6 +268,23 @@ define(['data'], function (d) {
                 cubes: cubes
             });
             return mainMask;
+        }
+        //когда ход прощитан, запускаем саму анимацию
+        this.animate = function(o){
+            var map;
+            var startCube = o.startCube;
+            //добавляем постоянную стрелку с кубику, с которого начинается анимация
+            startCube.$el.addClass("d" + startCube.direction);
+
+            map = this.mainMask.animationMap;
+            for(var key in map){
+                var cube = map[key].cube;
+                var actions = map[key].actions;
+                for(var key1 in actions){
+                    var action = actions[key1];
+                    cube.addAnimate(action);
+                }
+            }
         }
     };
     return new MoveMap;

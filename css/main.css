@@ -30,20 +30,23 @@
     border-width: 1px;
     border-style: solid;
     /*background: grey;*/
-    margin: 1px;
+    margin-top: 1px;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    margin-left: 1px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine{
+.tenOnTenContainer>.cube.firstInHoverLine, .tenOnTenContainer>.cube.dright{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
     background-position: -2px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.ftop{
+.tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbotton{
     background-position: -34px -2px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.fright{
+.tenOnTenContainer>.cube.firstInHoverLine.fright, .tenOnTenContainer>.cube.dleft{
     background-position: -66px -2px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.fbottom{
+.tenOnTenContainer>.cube.firstInHoverLine.fbottom, .tenOnTenContainer>.cube.dtop{
     background-position: -98px -2px;
 }
 

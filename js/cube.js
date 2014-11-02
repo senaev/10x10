@@ -5,7 +5,7 @@ define(['data'], function (d) {
             cube,
             color;
 
-        cube = this
+        cube = this;
         this.x = o.x;
         this.y = o.y;
         this.field = o.field;
@@ -33,10 +33,10 @@ define(['data'], function (d) {
         })(this.field);
 
         //задаем цвет кубика
-        if(o.color === undefined){
+        if (o.color === undefined) {
             color = d.colors[d.f.rand(0, d.levels[d.level].colorsCount - 1)];
         }
-        else{
+        else {
             color = o.color;
         }
         this.color = color;
@@ -113,5 +113,74 @@ define(['data'], function (d) {
             top: top
         });
     };
+    Cube.prototype.addAnimate = function (o) {
+        var action,
+            delay,
+            duration,
+            cube;
+        action = o.action;
+        delay = o.delay;
+        duration = o.duration;
+        cube = this;
+        setTimeout(function (o) {
+            cube.animate(o);
+        }({action: action, duration: duration}));
+    };
+    Cube.prototype.animate = function (o) {
+        function bezier(duration) {
+            var o = {
+                1: 99,
+                2: 58,
+                3: 42,
+                4: 34,
+                5: 27,
+                6: 23,
+                7: 19,
+                8: 15,
+                9: 12,
+                10: 11,
+                11: 10
+            }
+            return o[duration];
+        }
+
+        var action,
+            duration,
+            dur;
+        action = o.action;
+        duration = o.duration;
+        switch (action) {
+            //движение вправо со столкновением
+            case "srBump":
+                dur = duration - 1;
+                this.$el.transition({
+                    x: '+=' + dur * d.oneWidth,
+                    duration: d.animTime * dur,
+                    easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)'
+                })
+                    .transition({
+                        x: "+=4",
+                        scale: [0.9, 1.1],
+                        duration: d.animTime / 2
+                    })
+                    .transition({
+                        x: "-=4",
+                        scale: 1,
+                        duration: d.animTime / 2
+                    });
+                break;
+            //движение вправо с последующим вливанием в правое поле
+            case "srToSide":
+                dur = duration;
+                var easing = 'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
+                console.log(easing);
+                this.$el.transition({
+                    x: '+=' + dur * d.oneWidth,
+                    duration: d.animTime * dur,
+                    easing: easing
+                })
+                break;
+        }
+    }
     return Cube;
 });

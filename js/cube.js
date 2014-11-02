@@ -43,7 +43,7 @@ define(['data'], function (d) {
 
         //указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
-            .addClass(this.color)
+            .addClass(this.color + " f" + this.field)
             .hover(
             function () {
                 if (cube.field === "main") {

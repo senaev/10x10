@@ -20,6 +20,7 @@ define(['data'], function (d) {
                 startCube: startCube,
                 cubes: cubes
             });
+            console.log(mainMask);
         };
         //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
         this.generateJSONMask = function (o) {
@@ -247,9 +248,7 @@ define(['data'], function (d) {
                             });
                         }
                     }
-                    console.log(this.animationMap);
                 };
-
                 this.step();
             }
 
@@ -268,6 +267,7 @@ define(['data'], function (d) {
                 startCube: startCube,
                 cubes: cubes
             });
+            return mainMask;
         }
     };
     return new MoveMap;

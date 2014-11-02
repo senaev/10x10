@@ -26,12 +26,25 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
         //Initialize container function
         (function () {
+            var background = '<div class="backgroungField">';
+            for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
+                background += '<div class="dCube"></div>';
+            }
+            background += '</div>';
+            var backgroundField = $(background).css({
+                height: d.oneWidth * d.cubesWidth,
+                width: d.oneWidth * d.cubesWidth,
+                padding: d.oneWidth * 3 + 3,
+                left: d.oneWidth * -3 - 3,
+                top: d.oneWidth * -3 - 3
+            });
             this.container.css({
                 height: d.oneWidth * d.cubesWidth,
                 width: d.oneWidth * d.cubesWidth,
                 margin: d.oneWidth * 3,
                 position: "relative"
-            }).addClass("tenOnTenContainer");
+            }).addClass("tenOnTenContainer")
+                .append(backgroundField);
         }).apply(this);
 
 

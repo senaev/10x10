@@ -1,9 +1,12 @@
-define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) {
+define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) {
     var TenOnTen = function (args) {
         var undefined;
         var tenOnTen = this;
 
+        //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
+        //которому эти кубики принадлежат
         this.cubes = cubes;
+        this.cubes._app = this;
 
         //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
@@ -84,17 +87,24 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
         this.initialize();
 
         this.run = function (o) {
+            var moveMap;
+            moveMap = new MoveMap();
+
             moveMap.generate({
                 startCube: o.startCube,
                 cubes: this.cubes
             });
-
-
             //пошаговый запуск анимации
             moveMap.animate({
-                startCube: o.startCube,
                 app: this
             });
+            //подитоживание - внесение изменений, произошедших в абстрактном moveMap
+            //в реальную коллекцию cubes
+            this.cubes._mergeMoveMap(moveMap);
+
+            console.log("");
+            console.log("//////////ITOG CUBES:");
+            console.log(this.cubes);
         }
     };
 

@@ -1,20 +1,25 @@
 define(['data', 'mainMask'], function (d, MainMask) {
-
+    /**
+     * класс для удобной работы с абстрактным классом MainMask
+     * абстрагирует функции, связанные с анимацией от этого класса
+     * сочетает в себе как функцию генерации хода, так и генерации анимации
+     * предаставляет удобрый интерфейс для доступа к методам построения хода
+     * для основного приложения
+     */
     function MoveMap() {
         var undefined;
 
         var moveMap = this;
         this.generate = function (o) {
             var cubes,
-                startCube,
                 mainMask;
 
             cubes = o.cubes;
-            startCube = o.startCube;
+            this.startCube = o.startCube;
 
             //создаем класс маски
             this.mainMask = new MainMask({
-                startCube: startCube,
+                startCube: this.startCube,
                 cubes: cubes
             });
 
@@ -27,14 +32,17 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.animationMap = [];
             var noEmptyActions = [];
 
+            //массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
+            //в последовательности,  в которой они туда попали
+            this.toSideActions = [];
+
             //поскольку у каждого кубика одинаковое число шагов анимации, чтобы
             //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
             this.animationLength = this.mainMask.arr[0].steps.length;
 
             for (var key in this.mainMask.arr) {
-                var steps = this.mainMask.arr[key].steps;
-                //console.log(steps);
-                var cube = this.mainMask.arr[key].cube;
+                var mCube = this.mainMask.arr[key];
+                var steps = mCube.steps;
                 var actions = [{action: null, duration: 0}];
                 for (var key1 = 0; key1 < steps.length; key1++) {
                     var step = steps[key1];
@@ -49,6 +57,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                             case "toSide":
                                 lastAction.action = lastAction.action + "ToSide";
                                 lastAction.duration++;
+                                this.toSideActions.push(mCube);
                                 break;
                             case null:
                                 if (["st", "sr", "sl", "sb"].indexOf(lastAction.action) > -1) {
@@ -90,18 +99,19 @@ define(['data', 'mainMask'], function (d, MainMask) {
         //когда ход прощитан, запускаем саму анимацию
         this.animate = function (o) {
             var map;
-            var startCube = o.startCube;
+            var startCube = this.startCube;
 
             //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
             startCube.$el.addClass("d" + startCube.direction);
 
             //блокируем приложение от начала до конца анимации
+            //минус один - потому, что в последний такт обычно анимация чисто символическая
             o.app.blockApp = true;
             setTimeout(
                 function (app) {
                     app.blockApp = false;
                 },
-                this.animationLength * d.animTime,
+                this.animationLength * d.animTime - 1,
                 o.app
             );
 
@@ -166,5 +176,5 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.colorSheme = colors;
         };
     };
-    return new MoveMap;
+    return MoveMap;
 });

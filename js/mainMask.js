@@ -84,7 +84,6 @@ define(['mCube'], function (MCube) {
                 this.step();
             }
             else {
-                console.log(this.arr);
                 /**
                  * здесь долдна быть функция подрыва кубиков и проверки,
                  * продолжается ход или нет

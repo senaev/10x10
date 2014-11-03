@@ -159,6 +159,10 @@ define(['data'], function (d) {
             cube.animate(o);
         }({action: action, duration: duration}));
     };
+    //добавляем объект анимации на обработку через время, полученное в атрибутах
+    Cube.prototype.remove = function () {
+        this.$el.remove();
+    };
     //сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     //преобразования html-элемента кубика
     Cube.prototype.animate = function (o) {

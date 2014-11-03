@@ -3,7 +3,8 @@ define(['data'], function (d) {
     function Cube(o) {
         var undefined,
             cube,
-            color;
+            color,
+            visibleModeClasses;
 
         cube = this;
         this.x = o.x;
@@ -41,11 +42,26 @@ define(['data'], function (d) {
         }
         this.color = color;
 
+        //проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
+        if (cube.field !== "main") {
+            if (this._inFieldIsVisible()) {
+                visibleModeClasses = " ";
+            }
+            else {
+                visibleModeClasses = " cubeHidden cubeUnvisible";
+            }
+        }
+        else {
+            visibleModeClasses = " ";
+        }
+
         //указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
-            .addClass(this.color + " f" + this.field)
+            .addClass(this.color + " f" + this.field + visibleModeClasses)
             .hover(
-            function () {
+            function (e) {
+                e.preventDefault();
+
                 if (cube.field === "main") {
 
                 }
@@ -53,7 +69,9 @@ define(['data'], function (d) {
                     cube.findFirstInLine().$el.addClass("firstInHoverLine");
                 }
             },
-            function () {
+            function (e) {
+                e.preventDefault();
+
                 if (cube.field === "main") {
 
                 }
@@ -61,24 +79,37 @@ define(['data'], function (d) {
                     cube.findFirstInLine().$el.removeClass("firstInHoverLine");
                 }
             })
-            .click(function () {
+            .click(function (e) {
+                e.preventDefault();
+
+                //если стоит блокировка событий приложения - не даём пользователю ничего сделать
+                if(cube.app.blockApp){
+                    return;
+                }
+
+                //если щелчек произошол по главному полю - ничего не делаем
                 if (cube.field === "main") {
 
                 }
+                //если по боковому
                 else {
+                    //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
                     var startCube = cube.findFirstInLine();
+                    //и отправляем его в путь-дорогу
                     cube.app.run({startCube: startCube});
                 }
             });
 
         this.toField();
-    };
+    }
 
+    //отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
     Cube.prototype.toField = function () {
         this.app.cubes._add(this);
         this.toState();
         this.app.container.append(this.$el);
     };
+    //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
     Cube.prototype.findFirstInLine = function () {
         var o = {field: this.field};
         if (o.field === "top" || o.field === "bottom") {
@@ -91,6 +122,7 @@ define(['data'], function (d) {
         }
         return this.app.cubes._get(o);
     };
+    //задаем html-элементу кубика положение на доске
     Cube.prototype.toState = function () {
         var left = this.x * d.oneWidth;
         var top = this.y * d.oneWidth;
@@ -113,6 +145,7 @@ define(['data'], function (d) {
             top: top
         });
     };
+    //добавляем объект анимации на обработку через время, полученное в атрибутах
     Cube.prototype.addAnimate = function (o) {
         var action,
             delay,
@@ -126,6 +159,8 @@ define(['data'], function (d) {
             cube.animate(o);
         }({action: action, duration: duration}));
     };
+    //сама функция анимации - в зависимости од переданного значения, выполняем те или иные
+    //преобразования html-элемента кубика
     Cube.prototype.animate = function (o) {
 
         var action,
@@ -222,5 +257,16 @@ define(['data'], function (d) {
             cube.$el.transition(trans)
         }
     }
+    Cube.prototype._inFieldIsVisible = function () {
+        var pos;
+        if (this.field === "top" || this.field === "bottom") {
+            pos = this["y"];
+            return (this.field === "top") ? pos > 6 : pos < 3;
+        }
+        else {
+            pos = this["x"];
+            return (this.field === "left") ? pos > 6 : pos < 3;
+        }
+    };
     return Cube;
 });

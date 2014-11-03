@@ -5,6 +5,9 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
         this.cubes = cubes;
 
+        //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
+        this.blockApp = false;
+
         //variables
         var appContainer;
 
@@ -88,7 +91,10 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
 
             //пошаговый запуск анимации
-            moveMap.animate({startCube: o.startCube});
+            moveMap.animate({
+                startCube: o.startCube,
+                app: this
+            });
         }
     };
 

@@ -26,6 +26,11 @@ define(['data', 'mainMask'], function (d, MainMask) {
         this.createAnimationMap = function () {
             this.animationMap = [];
             var noEmptyActions = [];
+
+            //поскольку у каждого кубика одинаковое число шагов анимации, чтобы
+            //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
+            this.animationLength = this.mainMask.arr[0].steps.length;
+
             for (var key in this.mainMask.arr) {
                 var steps = this.mainMask.arr[key].steps;
                 //console.log(steps);
@@ -83,28 +88,42 @@ define(['data', 'mainMask'], function (d, MainMask) {
         };
 
         //когда ход прощитан, запускаем саму анимацию
-        this.animate = function(o){
+        this.animate = function (o) {
             var map;
             var startCube = o.startCube;
-            //добавляем постоянную стрелку с кубику, с которого начинается анимация
+
+            //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
             startCube.$el.addClass("d" + startCube.direction);
 
+            //блокируем приложение от начала до конца анимации
+            o.app.blockApp = true;
+            setTimeout(
+                function (app) {
+                    app.blockApp = false;
+                },
+                this.animationLength * d.animTime,
+                o.app
+            );
+
+            //перебираем карту анимации и передаем каждому кубику объект действия,
+            //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
+            //далее кубик запускает таймер до выполнения и выполняет нужную анимацию
             map = this.animationMap;
-            for(var key in map){
+            for (var key in map) {
                 var cube = map[key].cube;
                 var actions = map[key].actions;
-                for(var key1 in actions){
+                for (var key1 in actions) {
                     var action = actions[key1];
                     cube.addAnimate(action);
                 }
             }
-        }
+        };
 
 
         /**
          * Функции, которым могут понадобиться в дальнейшем
          */
-        //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
+            //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
         this.generateJSONMask = function (o) {
 
             //цветовая схема нужна для укорачивания данных, передаваемых по сети

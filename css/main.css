@@ -6,14 +6,18 @@
 }
 
 /*game*/
+/*основной контейнер, класс присваивается элементу, передаваемому в приложение,
+он же срановится корневым для всех элементов игры*/
 .tenOnTenContainer {
     display: inline-block;
 }
+/* само главное поле бэкграунда*/
 .tenOnTenContainer>.backgroungField {
     position: absolute;
     background-color: #999;
     border-radius: 3px;
 }
+/*кубики бэкграунда на главном поле*/
 .tenOnTenContainer>.backgroungField>.dCube{
     height: 30px;
     width: 30px;
@@ -22,6 +26,9 @@
     border-radius: 10px;
     float: left;
 }
+
+/*сам кубик*/
+
 .tenOnTenContainer>.cube {
     position: absolute;
     height: 28px;
@@ -35,6 +42,24 @@
     margin-bottom: 1px;
     margin-left: 1px;
 }
+
+
+
+/*
+для скрытия кубиков в боковых панелях
+*/
+.tenOnTenContainer>.cube.cubeUnvisible{
+    /*здесь, возможно, будет класс для развёртывания кубика, а может и не будет*/
+}
+.tenOnTenContainer>.cube.cubeUnvisible.cubeHidden{
+    display: none;
+}
+
+
+
+
+/*классы стрелок - могут быть у первого кубика под наведенной строкой в боковом меню,
+либо у кубика на главном поле, имеющего направление*/
 .tenOnTenContainer>.cube.firstInHoverLine, .tenOnTenContainer>.cube.dright{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
@@ -56,6 +81,7 @@
     background-position: -98px -2px;
 }
 
+/*расцветка кубиков*/
 .tenOnTenContainer>.cube.blue{
     background-color: #4e7cff;
     border-color: #7a9cff;

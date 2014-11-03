@@ -40,13 +40,19 @@
     background-repeat: no-repeat;
     background-position: -2px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbotton{
+.tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbottom{
+    background-image: url(../img/arrow.png);
+    background-repeat: no-repeat;
     background-position: -34px -2px;
 }
 .tenOnTenContainer>.cube.firstInHoverLine.fright, .tenOnTenContainer>.cube.dleft{
+    background-image: url(../img/arrow.png);
+    background-repeat: no-repeat;
     background-position: -66px -2px;
 }
 .tenOnTenContainer>.cube.firstInHoverLine.fbottom, .tenOnTenContainer>.cube.dtop{
+    background-image: url(../img/arrow.png);
+    background-repeat: no-repeat;
     background-position: -98px -2px;
 }
 

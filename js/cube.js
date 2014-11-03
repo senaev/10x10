@@ -127,6 +127,50 @@ define(['data'], function (d) {
         }({action: action, duration: duration}));
     };
     Cube.prototype.animate = function (o) {
+
+        var action,
+            duration,
+            dur,
+            cube;
+        cube = this;
+        action = o.action;
+        duration = o.duration;
+        switch (action) {
+            //движение вправо со столкновением
+            case "srBump":
+                slideWithBump("x", "+");
+                break;
+            //движение вправо со столкновением
+            case "sbBump":
+                slideWithBump("y", "+");
+                break;
+            //движение вправо со столкновением
+            case "slBump":
+                slideWithBump("x", "-");
+                break;
+            //движение вправо со столкновением
+            case "stBump":
+                slideWithBump("y", "-");
+                break;
+            //движение вправо с последующим вливанием в правое поле
+            case "srToSide":
+                slideToSide("x", "+");
+                break;
+            //движение вправо с последующим вливанием в правое поле
+            case "stToSide":
+                slideToSide("y", "-");
+                break;
+            //движение вправо с последующим вливанием в правое поле
+            case "slToSide":
+                slideToSide("x", "-");
+                break;
+            //движение вправо с последующим вливанием в правое поле
+            case "sbToSide":
+                slideToSide("y", "+");
+                break;
+        }
+
+
         function bezier(duration) {
             var o = {
                 1: 99,
@@ -144,42 +188,38 @@ define(['data'], function (d) {
             return o[duration];
         }
 
-        var action,
-            duration,
-            dur;
-        action = o.action;
-        duration = o.duration;
-        switch (action) {
-            //движение вправо со столкновением
-            case "srBump":
-                dur = duration - 1;
-                this.$el.transition({
-                    x: '+=' + dur * d.oneWidth,
-                    duration: d.animTime * dur,
-                    easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)'
-                })
-                    .transition({
-                        x: "+=4",
-                        scale: [0.9, 1.1],
-                        duration: d.animTime / 2
-                    })
-                    .transition({
-                        x: "-=4",
-                        scale: 1,
-                        duration: d.animTime / 2
-                    });
-                break;
-            //движение вправо с последующим вливанием в правое поле
-            case "srToSide":
-                dur = duration;
-                var easing = 'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
-                console.log(easing);
-                this.$el.transition({
-                    x: '+=' + dur * d.oneWidth,
-                    duration: d.animTime * dur,
-                    easing: easing
-                })
-                break;
+        function slideWithBump(prop, sign) {
+            dur = duration - 1;
+            var scale = (prop === "x") ? [0.9, 1.1] : [1.1, 0.9];
+            var trans0 = {
+                duration: d.animTime * dur,
+                easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)'
+            };
+            trans0[prop] = sign + '=' + dur * d.oneWidth;
+            var trans1 = {
+                scale: scale,
+                duration: d.animTime / 2
+            };
+            trans1[prop] = (sign === "+" ? "+" : "-") + "=4";
+            var trans2 = {
+                scale: 1,
+                duration: d.animTime / 2
+            }
+            trans2[prop] = (sign === "+" ? "-" : "+") + "=4";
+            cube.$el.transition(trans0)
+                .transition(trans1)
+                .transition(trans2);
+        }
+
+        function slideToSide(prop, sign) {
+            dur = duration;
+            var easing = 'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
+            var trans = {
+                duration: d.animTime * dur,
+                easing: easing
+            }
+            trans[prop] = sign + '=' + dur * d.oneWidth;
+            cube.$el.transition(trans)
         }
     }
     return Cube;

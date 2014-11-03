@@ -140,27 +140,71 @@ define(['data', 'cube'], function (d, Cube) {
         //данный кубик
         for (var key in arr) {
             var mCube = arr[key];
-            if (mCube.x < 0 || mCube.x > 9 || mCube.y < 0 || mCube.y > 9) {
-                //кубик входит в панель
+            if (mCube.x > -1 && mCube.x < 10 && mCube.y > -1 && mCube.y < 10) {
+                //кубик просто перемещается и не входит не в какую панель
+                //устанавливаем кубик в новую клетку
+                this._set({field: "main", x: mCube.x, y: mCube.y});
+                //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
+                //обнуляем эту клетку
+                if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
+                    cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
+                }
                 mCube.cube.x = mCube.x;
                 mCube.cube.y = mCube.y;
-                this._pushInLine(mCube.cube);
-
             }
         }
-        for(var key in moveMap.toSideActions){
+        for (var key in moveMap.toSideActions) {
+            //вычисляем,
+            /*var field,
+                x,
+                y;
+            if (mCube.x < 0) {
+                field = "left";
+                x = mCube.x + d.cubesWidth;
+                y = mCube.y;
+            }
+            else if (mCube.x > 9) {
+                field = "right";
+                x = mCube.x - d.cubesWidth;
+                y = mCube.y;
+            }
+            else if (mCube.y < 0) {
+                field = "top";
+                x = mCube.x;
+                y = mCube.y + d.cubesWidth;
+            }
+            else if (mCube.y > 9) {
+                field = "bottom";
+                x = mCube.x;
+                y = mCube.y - d.cubesWidth;
+            }*/
+
+
             var mCube = moveMap.toSideActions[key];
-            //устанавливаем новую позицию кубика в боковом поле
-            cubes._set({field: "main", x: mCube.x, y: mCube.y}, mCube.cube);
-            //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
+
+            //если клетку, с которой сошел кубик, ещё не занял другой кубик
             //обнуляем эту клетку
             if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
                 cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
             }
             mCube.cube.x = mCube.x;
             mCube.cube.y = mCube.y;
+            this._pushInLine(mCube.cube);
         }
         console.log(arr);
+    };
+    cubes.animate = function (o) {
+        var action,
+            cube;
+
+        action = o.action;
+        cube = o.cube;
+        switch  (action){
+            case "fromLine":
+        //        var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
+        //        console.log(line);
+                break;
+        }
     };
 
     return cubes;

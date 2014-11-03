@@ -14,13 +14,13 @@ define(['data', 'mainMask'], function (d, MainMask) {
             var cubes,
                 mainMask;
 
-            cubes = o.cubes;
+            this.cubes = o.cubes;
             this.startCube = o.startCube;
 
             //создаем класс маски
             this.mainMask = new MainMask({
                 startCube: this.startCube,
-                cubes: cubes
+                cubes: this.cubes
             });
 
             //генерируем из м-кубиков маски карту анимации
@@ -101,9 +101,6 @@ define(['data', 'mainMask'], function (d, MainMask) {
             var map;
             var startCube = this.startCube;
 
-            //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
-            startCube.$el.addClass("d" + startCube.direction);
-
             //блокируем приложение от начала до конца анимации
             //минус один - потому, что в последний такт обычно анимация чисто символическая
             o.app.blockApp = true;
@@ -114,6 +111,11 @@ define(['data', 'mainMask'], function (d, MainMask) {
                 this.animationLength * d.animTime - 1,
                 o.app
             );
+
+            this.cubes.animate({action: "fromLine", cube: "startCube"});
+
+            //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
+            startCube.$el.addClass("d" + startCube.direction);
 
             //перебираем карту анимации и передаем каждому кубику объект действия,
             //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,

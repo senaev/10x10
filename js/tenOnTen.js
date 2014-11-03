@@ -50,6 +50,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
         //Initialize map function
         this.initialize = function () {
+            //генерируем кубики в боковых панелях
             cubes._sideEach(function (cube, field, x, y) {
                 cube = new Cube({
                     x: x,
@@ -58,6 +59,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                     app: tenOnTen
                 });
             });
+            //генерируем кубики на главном поле
             for (var number = 0, len = d.levels[d.level].cubesCount; number < len; number++) {
                 if (d.firstCubesPosition[number] !== undefined) {
                     var pos = d.firstCubesPosition[number];
@@ -75,6 +77,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                 }
             }
         };
+        //запускаем инициализацию приложения
         this.initialize();
 
         this.run = function (o) {
@@ -82,6 +85,10 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                 startCube: o.startCube,
                 cubes: this.cubes
             });
+
+
+            //пошаговый запуск анимации
+            moveMap.animate({startCube: o.startCube});
         }
     };
 

@@ -111,7 +111,7 @@ define(['data', 'cube'], function (d, Cube) {
         //меняем значения кубика
         cube.field = cube.direction;
         cube.direction = null;
-        //получаем линию, вкоторую вставим кубик
+        //получаем линию, в которую вставим кубик
         var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
         //получаем удаляемый (дальний от mainField в линии) кубик
         var removedCube = this._get(line[0]);
@@ -143,7 +143,7 @@ define(['data', 'cube'], function (d, Cube) {
             if (mCube.x > -1 && mCube.x < 10 && mCube.y > -1 && mCube.y < 10) {
                 //кубик просто перемещается и не входит не в какую панель
                 //устанавливаем кубик в новую клетку
-                this._set({field: "main", x: mCube.x, y: mCube.y});
+                this._set({field: "main", x: mCube.x, y: mCube.y}, mCube.cube);
                 //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
                 //обнуляем эту клетку
                 if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
@@ -154,34 +154,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
         }
         for (var key in moveMap.toSideActions) {
-            //вычисляем,
-            /*var field,
-                x,
-                y;
-            if (mCube.x < 0) {
-                field = "left";
-                x = mCube.x + d.cubesWidth;
-                y = mCube.y;
-            }
-            else if (mCube.x > 9) {
-                field = "right";
-                x = mCube.x - d.cubesWidth;
-                y = mCube.y;
-            }
-            else if (mCube.y < 0) {
-                field = "top";
-                x = mCube.x;
-                y = mCube.y + d.cubesWidth;
-            }
-            else if (mCube.y > 9) {
-                field = "bottom";
-                x = mCube.x;
-                y = mCube.y - d.cubesWidth;
-            }*/
-
-
             var mCube = moveMap.toSideActions[key];
-
             //если клетку, с которой сошел кубик, ещё не занял другой кубик
             //обнуляем эту клетку
             if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
@@ -189,6 +162,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
             mCube.cube.x = mCube.x;
             mCube.cube.y = mCube.y;
+            //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
         console.log(arr);

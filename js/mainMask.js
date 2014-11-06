@@ -1,7 +1,7 @@
 /**
  * Created by aa.senaev on 03.11.2014.
  */
-define(['mCube'], function (MCube) {
+define(['mCube', 'data'], function (MCube, d) {
 
     /**
      * класс для маски(слепок текущего состояния с возможностью создать пошагово один ход игры)
@@ -15,7 +15,8 @@ define(['mCube'], function (MCube) {
     function MainMask(o) {
         var cubes,
             startCube,
-            mainMask;
+            mainMask,
+            undefined;
 
         mainMask = this;
         cubes = o.cubes;
@@ -84,12 +85,48 @@ define(['mCube'], function (MCube) {
                 this.step();
             }
             else {
-                /**
-                 * здесь долдна быть функция подрыва кубиков и проверки,
-                 * продолжается ход или нет
-                 * и если да, то выполняем еще один степ()
-                 */
+                //ищем, появились ли у нас в результате хода смежные кубики
+                //ещё один шаг хода, если нет - заканчиваем ход
+                var adjacentCubes = this.searchAdjacentCubes();
+                if(adjacentCubes.length){
+                    //если такие группы кубиков имеются, подрываем их и запускаем
+                    //еще один шаг хода
+                }
+                else{
+                    //если нет - заканчиваем ход
+                }
             }
+        };
+        this.searchAdjacentCubes = function(){
+            var arr = this.arr,
+                byColorPrev = {},
+                byColor = {};
+            //создаем объект с массивами м-кубиков по цветам
+            for(var key in arr){
+                var mCube = arr[key];
+                //если такого значения в объекте еще нет - сздаем его
+                if(byColorPrev[mCube.color] === undefined){
+                    byColorPrev[mCube.color] = [];
+                }
+                //добавляем в этот массив все кубики, которые есть на доске
+                if(mCube.x > 0 && mCube.x < d.cubesWidth && mCube.y > 0 && mCube.y < d.cubesWidth) {
+                    byColorPrev[mCube.color].push(mCube);
+                }
+            }
+            //если количество кубиков определенного цвета на доске меньшь двух,
+            //исключаем эту группу кубиков из обработки
+            for(var key in byColorPrev){
+                if(byColorPrev[key].length > 2){
+                    byColor[key] = byColorPrev[key];
+                }
+            }
+            for(var key in byColor){
+
+            }
+
+            console.log(byColor);
+
+            return [];
         };
         this.step();
     }

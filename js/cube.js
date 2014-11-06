@@ -207,6 +207,9 @@ define(['data'], function (d) {
             case "sbToSide":
                 slideToSide("y", "+");
                 break;
+            case "nearer":
+                nearer();
+                break;
         }
 
 
@@ -258,6 +261,27 @@ define(['data'], function (d) {
                 easing: easing
             }
             trans[prop] = sign + '=' + dur * d.oneWidth;
+            cube.$el.transition(trans)
+        }
+
+        function nearer(){
+            var prop,
+                sign = "-",
+                trans = {};
+
+            if (cube.field === "top" || cube.field === "bottom") {
+                prop = "y";
+                if(cube.field === "top"){
+                    sign = "+";
+                }
+            }
+            else {
+                prop = "x";
+                if(cube.field === "left"){
+                    sign = "+";
+                }
+            }
+            trans[prop] = sign + "=" + duration * d.oneWidth;
             cube.$el.transition(trans)
         }
     }

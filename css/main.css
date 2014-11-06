@@ -52,7 +52,7 @@
     /*здесь, возможно, будет класс для развёртывания кубика, а может и не будет*/
 }
 .tenOnTenContainer>.cube.cubeUnvisible.cubeHidden{
-    display: none;
+    /*display: none;*/
 }
 
 

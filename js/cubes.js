@@ -23,6 +23,10 @@ define(['data', 'cube'], function (d, Cube) {
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
         cubes[o.field][o.x][o.y] = value;
+        if(value !== null && value instanceof Cube) {
+            value.x = o.x;
+            value.y = o.y;
+        }
         return this[o.field][o.x][o.y];
     };
     //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -96,15 +100,16 @@ define(['data', 'cube'], function (d, Cube) {
         var line = this._getLine({x: x, y: y, field: field});
         //пробегаемся, меняем значения в коллекции
         for (var key = line.length - 1; key > 0; key--) {
-            this._set(line[key], this._get(line[key - 1]));
+            var prevCube = this._get(line[key - 1]);
+            this._set(line[key], prevCube);
         }
         //генерируем кубик для крайнего значения в линии
-        this._set(line[0], new Cube({
+        cubes._set(line[0], new Cube({
             x: line[0].x,
             y: line[0].y,
             field: line[0].field,
             app: this._app
-        }))
+        }));
     };
     //добавляем в линию кубик, по кубику мы должны определить, в какую линию
     cubes._pushInLine = function (cube) {
@@ -165,7 +170,7 @@ define(['data', 'cube'], function (d, Cube) {
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
-        console.log(arr);
+        //console.log(arr);
     };
     cubes.animate = function (o) {
         var action,
@@ -173,10 +178,13 @@ define(['data', 'cube'], function (d, Cube) {
 
         action = o.action;
         cube = o.cube;
-        switch  (action){
+        switch (action) {
             case "fromLine":
-        //        var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
-        //        console.log(line);
+                var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
+                //this._get(line[6]);
+                this._get(line[7]).animate({action: "nearer", duration: 1});
+                this._get(line[8]).animate({action: "nearer", duration: 1});
+                var nearerToFieldCubeSecond = this._get(line[7]);
                 break;
         }
     };

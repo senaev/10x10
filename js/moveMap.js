@@ -112,7 +112,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                 o.app
             );
 
-            this.cubes.animate({action: "fromLine", cube: "startCube"});
+            this.cubes.animate({action: "fromLine", cube: startCube});
 
             //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
             startCube.$el.addClass("d" + startCube.direction);

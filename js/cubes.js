@@ -115,7 +115,7 @@ define(['data', 'cube'], function (d, Cube) {
     cubes._pushInLine = function (cube) {
         //меняем значения кубика
         cube.field = cube.direction;
-        cube.direction = null;
+        cube.direction = d.f.reverseField(cube.field);
         //получаем линию, в которую вставим кубик
         var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
         //получаем удаляемый (дальний от mainField в линии) кубик

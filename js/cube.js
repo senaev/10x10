@@ -80,7 +80,10 @@ define(['data'], function (d) {
                 }
             })
             .click(function (e) {
+                //не даем продолжить выполнение событий
                 e.preventDefault();
+                //и снимаем курсор с элемента
+                cube.$el.trigger("mouseout");
 
                 //если стоит блокировка событий приложения - не даём пользователю ничего сделать
                 if (cube.app.blockApp) {
@@ -189,35 +192,35 @@ define(['data'], function (d) {
         switch (action) {
             //движение вправо со столкновением
             case "srBump":
-                slideWithBump("x", "+");
+                slideWithBump("left", "+");
                 break;
             //движение вправо со столкновением
             case "sbBump":
-                slideWithBump("y", "+");
+                slideWithBump("top", "+");
                 break;
             //движение вправо со столкновением
             case "slBump":
-                slideWithBump("x", "-");
+                slideWithBump("left", "-");
                 break;
             //движение вправо со столкновением
             case "stBump":
-                slideWithBump("y", "-");
+                slideWithBump("top", "-");
                 break;
             //движение вправо с последующим вливанием в правое поле
             case "srToSide":
-                slideToSide("x", "+");
+                slideToSide("left", "+");
                 break;
             //движение вправо с последующим вливанием в правое поле
             case "stToSide":
-                slideToSide("y", "-");
+                slideToSide("top", "-");
                 break;
             //движение вправо с последующим вливанием в правое поле
             case "slToSide":
-                slideToSide("x", "-");
+                slideToSide("left", "-");
                 break;
             //движение вправо с последующим вливанием в правое поле
             case "sbToSide":
-                slideToSide("y", "+");
+                slideToSide("top", "+");
                 break;
             //передвигаем кубик в боковом поле ближе к mainField
             case "nearer":
@@ -259,7 +262,7 @@ define(['data'], function (d) {
 
         function slideWithBump(prop, sign) {
             dur = duration - 1;
-            var scale = (prop === "x") ? [0.9, 1.1] : [1.1, 0.9];
+            var scale = (prop === "left") ? [0.9, 1.1] : [1.1, 0.9];
             var trans0 = {
                 duration: d.animTime * dur,
                 easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)'
@@ -293,7 +296,11 @@ define(['data'], function (d) {
                 cube.app.cubes.animate({action: "inLine", cube: cube});
             }, d.animTime * (dur - 1), cube);
 
-            cube.$el.transition(trans);
+            cube.$el.transition(trans, function () {
+                var dir = d.f.reverseField(cube.field);
+                cube.$el.removeClass("d" + cube.field + " f" + dir)
+                    .addClass("f" + cube.field);
+            });
         }
 
         function nearer() {
@@ -302,13 +309,13 @@ define(['data'], function (d) {
                 trans = {};
 
             if (cube.field === "top" || cube.field === "bottom") {
-                prop = "y";
+                prop = "top";
                 if (cube.field === "top") {
                     sign = "+";
                 }
             }
             else {
-                prop = "x";
+                prop = "left";
                 if (cube.field === "left") {
                     sign = "+";
                 }
@@ -323,13 +330,13 @@ define(['data'], function (d) {
                 trans = {easing: "out"};
 
             if (cube.field === "top" || cube.field === "bottom") {
-                prop = "y";
+                prop = "top";
                 if (cube.field === "top") {
                     sign = "-";
                 }
             }
             else {
-                prop = "x";
+                prop = "left";
                 if (cube.field === "left") {
                     sign = "-";
                 }
@@ -367,19 +374,18 @@ define(['data'], function (d) {
         }
 
         function disapperance() {
-            cube.$el
-                .transition({
+            cube.$el.transition({
                     scale: 0,
-                    opacity: 0.4,
+                    opacity: 0,
                     duration: duration * d.animTime,
                     easing: "out"
-                }, function () {
-                    cube.$el.addClass("cubeHidden")
-                        .css({
-                            scale: 1,
-                            opacity: 1
-                        });
                 });
+            setTimeout(function (cube) {
+                cube.$el.css({
+                    scale: 1,
+                    opacity: 1
+                }).addClass("cubeHidden");
+            },duration * d.animTime,cube);
         }
     };
     Cube.prototype._inFieldIsVisible = function () {

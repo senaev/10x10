@@ -41,6 +41,20 @@ define(function () {
         f: {
             rand: function rand(min, max) {
                 return min + ((max - min + 1) * Math.random() ^ 0);
+            },
+            reverseField: function(field){
+                if (field === "top") {
+                    return "bottom";
+                }
+                else if (field === "bottom") {
+                    return "top";
+                }
+                else if (field === "left") {
+                    return "right";
+                }
+                else if (field === "right") {
+                    return "left";
+                }
             }
         }
     };

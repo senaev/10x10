@@ -178,13 +178,27 @@ define(['data', 'cube'], function (d, Cube) {
 
         action = o.action;
         cube = o.cube;
+        //получаем линию кубика
+        var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
+
         switch (action) {
+            //при выходе одного кубика из линии, анимируем линию
             case "fromLine":
-                var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
-                //this._get(line[6]);
+                //первый кубик появляется
+                this._get(line[6]).animate({action: "apperanceInSide", duration: 1});
+                //остальные два сдвигаются ближе к линии
                 this._get(line[7]).animate({action: "nearer", duration: 1});
                 this._get(line[8]).animate({action: "nearer", duration: 1});
-                var nearerToFieldCubeSecond = this._get(line[7]);
+                break;
+            //при входе кубика в линию, анимируем линию
+            case "inLine":
+                //получаем линию кубика
+                var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
+                //первый кубик появляется
+                this._get(line[6]).animate({action: "disapperanceInSide", duration: 1});
+                //остальные два сдвигаются ближе к линии
+                this._get(line[7]).animate({action: "forth", duration: 1});
+                this._get(line[8]).animate({action: "forth", duration: 1});
                 break;
         }
     };

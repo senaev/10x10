@@ -48,7 +48,7 @@ define(['data'], function (d) {
                 visibleModeClasses = " ";
             }
             else {
-                visibleModeClasses = " cubeHidden cubeUnvisible";
+                visibleModeClasses = " cubeHidden";
             }
         }
         else {
@@ -83,7 +83,7 @@ define(['data'], function (d) {
                 e.preventDefault();
 
                 //если стоит блокировка событий приложения - не даём пользователю ничего сделать
-                if(cube.app.blockApp){
+                if (cube.app.blockApp) {
                     return;
                 }
 
@@ -123,9 +123,21 @@ define(['data'], function (d) {
         return this.app.cubes._get(o);
     };
     //задаем html-элементу кубика положение на доске
-    Cube.prototype.toState = function () {
-        var left = this.x * d.oneWidth;
-        var top = this.y * d.oneWidth;
+    //если параметры не переданы, устанавливаем текущую позицию кубика
+    //если переданы - устанавливаем в поле кубику, в позицию х/у, переданные в параметрах
+    Cube.prototype.toState = function (o) {
+        var x,
+            y;
+        if (o === undefined) {
+            x = this.x;
+            y = this.y;
+        }
+        else {
+            x = o.x;
+            y = o.y;
+        }
+        var left = x * d.oneWidth;
+        var top = y * d.oneWidth;
         switch (this.field) {
             case "top":
                 top -= d.oneWidth * 10;
@@ -207,8 +219,23 @@ define(['data'], function (d) {
             case "sbToSide":
                 slideToSide("y", "+");
                 break;
+            //передвигаем кубик в боковом поле ближе к mainField
             case "nearer":
                 nearer();
+                break;
+            //кубик появляется третим в боковом поле
+            case "apperanceInSide":
+                apperance();
+                break;
+            //третий кубик в боковой линии пропадает
+            case "disapperanceInSide":
+                disapperance();
+                break;
+                e();
+                break;
+            //передвигаем кубик в боковой панели дальше от mainField
+            case "forth":
+                forth();
                 break;
         }
 
@@ -259,32 +286,102 @@ define(['data'], function (d) {
             var trans = {
                 duration: d.animTime * dur,
                 easing: easing
-            }
+            };
             trans[prop] = sign + '=' + dur * d.oneWidth;
-            cube.$el.transition(trans)
+
+            setTimeout(function (cube) {
+                cube.app.cubes.animate({action: "inLine", cube: cube});
+            }, d.animTime * (dur - 1), cube);
+
+            cube.$el.transition(trans);
         }
 
-        function nearer(){
+        function nearer() {
             var prop,
                 sign = "-",
                 trans = {};
 
             if (cube.field === "top" || cube.field === "bottom") {
                 prop = "y";
-                if(cube.field === "top"){
+                if (cube.field === "top") {
                     sign = "+";
                 }
             }
             else {
                 prop = "x";
-                if(cube.field === "left"){
+                if (cube.field === "left") {
                     sign = "+";
                 }
             }
             trans[prop] = sign + "=" + duration * d.oneWidth;
             cube.$el.transition(trans)
         }
-    }
+
+        function forth() {
+            var prop,
+                sign = "+",
+                trans = {easing: "out"};
+
+            if (cube.field === "top" || cube.field === "bottom") {
+                prop = "y";
+                if (cube.field === "top") {
+                    sign = "-";
+                }
+            }
+            else {
+                prop = "x";
+                if (cube.field === "left") {
+                    sign = "-";
+                }
+            }
+            trans[prop] = sign + "=" + duration * d.oneWidth;
+            cube.$el.transition(trans)
+        }
+
+        function apperance() {
+            var pos = {x: cube.x, y: cube.y};
+            switch (cube.field) {
+                case "top":
+                    pos.y = d.cubesWidth - 3;
+                    break;
+                case "right":
+                    pos.x = 2;
+                    break;
+                case "bottom":
+                    pos.y = 2;
+                    break;
+                case "left":
+                    pos.x = d.cubesWidth - 3;
+                    break;
+            }
+            cube.toState(pos);
+            cube.$el.removeClass("cubeHidden")
+                .css({scale: 0, opacity: 0.4})
+                .transition({
+                    scale: 1,
+                    opacity: 1,
+                    duration: duration * d.animTime,
+                    delay: duration * d.animTime,
+                    easing: "out"
+                });
+        }
+
+        function disapperance() {
+            cube.$el
+                .transition({
+                    scale: 0,
+                    opacity: 0.4,
+                    duration: duration * d.animTime,
+                    easing: "out"
+                }, function () {
+                    cube.$el.addClass("cubeHidden")
+                        .css({
+                            scale: 1,
+                            opacity: 1
+                        });
+                });
+        }
+    };
     Cube.prototype._inFieldIsVisible = function () {
         var pos;
         if (this.field === "top" || this.field === "bottom") {

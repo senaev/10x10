@@ -48,11 +48,8 @@
 /*
 для скрытия кубиков в боковых панелях
 */
-.tenOnTenContainer>.cube.cubeUnvisible{
-    /*здесь, возможно, будет класс для развёртывания кубика, а может и не будет*/
-}
-.tenOnTenContainer>.cube.cubeUnvisible.cubeHidden{
-    /*display: none;*/
+.tenOnTenContainer>.cube.cubeHidden{
+    display: none;
 }
 
 

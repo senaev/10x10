@@ -23,7 +23,7 @@ define(['data', 'cube'], function (d, Cube) {
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
         cubes[o.field][o.x][o.y] = value;
-        if(value !== null && value instanceof Cube) {
+        if (value !== null && value instanceof Cube) {
             value.x = o.x;
             value.y = o.y;
         }
@@ -158,6 +158,7 @@ define(['data', 'cube'], function (d, Cube) {
                 mCube.cube.y = mCube.y;
             }
         }
+        //убираем в боковые поля кубики, которые ушли туда во время хода
         for (var key in moveMap.toSideActions) {
             var mCube = moveMap.toSideActions[key];
             //если клетку, с которой сошел кубик, ещё не занял другой кубик
@@ -170,7 +171,14 @@ define(['data', 'cube'], function (d, Cube) {
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
-        //console.log(arr);
+        //убираем с поля кубики, которые взорвались во время хода
+        for (var key in moveMap.mainMask.boomActions) {
+            var mCube = moveMap.mainMask.boomActions[key];
+            var gettingMCube = cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y});
+            if (gettingMCube === mCube.cube) {
+                cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
+            }
+        }
     };
     cubes.animate = function (o) {
         var action,

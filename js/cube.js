@@ -240,6 +240,9 @@ define(['data'], function (d) {
             case "forth":
                 forth();
                 break;
+            default:
+                console.log("Неизвестная анимация: " + action);
+                break
         }
 
 

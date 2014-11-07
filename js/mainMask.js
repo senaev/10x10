@@ -21,6 +21,10 @@ define(['mCube', 'data'], function (MCube, d) {
         mainMask = this;
         cubes = o.cubes;
         startCube = o.startCube;
+
+        //массив кубиков, которые взорвутся во время хода
+        this.boomActions = [];
+
         //основной массив со значениями
         //сюда будут попадать м-кубики, учавствующие в анимации
         this.arr = [];
@@ -91,6 +95,18 @@ define(['mCube', 'data'], function (MCube, d) {
                 if (adjacentCubes.length) {
                     //если такие группы кубиков имеются, подрываем их и запускаем
                     //еще один шаг хода
+                    for (var key in adjacentCubes) {
+                        var group = adjacentCubes[key];
+                        for (var key in this.arr) {
+                            if (group.indexOf(this.arr[key]) === -1) {
+                                this.arr[key].steps.push({do: null});
+                            }
+                            else {
+                                this.arr[key].steps.push({do: "boom"});
+                                this.boomActions.push(this.arr[key]);
+                            }
+                        }
+                    }
                 }
                 else {
                     //если нет - заканчиваем ход
@@ -101,73 +117,6 @@ define(['mCube', 'data'], function (MCube, d) {
             var arr = this.arr,
                 byColorPrev = {},
                 byColor = {};
-
-            //функция поиска смежных в массиве по цветам
-            function searchAdjacentCubesByColor(arr) {
-                var group;
-                for (var key = 0; key < arr.length - 1; key++) {
-                    //текущий кубик
-                    var current = arr[key];
-                    for (var key1 = key + 1; key1 < arr.length; key1++) {
-                        //кубик, который проверяем на смежность текущену кубику
-                        var compare = arr[key1];
-                        //если кубики смежные
-                        if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1) {
-                            //если текущий кубик не принадлежик групппе
-                            if (current.inGroup === null) {
-                                //и кубик, с которым сравниваем не принадлежит группе
-                                if (compare.inGroup === null) {
-                                    //создаём группу
-                                    group = [current, compare];
-                                }
-                                //а если кубик, с которым сравниваем, принадлежит группе
-                                else {
-                                    //закидываем текущий кубик в группу кубика, с которым сравниваем
-                                    group = compare.inGroup;
-                                    compare.inGroup.push(current);
-                                }
-                            }
-                            //если же текущий кубик принадлежит группе
-                            else {
-                                //а кубик, с которым савниваем принадлежит
-                                if (compare.inGroup === null) {
-                                    //закидываем кубик, с которым сравниваем, в группу текущего
-                                    group = current.inGroup;
-                                    current.inGroup.push(compare);
-                                }
-                                else {
-                                    //иначе закидываем все кубики и группы сравниваемого в группу текущего
-                                    group = current.inGroup;
-                                    if (current.inGroup !== compare.inGroup) {
-                                        for (var key2 in compare.inGroup) {
-                                            group.push(compare.inGroup[key2]);
-                                        }
-                                    }
-                                }
-                            }
-                            //пробегаем в цикле по измененной или созданной группе
-                            //и меняем значене принадлежности к группе кубиков на измененную группу
-                            for (var key2 in group) {
-                                group[key2].inGroup = group;
-                            }
-                        }
-                    }
-
-                }
-
-                //теперь, когда группы созданы, выбираем из кубиков все
-                //существующие неповторяющиеся группы
-                var groups = [];
-                for (var key in arr) {
-                    group = arr[key].inGroup;
-                    //добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
-                    if (group !== null && group.length > 2 && groups.indexOf(group) === -1) {
-                        groups.push(group);
-                    }
-                }
-
-                return groups;
-            }
 
             //создаем объект с массивами м-кубиков по цветам
             for (var key in arr) {
@@ -192,15 +141,79 @@ define(['mCube', 'data'], function (MCube, d) {
             //ищем группы смежных кубиков и помещаем их в массив groups
             var groups = [];
             for (var key in byColor) {
-                groups = groups.concat(searchAdjacentCubesByColor(byColor[key]));
+                groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
             }
 
-            console.log(groups);
-            console.log("///////");
-
-
-            return [];
+            return groups;
         };
+
+        //функция поиска смежных в массиве по цветам
+        this.searchAdjacentCubesByColor = function (arr) {
+            var group;
+            for (var key = 0; key < arr.length - 1; key++) {
+                //текущий кубик
+                var current = arr[key];
+                for (var key1 = key + 1; key1 < arr.length; key1++) {
+                    //кубик, который проверяем на смежность текущену кубику
+                    var compare = arr[key1];
+                    //если кубики смежные
+                    if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1) {
+                        //если текущий кубик не принадлежик групппе
+                        if (current.inGroup === null) {
+                            //и кубик, с которым сравниваем не принадлежит группе
+                            if (compare.inGroup === null) {
+                                //создаём группу
+                                group = [current, compare];
+                            }
+                            //а если кубик, с которым сравниваем, принадлежит группе
+                            else {
+                                //закидываем текущий кубик в группу кубика, с которым сравниваем
+                                group = compare.inGroup;
+                                compare.inGroup.push(current);
+                            }
+                        }
+                        //если же текущий кубик принадлежит группе
+                        else {
+                            //а кубик, с которым савниваем принадлежит
+                            if (compare.inGroup === null) {
+                                //закидываем кубик, с которым сравниваем, в группу текущего
+                                group = current.inGroup;
+                                current.inGroup.push(compare);
+                            }
+                            else {
+                                //иначе закидываем все кубики и группы сравниваемого в группу текущего
+                                group = current.inGroup;
+                                if (current.inGroup !== compare.inGroup) {
+                                    for (var key2 in compare.inGroup) {
+                                        group.push(compare.inGroup[key2]);
+                                    }
+                                }
+                            }
+                        }
+                        //пробегаем в цикле по измененной или созданной группе
+                        //и меняем значене принадлежности к группе кубиков на измененную группу
+                        for (var key2 in group) {
+                            group[key2].inGroup = group;
+                        }
+                    }
+                }
+
+            }
+
+            //теперь, когда группы созданы, выбираем из кубиков все
+            //существующие неповторяющиеся группы
+            var groups = [];
+            for (var key in arr) {
+                group = arr[key].inGroup;
+                //добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
+                if (group !== null && group.length > 2 && groups.indexOf(group) === -1) {
+                    groups.push(group);
+                }
+            }
+
+            return groups;
+        };
+
         this.step();
     }
 

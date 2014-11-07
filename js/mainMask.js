@@ -75,6 +75,10 @@ define(['mCube', 'data'], function (MCube, d) {
             //вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
             //либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
             var somethingHappend;
+
+            //сюда запишутся все не взорвавшиеся кубики, это значение присвоим основному после хода
+            this.withoutBoom = [];
+
             somethingHappend = false;
             for (var key in this.arr) {
                 var oneStep;
@@ -94,17 +98,27 @@ define(['mCube', 'data'], function (MCube, d) {
                 var adjacentCubes = this.searchAdjacentCubes();
                 if (adjacentCubes.length) {
                     //если такие группы кубиков имеются, подрываем их и запускаем
-                    //еще один шаг хода
+                    //еще один шаг хода, при этом обновляем массив м-кубиков
+                    //сюда попадут все кубики, которые будут взорваны
+                    var allAdjacent = [];
                     for (var key in adjacentCubes) {
                         var group = adjacentCubes[key];
                         for (var key in this.arr) {
                             if (group.indexOf(this.arr[key]) === -1) {
                                 this.arr[key].steps.push({do: null});
+                                this.withoutBoom.push();
                             }
                             else {
                                 this.arr[key].steps.push({do: "boom"});
                                 this.boomActions.push(this.arr[key]);
+                                allAdjacent.push(this.arr[key]);
                             }
+                        }
+                    }
+                    //выделяем новый массив из не взорванных кубиков и меняем основной
+                    for(var key in this.arr){
+                        if(allAdjacent.indexOf(this.arr[key]) === -1){
+                            this.withoutBoom.push(this.arr[key]);
                         }
                     }
                 }

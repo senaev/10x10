@@ -88,43 +88,74 @@ define(['mCube', 'data'], function (MCube, d) {
                 //ищем, появились ли у нас в результате хода смежные кубики
                 //ещё один шаг хода, если нет - заканчиваем ход
                 var adjacentCubes = this.searchAdjacentCubes();
-                if(adjacentCubes.length){
+                if (adjacentCubes.length) {
                     //если такие группы кубиков имеются, подрываем их и запускаем
                     //еще один шаг хода
                 }
-                else{
+                else {
                     //если нет - заканчиваем ход
                 }
             }
         };
-        this.searchAdjacentCubes = function(){
+        this.searchAdjacentCubes = function () {
             var arr = this.arr,
                 byColorPrev = {},
                 byColor = {};
+
+            //функция поиска смежных в массиве по цветам
+            function searchAdjacentCubesByColor(arr) {
+                for (var key = 0; key < arr.length - 1; key++) {
+                    //текущий кубик
+                    var current = arr[key];
+                    for (var key1 = key + 1; key1 < arr.length; key1++) {
+                        //кубик, который проверяем на смежность текущену кубику
+                        var compare = arr[key1];
+                        if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y1) === 1) {
+                            if(current.inGroup === null){
+                                if(compare.inGroup === null){
+                                    //создаем группу с новыми значениями
+                                }
+                                else{
+                                    //добавляем в компэйр ин груп
+                                }
+                            }
+                            else{
+                                if(compare.inGroup === null){
+                                    //добавляем к кьюррент
+                                }
+                                else{
+                                    //связываем группы
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             //создаем объект с массивами м-кубиков по цветам
-            for(var key in arr){
+            for (var key in arr) {
                 var mCube = arr[key];
                 //если такого значения в объекте еще нет - сздаем его
-                if(byColorPrev[mCube.color] === undefined){
+                if (byColorPrev[mCube.color] === undefined) {
                     byColorPrev[mCube.color] = [];
                 }
                 //добавляем в этот массив все кубики, которые есть на доске
-                if(mCube.x > 0 && mCube.x < d.cubesWidth && mCube.y > 0 && mCube.y < d.cubesWidth) {
+                if (mCube.x > 0 && mCube.x < d.cubesWidth && mCube.y > 0 && mCube.y < d.cubesWidth) {
                     byColorPrev[mCube.color].push(mCube);
                 }
             }
             //если количество кубиков определенного цвета на доске меньшь двух,
             //исключаем эту группу кубиков из обработки
-            for(var key in byColorPrev){
-                if(byColorPrev[key].length > 2){
+            for (var key in byColorPrev) {
+                if (byColorPrev[key].length > 2) {
                     byColor[key] = byColorPrev[key];
                 }
             }
-            for(var key in byColor){
-
+            for (var key in byColor) {
+                searchAdjacentCubesByColor(byColor[key]);
             }
 
-            console.log(byColor);
+            console.log("///////");
 
             return [];
         };

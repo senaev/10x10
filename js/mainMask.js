@@ -110,26 +110,53 @@ define(['mCube', 'data'], function (MCube, d) {
                     for (var key1 = key + 1; key1 < arr.length; key1++) {
                         //кубик, который проверяем на смежность текущену кубику
                         var compare = arr[key1];
-                        if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y1) === 1) {
-                            if(current.inGroup === null){
-                                if(compare.inGroup === null){
-                                    //создаем группу с новыми значениями
+                        //если кубики смежные
+                        if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1) {
+                            var group;
+                            //если текущий кубик не принадлежик групппе
+                            if (current.inGroup === null) {
+                                //и кубик, с которым сравниваем не принадлежит группе
+                                if (compare.inGroup === null) {
+                                    //создаём группу
+                                    group = [current, compare];
                                 }
-                                else{
-                                    //добавляем в компэйр ин груп
+                                //а если кубик, с которым сравниваем, принадлежит группе
+                                else {
+                                    //закидываем текущий кубик в группу кубика, с которым сравниваем
+                                    group = compare.inGroup;
+                                    compare.inGroup.push(current);
                                 }
                             }
-                            else{
-                                if(compare.inGroup === null){
-                                    //добавляем к кьюррент
+                            //если же текущий кубик принадлежит группе
+                            else {
+                                //а кубик, с которым савниваем принадлежит
+                                if (compare.inGroup === null) {
+                                    //закидываем кубик, с которым сравниваем, в группу текущего
+                                    group = current.inGroup;
+                                    current.inGroup.push(compare);
                                 }
-                                else{
-                                    //связываем группы
+                                else {
+                                    //иначе закидываем все кубики и группы сравниваемого в группу текущего
+                                    group = current.inGroup;
+                                    if (current.inGroup !== compare.inGroup) {
+                                        for (var key2 in compare.inGroup) {
+                                            group.push(compare.inGroup[key2]);
+                                        }
+                                    }
                                 }
+                            }
+                            //пробегаем в цикле по измененной или созданной группе
+                            //и меняем значене принадлежности к группе кубиков на измененную группу
+                            for (var key2 in group) {
+                                group[key2].inGroup = group;
                             }
                         }
                     }
+
                 }
+
+                //теперь, когда группы созданы, выбираем из кубиков все
+                //существующие неповторяющиеся группы
             }
 
             //создаем объект с массивами м-кубиков по цветам
@@ -140,7 +167,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     byColorPrev[mCube.color] = [];
                 }
                 //добавляем в этот массив все кубики, которые есть на доске
-                if (mCube.x > 0 && mCube.x < d.cubesWidth && mCube.y > 0 && mCube.y < d.cubesWidth) {
+                if (mCube.x > -1 && mCube.x < d.cubesWidth && mCube.y > -1 && mCube.y < d.cubesWidth) {
                     byColorPrev[mCube.color].push(mCube);
                 }
             }
@@ -151,6 +178,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     byColor[key] = byColorPrev[key];
                 }
             }
+            //console.log(byColor);
             for (var key in byColor) {
                 searchAdjacentCubesByColor(byColor[key]);
             }

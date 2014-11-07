@@ -104,6 +104,7 @@ define(['mCube', 'data'], function (MCube, d) {
 
             //функция поиска смежных в массиве по цветам
             function searchAdjacentCubesByColor(arr) {
+                var group;
                 for (var key = 0; key < arr.length - 1; key++) {
                     //текущий кубик
                     var current = arr[key];
@@ -112,7 +113,6 @@ define(['mCube', 'data'], function (MCube, d) {
                         var compare = arr[key1];
                         //если кубики смежные
                         if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1) {
-                            var group;
                             //если текущий кубик не принадлежик групппе
                             if (current.inGroup === null) {
                                 //и кубик, с которым сравниваем не принадлежит группе
@@ -157,6 +157,16 @@ define(['mCube', 'data'], function (MCube, d) {
 
                 //теперь, когда группы созданы, выбираем из кубиков все
                 //существующие неповторяющиеся группы
+                var groups = [];
+                for (var key in arr) {
+                    group = arr[key].inGroup;
+                    //добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
+                    if (group !== null && group.length > 2 && groups.indexOf(group) === -1) {
+                        groups.push(group);
+                    }
+                }
+
+                return groups;
             }
 
             //создаем объект с массивами м-кубиков по цветам
@@ -178,12 +188,16 @@ define(['mCube', 'data'], function (MCube, d) {
                     byColor[key] = byColorPrev[key];
                 }
             }
-            //console.log(byColor);
+
+            //ищем группы смежных кубиков и помещаем их в массив groups
+            var groups = [];
             for (var key in byColor) {
-                searchAdjacentCubesByColor(byColor[key]);
+                groups = groups.concat(searchAdjacentCubesByColor(byColor[key]));
             }
 
+            console.log(groups);
             console.log("///////");
+
 
             return [];
         };

@@ -207,21 +207,23 @@ define(['data'], function (d) {
             case "stBump":
                 slideWithBump("top", "-");
                 break;
-            //движение вправо с последующим вливанием в правое поле
-            case "srToSide":
-                slideToSide("left", "+");
-                break;
-            //движение вправо с последующим вливанием в правое поле
-            case "stToSide":
-                slideToSide("top", "-");
-                break;
-            //движение вправо с последующим вливанием в правое поле
-            case "slToSide":
-                slideToSide("left", "-");
-                break;
-            //движение вправо с последующим вливанием в правое поле
-            case "sbToSide":
-                slideToSide("top", "+");
+            //движение с последующим вливанием в поле
+            case "toSide":
+                var field = cube.field;
+                var sign = "-";
+                var prop = "left";
+                if (field === "top" || field === "bottom") {
+                    prop = "top";
+                    if(field === "bottom"){
+                        sign = "+";
+                    }
+                }
+                else {
+                    if(field === "right"){
+                        sign = "+";
+                    }
+                }
+                slideToSide(prop, sign);
                 break;
             //передвигаем кубик в боковом поле ближе к mainField
             case "nearer":
@@ -284,7 +286,7 @@ define(['data'], function (d) {
             var trans2 = {
                 scale: 1,
                 duration: d.animTime / 2
-            }
+            };
             trans2[prop] = (sign === "+" ? "-" : "+") + "=4";
             cube.$el.transition(trans0)
                 .transition(trans1)
@@ -292,6 +294,11 @@ define(['data'], function (d) {
         }
 
         function slideToSide(prop, sign) {
+            /*
+            * движение в боковую панель без разрывов анимации,
+            * чтобы сохранить максимальную плавность анимации, делать
+            * именно так
+            * */
             dur = duration;
             var easing = 'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
             var trans = {
@@ -314,7 +321,7 @@ define(['data'], function (d) {
         function nearer() {
             var prop,
                 sign = "-",
-                trans = {};
+                trans = {duration: d.animTime};
 
             if (cube.field === "top" || cube.field === "bottom") {
                 prop = "top";
@@ -335,7 +342,7 @@ define(['data'], function (d) {
         function forth() {
             var prop,
                 sign = "+",
-                trans = {easing: "out"};
+                trans = {duration: d.animTime};
 
             if (cube.field === "top" || cube.field === "bottom") {
                 prop = "top";

@@ -102,9 +102,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             //в реальную коллекцию cubes
             this.cubes._mergeMoveMap(moveMap);
 
-            console.log("");
-            console.log("//////////ITOG CUBES:");
-            console.log(this.cubes);
+            console.log("//////////ITOG CUBES:", this.cubes);
         }
     };
 

@@ -40,7 +40,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
             //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
             this.animationLength = this.mainMask.arr[0].steps.length;
 
-            console.log(this.mainMask.arr);
+            console.log("////inMainActions:", this.mainMask.arr);
 
             //проходимся в цикле по всем кубикам
             for (var key in this.mainMask.arr) {
@@ -64,7 +64,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
                         switch (step.do) {
                             case "toSide":
-                                lastAction.action = lastAction.action + "ToSide";
+                                lastAction.action = "toSide";
                                 lastAction.duration++;
                                 this.toSideActions.push(mCube);
                                 break;

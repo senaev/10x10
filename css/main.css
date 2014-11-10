@@ -31,10 +31,10 @@
 
 .tenOnTenContainer>.cube {
     position: absolute;
-    height: 28px;
-    width: 28px;
+    height: 30px;
+    width: 30px;
     border-radius: 10px;
-    border-width: 1px;
+    border-width: 0px;
     border-style: solid;
     /*background: grey;*/
     margin-top: 1px;
@@ -60,22 +60,22 @@
 .tenOnTenContainer>.cube.firstInHoverLine, .tenOnTenContainer>.cube.dright{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -2px;
+    background-position: -1px;
 }
 .tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbottom{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -34px -2px;
+    background-position: -33px -1px;
 }
 .tenOnTenContainer>.cube.firstInHoverLine.fright, .tenOnTenContainer>.cube.dleft{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -66px -2px;
+    background-position: -65px -1px;
 }
 .tenOnTenContainer>.cube.firstInHoverLine.fbottom, .tenOnTenContainer>.cube.dtop{
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -98px -2px;
+    background-position: -97px -1px;
 }
 
 /*расцветка кубиков*/

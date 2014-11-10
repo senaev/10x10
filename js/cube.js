@@ -167,8 +167,6 @@ define(['data'], function (d) {
             duration,
             cube;
 
-        console.log(o);
-
         action = o.action;
         delay = o.delay;
         duration = o.duration;
@@ -399,7 +397,7 @@ define(['data'], function (d) {
         }
 
         function boom(){
-            console.log("123: ", duration, action);
+            console.log("boom:",cube.color, cube.x, cube.y);
             cube.$el.transition({
                 scale: 1.5,
                 opacity: 0,

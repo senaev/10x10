@@ -3,7 +3,7 @@ define(function () {
         //ширина доски в кубиках
         cubesWidth: 10,
         //уровень, с которого начинаем
-        level: 10,
+        level: 1,
         //ширина одного контейнера кубика
         oneWidth: 32,
         //список полей
@@ -17,7 +17,7 @@ define(function () {
                 cubesCount: 5
             },
             "10": {
-                colorsCount: 5,
+                colorsCount: 10,
                 cubesCount: 10
             }
         },

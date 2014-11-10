@@ -18,14 +18,12 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.startCube = o.startCube;
 
             //создаем класс маски
-            console.log("createSteps");
             this.mainMask = new MainMask({
                 startCube: this.startCube,
                 cubes: this.cubes
             });
 
             //генерируем из м-кубиков маски карту анимации
-            console.log("createAnimationMap");
             this.createAnimationMap();
         };
 

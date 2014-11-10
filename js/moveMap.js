@@ -85,7 +85,9 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         }
                     }
                 }
-                actions.shift();
+                if(actions.length === 1 && actions[0].action === null) {
+                    actions.shift();
+                }
 
                 //console.log(actions);
 
@@ -111,7 +113,6 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     });
                 }
             }
-            console.log( this.animationMap );
         };
 
         //когда ход прощитан, запускаем саму анимацию

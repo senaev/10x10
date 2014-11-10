@@ -166,13 +166,16 @@ define(['data'], function (d) {
             delay,
             duration,
             cube;
+
+        console.log(o);
+
         action = o.action;
         delay = o.delay;
         duration = o.duration;
         cube = this;
         setTimeout(function (o) {
             cube.animate(o);
-        }({action: action, duration: duration}));
+        },delay* d.animTime,{action: action, duration: duration});
     };
     //добавляем объект анимации на обработку через время, полученное в атрибутах
     Cube.prototype.remove = function () {
@@ -396,6 +399,7 @@ define(['data'], function (d) {
         }
 
         function boom(){
+            console.log("123: ", duration, action);
             cube.$el.transition({
                 scale: 1.5,
                 opacity: 0,

@@ -28,41 +28,47 @@ define(function(){
     MCube.prototype.oneStep = function () {
         var step;
         step = {};
-        //если м-кубик не имеет направления - он стоит на месте
-        if (this.direction !== null) {
-            //если у м-кубика имеется направление, подсчитываем, где он может оказаться
-            var nextPos = {x: this.x, y: this.y};
-            var prop;
-            if (this.direction === "top" || this.direction === "bottom") {
-                this.direction === "top" ? nextPos.y-- : nextPos.y++;
-            }
-            else {
-                this.direction === "left" ? nextPos.x-- : nextPos.x++;
-            }
-            //если следующая позиция - одно из боковых полей - отправляем кубик туда
-            if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
-                this.x = nextPos.x;
-                this.y = nextPos.y;
-                this.direction = null;
-                step.do = "toSide";
-            }
-            else {
-                //если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
-                if (this.mainMask._get(nextPos) === null) {
-                    //если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
-                    this.x = nextPos.x;
-                    this.y = nextPos.y;
-                    step.do = "s" + this.direction.charAt(0);
+        //если м-кубик взорван, он стоит на месте
+        if(this.x === -1 && this.y === -1) {
+            step.do = null;
+        }
+        else{
+            //если м-кубик не имеет направления - он стоит на месте
+            if (this.direction !== null) {
+                //если у м-кубика имеется направление, подсчитываем, где он может оказаться
+                var nextPos = {x: this.x, y: this.y};
+                var prop;
+                if (this.direction === "top" || this.direction === "bottom") {
+                    this.direction === "top" ? nextPos.y-- : nextPos.y++;
                 }
                 else {
-                    //если клетка занята - кубик стоит на месте
-                    step.do = null;
+                    this.direction === "left" ? nextPos.x-- : nextPos.x++;
+                }
+                //если следующая позиция - одно из боковых полей - отправляем кубик туда
+                if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
+                    this.x = nextPos.x;
+                    this.y = nextPos.y;
+                    this.direction = null;
+                    step.do = "toSide";
+                }
+                else {
+                    //если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
+                    if (this.mainMask._get(nextPos) === null) {
+                        //если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
+                        this.x = nextPos.x;
+                        this.y = nextPos.y;
+                        step.do = "s" + this.direction.charAt(0);
+                    }
+                    else {
+                        //если клетка занята - кубик стоит на месте
+                        step.do = null;
+                    }
                 }
             }
-        }
-        else {
-            //если не имеет - стоит на мется
-            step.do = null;
+            else {
+                //если не имеет - стоит на мется
+                step.do = null;
+            }
         }
         this.steps.push(step);
 

@@ -22,9 +22,6 @@ define(['mCube', 'data'], function (MCube, d) {
         cubes = o.cubes;
         startCube = o.startCube;
 
-        //массив кубиков, которые взорвутся во время хода
-        this.boomActions = [];
-
         //основной массив со значениями
         //сюда будут попадать м-кубики, учавствующие в анимации
         this.arr = [];
@@ -76,9 +73,6 @@ define(['mCube', 'data'], function (MCube, d) {
             //либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
             var somethingHappend;
 
-            //сюда запишутся все не взорвавшиеся кубики, это значение присвоим основному после хода
-            this.withoutBoom = [];
-
             somethingHappend = false;
             for (var key in this.arr) {
                 var oneStep;
@@ -94,33 +88,29 @@ define(['mCube', 'data'], function (MCube, d) {
             }
             else {
                 //ищем, появились ли у нас в результате хода смежные кубики
-                //ещё один шаг хода, если нет - заканчиваем ход
+                //и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
                 var adjacentCubes = this.searchAdjacentCubes();
                 if (adjacentCubes.length) {
                     //если такие группы кубиков имеются, подрываем их и запускаем
                     //еще один шаг хода, при этом обновляем массив м-кубиков
                     //сюда попадут все кубики, которые будут взорваны
-                    var allAdjacent = [];
                     for (var key in adjacentCubes) {
                         var group = adjacentCubes[key];
                         for (var key in this.arr) {
                             if (group.indexOf(this.arr[key]) === -1) {
                                 this.arr[key].steps.push({do: null});
-                                this.withoutBoom.push();
                             }
                             else {
                                 this.arr[key].steps.push({do: "boom"});
-                                this.boomActions.push(this.arr[key]);
-                                allAdjacent.push(this.arr[key]);
+                                //взорвавшимся м-кубикам присваиваем координаты -1 -1,
+                                //чтобы в дальнейшей анимации они не учавствовали
+                                this.arr[key].x = -1;
+                                this.arr[key].y = -1;
                             }
                         }
                     }
-                    //выделяем новый массив из не взорванных кубиков и меняем основной
-                    for(var key in this.arr){
-                        if(allAdjacent.indexOf(this.arr[key]) === -1){
-                            this.withoutBoom.push(this.arr[key]);
-                        }
-                    }
+                    //продолжаем ход
+                    this.step();
                 }
                 else {
                     //если нет - заканчиваем ход

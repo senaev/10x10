@@ -18,12 +18,14 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.startCube = o.startCube;
 
             //создаем класс маски
+            console.log("createSteps");
             this.mainMask = new MainMask({
                 startCube: this.startCube,
                 cubes: this.cubes
             });
 
             //генерируем из м-кубиков маски карту анимации
+            console.log("createAnimationMap");
             this.createAnimationMap();
         };
 
@@ -40,16 +42,25 @@ define(['data', 'mainMask'], function (d, MainMask) {
             //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
             this.animationLength = this.mainMask.arr[0].steps.length;
 
+            console.log(this.mainMask.arr);
+
+            //проходимся в цикле по всем кубикам
             for (var key in this.mainMask.arr) {
                 var mCube = this.mainMask.arr[key];
                 var steps = mCube.steps;
+                //массив с действиями одного кубика
                 var actions = [{action: null, duration: 0}];
+                //пробегаемся по массиву шагов анимации
                 for (var key1 = 0; key1 < steps.length; key1++) {
+                    //один шаг анимации
                     var step = steps[key1];
+                    //последний шаг анимации, к которому добавляем продолжительность
+                    //в случае совпадения со следующим шагом
                     var lastAction = actions[actions.length - 1];
-                    //console.log(key1,  step.do, lastAction.action, steps);
+                    //если это такой же шаг, как и предидущий
                     if (step.do === lastAction.action) {
-                        lastAction.duration++;
+                            //иначе просто увеличиваем продолжительность предидущего
+                            lastAction.duration++;
                     }
                     else {
                         //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
@@ -76,13 +87,19 @@ define(['data', 'mainMask'], function (d, MainMask) {
                 }
                 actions.shift();
 
+                //console.log(actions);
 
+                //подтягиваем задержки
                 if (actions.length !== 0) {
+                    //итоговый массив, в котором продолжительность анимаций
+                    //и задержки выстроены, как надо
                     var nullToDelayActions = [];
                     var delay = 0;
                     for (var key1 = 0; key1 < actions.length; key1++) {
                         var action = actions[key1];
+                        //выставляем задержку от начала хода
                         action.delay = delay;
+                        //добавляем к задержке следующего действия текущую продолжительность
                         delay += action.duration;
                         if (action.action !== null) {
                             nullToDelayActions.push(action);
@@ -94,6 +111,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     });
                 }
             }
+            console.log( this.animationMap );
         };
 
         //когда ход прощитан, запускаем саму анимацию

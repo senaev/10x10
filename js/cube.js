@@ -240,6 +240,10 @@ define(['data'], function (d) {
             case "forth":
                 forth();
                 break;
+            //передвигаем кубик в боковой панели дальше от mainField
+            case "boom":
+                boom();
+                break;
             default:
                 console.log("Неизвестная анимация: " + action);
                 break
@@ -389,6 +393,17 @@ define(['data'], function (d) {
                     opacity: 1
                 }).addClass("cubeHidden");
             },duration * d.animTime,cube);
+        }
+
+        function boom(){
+            cube.$el.transition({
+                scale: 1.5,
+                opacity: 0,
+                duration: d.animTime,
+                easing: "out"
+            },function(){
+                cube.remove();
+            });
         }
     };
     Cube.prototype._inFieldIsVisible = function () {

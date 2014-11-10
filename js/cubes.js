@@ -157,6 +157,11 @@ define(['data', 'cube'], function (d, Cube) {
                 mCube.cube.x = mCube.x;
                 mCube.cube.y = mCube.y;
             }
+            else if(mCube.x === -1 && mCube.y === -1){
+                if(cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube){
+                    cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
+                }
+            }
         }
         //убираем в боковые поля кубики, которые ушли туда во время хода
         for (var key in moveMap.toSideActions) {
@@ -172,13 +177,13 @@ define(['data', 'cube'], function (d, Cube) {
             this._pushInLine(mCube.cube);
         }
         //убираем с поля кубики, которые взорвались во время хода
-        for (var key in moveMap.mainMask.boomActions) {
+        /*for (var key in moveMap.mainMask.boomActions) {
             var mCube = moveMap.mainMask.boomActions[key];
             var gettingMCube = cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y});
             if (gettingMCube === mCube.cube) {
                 cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
             }
-        }
+        }*/
     };
     cubes.animate = function (o) {
         var action,

@@ -32,6 +32,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
         //Initialize container function
         (function () {
+            var topRightPanel = '<div class="panel topRightPanel"><div class="previousButton">back</div></div>';
             var background = '<div class="backgroungField">';
             for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
                 background += '<div class="dCube"></div>';
@@ -50,7 +51,8 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 margin: d.oneWidth * 3,
                 position: "relative"
             }).addClass("tenOnTenContainer")
-                .append(backgroundField);
+                .append(backgroundField)
+                .append(topRightPanel);
         }).apply(this);
 
 
@@ -102,7 +104,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             //в реальную коллекцию cubes
             this.cubes._mergeMoveMap(moveMap);
 
-            console.log("//////////ITOG CUBES:", this.cubes);
+            //console.log("//////////ITOG CUBES:", this.cubes);
         }
     };
 

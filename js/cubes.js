@@ -157,7 +157,9 @@ define(['data', 'cube'], function (d, Cube) {
                 mCube.cube.x = mCube.x;
                 mCube.cube.y = mCube.y;
             }
+            //если кубик ворвался во время хода, удираем его с доски
             else if(mCube.x === -1 && mCube.y === -1){
+                console.log("убираем: ", {field: "main", x: mCube.cube.x, y: mCube.cube.y});
                 if(cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube){
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }

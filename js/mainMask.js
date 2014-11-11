@@ -96,6 +96,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     //сюда попадут все кубики, которые будут взорваны
                     for (var key in adjacentCubes) {
                         var group = adjacentCubes[key];
+                        console.log(group);
                         for (var key in this.arr) {
                             if (group.indexOf(this.arr[key]) === -1) {
                                 this.arr[key].steps.push({do: null});

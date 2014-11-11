@@ -10,6 +10,7 @@
 он же срановится корневым для всех элементов игры*/
 .tenOnTenContainer {
     display: inline-block;
+    font-family: sans-serif;
 }
 /* само главное поле бэкграунда*/
 .tenOnTenContainer>.backgroungField {
@@ -25,6 +26,23 @@
     background: #a0a0a0;
     border-radius: 10px;
     float: left;
+}
+
+/*панели с информацией и кнопками*/
+.tenOnTenContainer>.panel{
+    height: 96px;
+    width: 96px;
+    position: absolute;
+}
+.tenOnTenContainer>.panel.topRightPanel{
+    right: -96px;
+    top: -96px;
+}
+.tenOnTenContainer>.panel.topRightPanel>.previousButton{
+    font-weight: bold;
+    margin-top: 7px;
+    color: white;
+    cursor: pointer;
 }
 
 /*сам кубик*/

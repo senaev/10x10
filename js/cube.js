@@ -404,7 +404,7 @@ define(['data'], function (d) {
         }
 
         function boom(){
-            console.log("boom:",cube.color, cube.x, cube.y);
+            //console.log("boom:",cube.color, cube.x, cube.y);
             cube.$el.transition({
                 scale: 1.5,
                 opacity: 0,

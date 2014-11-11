@@ -14,8 +14,12 @@ define(['data', 'mainMask'], function (d, MainMask) {
             var cubes,
                 mainMask;
 
+
             this.cubes = o.cubes;
             this.startCube = o.startCube;
+
+
+            localStorage["tenOnTenLastMask"] = this.generateJSONMask();
 
             //создаем класс маски
             this.mainMask = new MainMask({
@@ -40,7 +44,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
             //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
             this.animationLength = this.mainMask.arr[0].steps.length;
 
-            console.log("////inMainActions:", this.mainMask.arr);
+            //console.log("////inMainActions:", this.mainMask.arr);
 
             //проходимся в цикле по всем кубикам
             for (var key in this.mainMask.arr) {
@@ -153,36 +157,36 @@ define(['data', 'mainMask'], function (d, MainMask) {
          * Функции, которым могут понадобиться в дальнейшем
          */
             //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
-        this.generateJSONMask = function (o) {
-
-            //цветовая схема нужна для укорачивания данных, передаваемых по сети
-            if (this.colorSheme === undefined) {
-                //цветовая схема нужна для приведения коллекции к маске
-                this.generateColorSheme();
-            }
+        this.generateJSONMask = function () {
 
             var cubes;
             var mask;
             var main;
 
             mask = {};
-            main = [];
             for (var key in d.fields) {
-                mask[d.fields[key]] = "";
+                mask[d.fields[key]] = [];
             }
-            cubes = o.cubes;
+            mask.main = [];
+            cubes = this.cubes;
+
             //сначала генерируем боковые поля, где направление кубиков зависит исключительно от поля
             cubes._sideEach(function (cube) {
-                mask[cube.field] += moveMap.colorSheme[cube.color];
+                mask[cube.field].push({
+                    color: cube.color,
+                    x: cube.x,
+                    y: cube.y
+                });
             });
             //затем основное поле, с указателем направления, если направления нет - ноль
-            cubes._mainEach(function (cube, field, x, y, i) {
-                var direction;
-                direction = cube.direction === null ? "0" : cube.direction.charAt(0);
-                main.push(x + "" + y + direction);
+            cubes._mainEach(function (cube) {
+                mask.main.push({
+                    color: cube.color,
+                    direction: cube.direction,
+                    x: cube.x,
+                    y: cube.y
+                });
             });
-            //возвращаем значения главного поля в виде строки, кубики через запятую
-            mask["main"] = main.join(",");
 
             return mask;
         };

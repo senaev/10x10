@@ -1,9 +1,15 @@
-define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) {
+define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) {
     var TenOnTen = function (args) {
         var undefined;
         var tenOnTen = this;
 
+        //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
+        //которому эти кубики принадлежат
         this.cubes = cubes;
+        this.cubes._app = this;
+
+        //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
+        this.blockApp = false;
 
         //variables
         var appContainer;
@@ -26,6 +32,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
 
         //Initialize container function
         (function () {
+            var topRightPanel = '<div class="panel topRightPanel"><div class="previousButton">back</div></div>';
             var background = '<div class="backgroungField">';
             for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
                 background += '<div class="dCube"></div>';
@@ -44,12 +51,14 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                 margin: d.oneWidth * 3,
                 position: "relative"
             }).addClass("tenOnTenContainer")
-                .append(backgroundField);
+                .append(backgroundField)
+                .append(topRightPanel);
         }).apply(this);
 
 
         //Initialize map function
         this.initialize = function () {
+            //генерируем кубики в боковых панелях
             cubes._sideEach(function (cube, field, x, y) {
                 cube = new Cube({
                     x: x,
@@ -58,6 +67,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                     app: tenOnTen
                 });
             });
+            //генерируем кубики на главном поле
             for (var number = 0, len = d.levels[d.level].cubesCount; number < len; number++) {
                 if (d.firstCubesPosition[number] !== undefined) {
                     var pos = d.firstCubesPosition[number];
@@ -75,13 +85,26 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, moveMap) 
                 }
             }
         };
+        //запускаем инициализацию приложения
         this.initialize();
 
         this.run = function (o) {
+            var moveMap;
+            moveMap = new MoveMap();
+
             moveMap.generate({
                 startCube: o.startCube,
                 cubes: this.cubes
             });
+            //пошаговый запуск анимации
+            moveMap.animate({
+                app: this
+            });
+            //подитоживание - внесение изменений, произошедших в абстрактном moveMap
+            //в реальную коллекцию cubes
+            this.cubes._mergeMoveMap(moveMap);
+
+            console.log("//////////ITOG CUBES:", this.cubes);
         }
     };
 

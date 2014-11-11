@@ -1,51 +1,192 @@
-define(['data'], function (d) {
+define(['data', 'mainMask'], function (d, MainMask) {
+    /**
+     * класс для удобной работы с абстрактным классом MainMask
+     * абстрагирует функции, связанные с анимацией от этого класса
+     * сочетает в себе как функцию генерации хода, так и генерации анимации
+     * предаставляет удобрый интерфейс для доступа к методам построения хода
+     * для основного приложения
+     */
     function MoveMap() {
         var undefined;
 
         var moveMap = this;
         this.generate = function (o) {
             var cubes,
-                startCube,
                 mainMask;
 
-            cubes = o.cubes;
-            startCube = o.startCube;
 
-            if (this.colorSheme === undefined) {
-                //цветовая схема, нужна для приведения коллекции к маске
-                this.generateColorSheme();
-            }
+            this.cubes = o.cubes;
+            this.startCube = o.startCube;
 
-            this.mainMask = this.generateMainMask({
-                startCube: startCube,
-                cubes: cubes
+
+            localStorage["tenOnTenLastMask"] = this.generateJSONMask();
+
+            //создаем класс маски
+            this.mainMask = new MainMask({
+                startCube: this.startCube,
+                cubes: this.cubes
             });
-            this.animate({startCube: startCube});
+
+            //генерируем из м-кубиков маски карту анимации
+            this.createAnimationMap();
         };
-        //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
-        this.generateJSONMask = function (o) {
+
+        //строим анимацию для каждого кубика одтельно на основе steps каждого м-кубика
+        this.createAnimationMap = function () {
+            this.animationMap = [];
+            var noEmptyActions = [];
+
+            //массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
+            //в последовательности,  в которой они туда попали
+            this.toSideActions = [];
+
+            //поскольку у каждого кубика одинаковое число шагов анимации, чтобы
+            //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
+            this.animationLength = this.mainMask.arr[0].steps.length;
+
+            //console.log("////inMainActions:", this.mainMask.arr);
+
+            //проходимся в цикле по всем кубикам
+            for (var key in this.mainMask.arr) {
+                var mCube = this.mainMask.arr[key];
+                var steps = mCube.steps;
+                //массив с действиями одного кубика
+                var actions = [{action: null, duration: 0}];
+                //пробегаемся по массиву шагов анимации
+                for (var key1 = 0; key1 < steps.length; key1++) {
+                    //один шаг анимации
+                    var step = steps[key1];
+                    //последний шаг анимации, к которому добавляем продолжительность
+                    //в случае совпадения со следующим шагом
+                    var lastAction = actions[actions.length - 1];
+                    //если это такой же шаг, как и предидущий
+                    if (step.do === lastAction.action) {
+                            //иначе просто увеличиваем продолжительность предидущего
+                            lastAction.duration++;
+                    }
+                    else {
+                        //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
+                        switch (step.do) {
+                            case "toSide":
+                                lastAction.action = "toSide";
+                                lastAction.duration++;
+                                this.toSideActions.push(mCube);
+                                break;
+                            case null:
+                                if (["st", "sr", "sl", "sb"].indexOf(lastAction.action) > -1) {
+                                    lastAction.action = lastAction.action + "Bump";
+                                    lastAction.duration++;
+                                }
+                                else {
+                                    actions.push({action: step.do, duration: 1});
+                                }
+                                break;
+                            default:
+                                actions.push({action: step.do, duration: 1});
+                                break;
+                        }
+                    }
+                }
+                if(actions.length === 1 && actions[0].action === null) {
+                    actions.shift();
+                }
+
+                //console.log(actions);
+
+                //подтягиваем задержки
+                if (actions.length !== 0) {
+                    //итоговый массив, в котором продолжительность анимаций
+                    //и задержки выстроены, как надо
+                    var nullToDelayActions = [];
+                    var delay = 0;
+                    for (var key1 = 0; key1 < actions.length; key1++) {
+                        var action = actions[key1];
+                        //выставляем задержку от начала хода
+                        action.delay = delay;
+                        //добавляем к задержке следующего действия текущую продолжительность
+                        delay += action.duration;
+                        if (action.action !== null) {
+                            nullToDelayActions.push(action);
+                        }
+                    }
+                    this.animationMap.push({
+                        actions: nullToDelayActions,
+                        cube: this.mainMask.arr[key].cube
+                    });
+                }
+            }
+        };
+
+        //когда ход прощитан, запускаем саму анимацию
+        this.animate = function (o) {
+            var map;
+            var startCube = this.startCube;
+
+            //блокируем приложение от начала до конца анимации
+            //минус один - потому, что в последний такт обычно анимация чисто символическая
+            o.app.blockApp = true;
+            setTimeout(
+                function (app) {
+                    app.blockApp = false;
+                },
+                this.animationLength * d.animTime - 1,
+                o.app
+            );
+
+            this.cubes.animate({action: "fromLine", cube: startCube});
+
+            //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
+            startCube.$el.addClass("d" + startCube.direction);
+
+            //перебираем карту анимации и передаем каждому кубику объект действия,
+            //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
+            //далее кубик запускает таймер до выполнения и выполняет нужную анимацию
+            map = this.animationMap;
+            for (var key in map) {
+                var cube = map[key].cube;
+                var actions = map[key].actions;
+                for (var key1 in actions) {
+                    var action = actions[key1];
+                    cube.addAnimate(action);
+                }
+            }
+        };
+
+
+        /**
+         * Функции, которым могут понадобиться в дальнейшем
+         */
+            //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
+        this.generateJSONMask = function () {
+
             var cubes;
             var mask;
             var main;
 
             mask = {};
-            main = [];
             for (var key in d.fields) {
-                mask[d.fields[key]] = "";
+                mask[d.fields[key]] = [];
             }
-            cubes = o.cubes;
+            mask.main = [];
+            cubes = this.cubes;
+
             //сначала генерируем боковые поля, где направление кубиков зависит исключительно от поля
             cubes._sideEach(function (cube) {
-                mask[cube.field] += moveMap.colorSheme[cube.color];
+                mask[cube.field].push({
+                    color: cube.color,
+                    x: cube.x,
+                    y: cube.y
+                });
             });
             //затем основное поле, с указателем направления, если направления нет - ноль
-            cubes._mainEach(function (cube, field, x, y, i) {
-                var direction;
-                direction = cube.direction === null ? "0" : cube.direction.charAt(0);
-                main.push(x + "" + y + direction);
+            cubes._mainEach(function (cube) {
+                mask.main.push({
+                    color: cube.color,
+                    direction: cube.direction,
+                    x: cube.x,
+                    y: cube.y
+                });
             });
-            //возвращаем значения главного поля в виде строки, кубики через запятую
-            mask["main"] = main.join(",");
 
             return mask;
         };
@@ -57,235 +198,6 @@ define(['data'], function (d) {
             }
             this.colorSheme = colors;
         };
-        //генерация маски из кубиков, которые могут учавствовать в построении хода
-        this.generateMainMask = function (o) {
-            var startCube,
-                mainMask,
-                cubes;
-
-            startCube = o.startCube;
-            cubes = o.cubes;
-            //класс для маски(слепок текущего состояния с возможностью создать пошагово один ход игры)
-            function MainMask() {
-                var cubes,
-                    startCube,
-                    mainMask;
-
-                mainMask = this;
-                cubes = o.cubes;
-                startCube = o.startCube;
-                //основной массив со значениями
-                this.arr = [];
-                //создаем маску, берем значения из коллекции кубес
-                this.initialize = function () {
-                    var startMCube,
-                        startMCubeX,
-                        startMCubeY;
-
-                    //класс для удобной работы с м-кубиком
-                    function MCube(o) {
-                        this.x = o.x;
-                        this.y = o.y;
-                        this.color = o.color;
-                        this.direction = o.direction;
-                        this.extra = o.extra;
-                        this.mainMask = o.mainMask;
-                        this.steps = [];
-                        this.cube = o.cube;
-                    }
-
-                    //один шаг для м-кубика, возвращает информацию о шаге для анимации
-                    MCube.prototype.oneStep = function () {
-                        var step;
-                        step = {};
-                        if (this.direction !== null) {
-                            var nextPos = {x: this.x, y: this.y};
-                            var prop;
-                            if (this.direction === "top" || this.direction === "bottom") {
-                                this.direction === "top" ? nextPos.y-- : nextPos.y++;
-                            }
-                            else {
-                                this.direction === "left" ? nextPos.x-- : nextPos.x++;
-                            }
-                            if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
-                                this.x = nextPos.x;
-                                this.y = nextPos.y;
-                                this.direction = null;
-                                step.do = "toSide";
-                            }
-                            else {
-                                if (this.mainMask._get(nextPos) === null) {
-                                    this.x = nextPos.x;
-                                    this.y = nextPos.y;
-                                    step.do = "s" + this.direction.charAt(0);
-                                }
-                                else {
-                                    step.do = null;
-                                }
-                            }
-                        }
-                        else {
-                            step.do = null;
-                        }
-                        this.steps.push(step);
-                        return step;
-                    };
-                    //создаем массив из всех кубиков, которые есть на доске
-                    cubes._mainEach(function (cube) {
-                        mainMask.arr.push(new MCube({
-                            x: cube.x,
-                            y: cube.y,
-                            color: cube.color,
-                            direction: cube.direction,
-                            extra: cube.extra,
-                            mainMask: mainMask,
-                            cube: cube
-                        }));
-                    });
-                    //добавляем в маску кубик, с которого начинаем анимацию
-                    if (startCube.field === "top" || startCube.field === "bottom") {
-                        startMCubeX = startCube.x;
-                        startMCubeY = (startCube.field === "top") ? -1 : 10;
-                    }
-                    else {
-                        startMCubeX = (startCube.field === "left") ? -1 : 10;
-                        startMCubeY = startCube.y;
-                    }
-                    startMCube = new MCube({
-                        x: startMCubeX,
-                        y: startMCubeY,
-                        color: startCube.color,
-                        direction: startCube.direction,
-                        extra: startCube.extra,
-                        mainMask: mainMask,
-                        cube: startCube
-                    });
-                    this.arr.push(startMCube);
-                };
-                this.initialize();
-                //один ход для всех кубиков на доске
-                this.step = function () {
-                    var somethingHappend;
-                    somethingHappend = false;
-                    for (var key in this.arr) {
-                        var oneStep;
-                        oneStep = this.arr[key].oneStep();
-                        if (oneStep.do !== null) {
-                            somethingHappend = true;
-                        }
-                    }
-
-                    //console.log("//////////_endOneStep");
-
-                    if (somethingHappend) {
-                        this.step();
-                    }
-                    else {
-                        //console.log("//////////_endOfRun");
-                        /**
-                         * здесь долдна быть функция подрыва кубиков и проверки,
-                         * продолжается ход или нет
-                         * и если да, то выполняем еще один степ()
-                         */
-                        this.createAnimationMap();
-                    }
-                };
-                //строим анимацию для каждого кубика одтельно на основе steps каждого м-кубика
-                this.createAnimationMap = function () {
-                    this.animationMap = [];
-                    var noEmptyActions = [];
-                    for (var key in this.arr) {
-                        var steps = this.arr[key].steps;
-                        //console.log(steps);
-                        var cube = this.arr[key].cube;
-                        var actions = [{action: null, duration: 0}];
-                        for (var key1 = 0; key1 < steps.length; key1++) {
-                            var step = steps[key1];
-                            var lastAction = actions[actions.length - 1];
-                            //console.log(key1,  step.do, lastAction.action, steps);
-                            if (step.do === lastAction.action) {
-                                lastAction.duration++;
-                            }
-                            else {
-                                //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
-                                switch (step.do) {
-                                    case "toSide":
-                                        lastAction.action = lastAction.action + "ToSide";
-                                        lastAction.duration++;
-                                        break;
-                                    case null:
-                                        if (["st", "sr", "sl", "sb"].indexOf(lastAction.action) > -1) {
-                                            lastAction.action = lastAction.action + "Bump";
-                                            lastAction.duration++;
-                                        }
-                                        else {
-                                            actions.push({action: step.do, duration: 1});
-                                        }
-                                        break;
-                                    default:
-                                        actions.push({action: step.do, duration: 1});
-                                        break;
-                                }
-                            }
-                        }
-                        actions.shift();
-
-
-                        if (actions.length !== 0) {
-                            var nullToDelayActions = [];
-                            var delay = 0;
-                            for (var key1 = 0; key1 < actions.length; key1++) {
-                                var action = actions[key1];
-                                action.delay = delay;
-                                delay += action.duration;
-                                if (action.action !== null) {
-                                    nullToDelayActions.push(action);
-                                }
-                            }
-                            this.animationMap.push({
-                                actions: nullToDelayActions,
-                                cube: this.arr[key].cube
-                            });
-                        }
-                    }
-                };
-                this.step();
-            }
-
-            //поскольку маска - несортированный масив, получаем куб методом перебора
-            MainMask.prototype._get = function (o) {
-                var arr;
-                arr = this.arr;
-                for (var key in arr) {
-                    if (arr[key].x === o.x && arr[key].y === o.y) {
-                        return arr[key];
-                    }
-                }
-                return null;
-            };
-            mainMask = new MainMask({
-                startCube: startCube,
-                cubes: cubes
-            });
-            return mainMask;
-        }
-        //когда ход прощитан, запускаем саму анимацию
-        this.animate = function(o){
-            var map;
-            var startCube = o.startCube;
-            //добавляем постоянную стрелку с кубику, с которого начинается анимация
-            startCube.$el.addClass("d" + startCube.direction);
-
-            map = this.mainMask.animationMap;
-            for(var key in map){
-                var cube = map[key].cube;
-                var actions = map[key].actions;
-                for(var key1 in actions){
-                    var action = actions[key1];
-                    cube.addAnimate(action);
-                }
-            }
-        }
     };
-    return new MoveMap;
+    return MoveMap;
 });

@@ -3,13 +3,13 @@ define(function () {
         //ширина доски в кубиках
         cubesWidth: 10,
         //уровень, с которого начинаем
-        level: 10,
+        level: 1,
         //ширина одного контейнера кубика
         oneWidth: 32,
         //список полей
         fields: ["main", "top", "right", "bottom", "left"],
         //время одного шага анимации
-        animTime: 50,
+        animTime: 75,
         //распределение по уровням
         levels: {
             "1": {
@@ -41,6 +41,20 @@ define(function () {
         f: {
             rand: function rand(min, max) {
                 return min + ((max - min + 1) * Math.random() ^ 0);
+            },
+            reverseField: function(field){
+                if (field === "top") {
+                    return "bottom";
+                }
+                else if (field === "bottom") {
+                    return "top";
+                }
+                else if (field === "left") {
+                    return "right";
+                }
+                else if (field === "right") {
+                    return "left";
+                }
             }
         }
     };

@@ -1,7 +1,7 @@
 /**
  * Created by aa.senaev on 03.11.2014.
  */
-define(function(){
+define(['data'], function(d){
     /**
      * класс для удобной работы с м-кубиком
      * м-кубик представляем из себя абстрактный объек кубика со всеми
@@ -15,6 +15,8 @@ define(function(){
         this.direction = o.direction;
         this.extra = o.extra;
         this.mainMask = o.mainMask;
+
+        this.rand = d.f.rand(0, 1000000);
         //метка, означающая, что м-кубик вошел в группу по цветам(у него есть смежные кубики того же цвета)
         //если значение null - нету, или еще не найдено, если не null - адрес заданной группы
         this.inGroup = null;

@@ -91,6 +91,7 @@ define(['mCube', 'data'], function (MCube, d) {
                 //и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
                 var adjacentCubes = this.searchAdjacentCubes();
                 if (adjacentCubes.length) {
+                    //console.log(adjacentCubes);
                     //если такие группы кубиков имеются, подрываем их и запускаем
                     //еще один шаг хода, при этом обновляем массив м-кубиков
                     //сюда попадут все кубики, которые будут взорваны
@@ -148,7 +149,6 @@ define(['mCube', 'data'], function (MCube, d) {
             for (var key in byColor) {
                 groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
             }
-
             return groups;
         };
 
@@ -163,6 +163,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     var compare = arr[key1];
                     //если кубики смежные
                     if (Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1) {
+                        var group;
                         //если текущий кубик не принадлежик групппе
                         if (current.inGroup === null) {
                             //и кубик, с которым сравниваем не принадлежит группе
@@ -190,7 +191,9 @@ define(['mCube', 'data'], function (MCube, d) {
                                 group = current.inGroup;
                                 if (current.inGroup !== compare.inGroup) {
                                     for (var key2 in compare.inGroup) {
-                                        group.push(compare.inGroup[key2]);
+                                        if(current.inGroup.indexOf(compare.inGroup[key]) === -1) {
+                                            group.push(compare.inGroup[key2]);
+                                        }
                                     }
                                 }
                             }

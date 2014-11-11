@@ -9,6 +9,10 @@ define(['data'], function (d) {
         cube = this;
         this.x = o.x;
         this.y = o.y;
+
+
+        this.rand = d.f.rand(0, 1000000);
+
         this.field = o.field;
         //указатель на игру, к которой кубик привязан
         this.app = o.app;

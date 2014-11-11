@@ -23,10 +23,10 @@ define(['data', 'cube'], function (d, Cube) {
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
         cubes[o.field][o.x][o.y] = value;
-        if (value !== null && value instanceof Cube) {
+        /*if (value !== null && value instanceof Cube) {
             value.x = o.x;
             value.y = o.y;
-        }
+        }*/
         return this[o.field][o.x][o.y];
     };
     //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -151,6 +151,7 @@ define(['data', 'cube'], function (d, Cube) {
                 this._set({field: "main", x: mCube.x, y: mCube.y}, mCube.cube);
                 //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
                 //обнуляем эту клетку
+                console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
                 if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }
@@ -159,7 +160,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
             //если кубик ворвался во время хода, удираем его с доски
             else if(mCube.x === -1 && mCube.y === -1){
-                console.log("убираем: ", {field: "main", x: mCube.cube.x, y: mCube.cube.y});
+                //console.log("убираем: ", {color: mCube.color, x: mCube.cube.x, y: mCube.cube.y},cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube ? true : cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}));
                 if(cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube){
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }

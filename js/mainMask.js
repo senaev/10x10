@@ -9,8 +9,6 @@ define(['mCube', 'data'], function (MCube, d) {
      * во время создания экземпляра класса коздаётся массив м-кубиков( экземпляков класса МКубе),
      * затем пожагово - обращение к каждому м-кубику, методом oneStep, в котором автоматически меняются
      * параметры состояния и создаётся объект из последовательности шагов для построения анимации
-     * @param o
-     * @constructor
      */
     function MainMask(o) {
         var cubes,
@@ -97,7 +95,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     //сюда попадут все кубики, которые будут взорваны
                     for (var key in adjacentCubes) {
                         var group = adjacentCubes[key];
-                        console.log(group);
+                        //console.log(group);
                         for (var key in this.arr) {
                             if (group.indexOf(this.arr[key]) === -1) {
                                 this.arr[key].steps.push({do: null});

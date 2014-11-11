@@ -18,10 +18,12 @@ define(['data', 'cube'], function (d, Cube) {
     };
     //берем значение клетки из коллекции по полю, иксу, игреку
     cubes._get = function (o) {
+        //console.log(o);
         return this[o.field][o.x][o.y];
     };
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
+        //console.log(o, value);
         cubes[o.field][o.x][o.y] = value;
         /*if (value !== null && value instanceof Cube) {
             value.x = o.x;
@@ -118,6 +120,9 @@ define(['data', 'cube'], function (d, Cube) {
         cube.direction = d.f.reverseField(cube.field);
         //получаем линию, в которую вставим кубик
         var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
+        //присваиваем значения координат в поле кубику
+        cube.x = line[line.length - 1].x;
+        cube.y = line[line.length - 1].y;
         //получаем удаляемый (дальний от mainField в линии) кубик
         var removedCube = this._get(line[0]);
         //сдвигаем линию на одну клетку от mainField
@@ -151,10 +156,18 @@ define(['data', 'cube'], function (d, Cube) {
                 this._set({field: "main", x: mCube.x, y: mCube.y}, mCube.cube);
                 //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
                 //обнуляем эту клетку
-                console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
+                //console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
+
+
+                if(mCube.cube.x < 0 || mCube.cube.x > 9 || mCube.cube.y < 0 || mCube.cube.y > 9 ){
+                    console.log(mCube, mCube.cube.x, mCube.cube.y, mCube.x, mCube.y);
+                }
+
+
                 if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }
+
                 mCube.cube.x = mCube.x;
                 mCube.cube.y = mCube.y;
             }
@@ -174,8 +187,8 @@ define(['data', 'cube'], function (d, Cube) {
             if (mCube.mainMask._get({x: mCube.cube.x, y: mCube.cube.y}) === null) {
                 cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
             }
-            mCube.cube.x = mCube.x;
-            mCube.cube.y = mCube.y;
+            /*mCube.cube.x = mCube.x;
+            mCube.cube.y = mCube.y;*/
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }

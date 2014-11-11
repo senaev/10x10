@@ -9,7 +9,8 @@ require.config({
         'movemap': 'moveMap',
         'transit': 'jquery.transit.min',
         'mainMask': 'mainMask',
-        'mCube': 'mCube'
+        'mCube': 'mCube',
+        'cubeAnimation': 'cubeAnimation'
     }
 });
 

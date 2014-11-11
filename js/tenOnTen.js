@@ -89,20 +89,19 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         this.initialize();
 
         this.run = function (o) {
-            var moveMap;
-            moveMap = new MoveMap();
+            this.moveMap = new MoveMap();
 
-            moveMap.generate({
+            this.moveMap.generate({
                 startCube: o.startCube,
                 cubes: this.cubes
             });
             //пошаговый запуск анимации
-            moveMap.animate({
+            this.moveMap.animate({
                 app: this
             });
             //подитоживание - внесение изменений, произошедших в абстрактном moveMap
             //в реальную коллекцию cubes
-            this.cubes._mergeMoveMap(moveMap);
+            this.cubes._mergeMoveMap(this.moveMap);
 
             console.log("//////////ITOG CUBES:", this.cubes);
         }

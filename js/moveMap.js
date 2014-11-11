@@ -18,6 +18,8 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.cubes = o.cubes;
             this.startCube = o.startCube;
 
+            this.beyondTheSide = [];
+
 
             localStorage["tenOnTenLastMask"] = this.generateJSONMask();
 

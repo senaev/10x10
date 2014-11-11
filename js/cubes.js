@@ -26,9 +26,9 @@ define(['data', 'cube'], function (d, Cube) {
         //console.log(o, value);
         cubes[o.field][o.x][o.y] = value;
         /*if (value !== null && value instanceof Cube) {
-            value.x = o.x;
-            value.y = o.y;
-        }*/
+         value.x = o.x;
+         value.y = o.y;
+         }*/
         return this[o.field][o.x][o.y];
     };
     //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -131,8 +131,17 @@ define(['data', 'cube'], function (d, Cube) {
         }
         //устанавливаем значение первой клетки
         this._set(line[line.length - 1], cube);
-        //удаляем крайний кубик
-        removedCube.remove();
+
+        /**
+         * заносим удаляемый кубик в массив удаляемых, а не
+         * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
+         * большого количества кубиков, при практически полной замене боковой линии,
+         * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
+         * html-элементы таких кубиков будут удалены еще до того, как начнется
+         * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
+         * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
+         */
+        this._app.moveMap.beyondTheSide.push(removedCube);
     };
     cubes._mergeMoveMap = function (moveMap) {
         var arr = moveMap.mainMask.arr;
@@ -159,7 +168,7 @@ define(['data', 'cube'], function (d, Cube) {
                 //console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
 
 
-                if(mCube.cube.x < 0 || mCube.cube.x > 9 || mCube.cube.y < 0 || mCube.cube.y > 9 ){
+                if (mCube.cube.x < 0 || mCube.cube.x > 9 || mCube.cube.y < 0 || mCube.cube.y > 9) {
                     console.log(mCube, mCube.cube.x, mCube.cube.y, mCube.x, mCube.y);
                 }
 
@@ -172,9 +181,9 @@ define(['data', 'cube'], function (d, Cube) {
                 mCube.cube.y = mCube.y;
             }
             //если кубик ворвался во время хода, удираем его с доски
-            else if(mCube.x === -1 && mCube.y === -1){
+            else if (mCube.x === -1 && mCube.y === -1) {
                 //console.log("убираем: ", {color: mCube.color, x: mCube.cube.x, y: mCube.cube.y},cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube ? true : cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}));
-                if(cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube){
+                if (cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube) {
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }
             }
@@ -188,19 +197,21 @@ define(['data', 'cube'], function (d, Cube) {
                 cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
             }
             /*mCube.cube.x = mCube.x;
-            mCube.cube.y = mCube.y;*/
+             mCube.cube.y = mCube.y;*/
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
         //убираем с поля кубики, которые взорвались во время хода
         /*for (var key in moveMap.mainMask.boomActions) {
-            var mCube = moveMap.mainMask.boomActions[key];
-            var gettingMCube = cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y});
-            if (gettingMCube === mCube.cube) {
-                cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
-            }
-        }*/
+         var mCube = moveMap.mainMask.boomActions[key];
+         var gettingMCube = cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y});
+         if (gettingMCube === mCube.cube) {
+         cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
+         }
+         }*/
     };
+    //массовая анимация для кубиков, вспомогательная
+    //функция для удобства анимации сразу нескольких кубиков
     cubes.animate = function (o) {
         var action,
             cube;
@@ -210,6 +221,7 @@ define(['data', 'cube'], function (d, Cube) {
         //получаем линию кубика
         var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
 
+        //в зависимости от типа действия
         switch (action) {
             //при выходе одного кубика из линии, анимируем линию
             case "fromLine":
@@ -221,15 +233,63 @@ define(['data', 'cube'], function (d, Cube) {
                 break;
             //при входе кубика в линию, анимируем линию
             case "inLine":
-                //получаем линию кубика
-                var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
-                //первый кубик появляется
-                this._get(line[6]).animate({action: "disapperanceInSide", duration: 1});
+
+                for(var key in line){
+                    console.log(cubes._get(line[key]).color);
+                }
+
+                //массив, в который по порядку попадут все кубики,
+                //которые войдут в эту же линию того же поля во время хода
+                var allCubesToSideInThisLine = [];
+                //все кубики, которые попадают во время хода в боковую панель
+                var toSideActions = cubes._app.moveMap.toSideActions;
+                //для идентификации линии
+                var prop = "y";
+                if (cube.field === "top" || cube.field === "bottom") {
+                    prop = "x";
+                }
+                //позиция кубика среди тех, которые во время данного хода
+                //попадают в данную линию данного поля 0-ближний к майн
+                var posInSide;
+                for (var key in toSideActions) {
+                    var c = toSideActions[key].cube;
+                    if (c.field === cube.field && c[prop] === cube[prop]) {
+                        if (c === cube) {
+                            posInSide = allCubesToSideInThisLine.length;
+                        }
+                        allCubesToSideInThisLine.push(c);
+                    }
+                }
+
+                //массив кубиков, которые удалились за пределами этой линии во время хода
+                //0 - первый удалённый(самый дальний)
+                var removeBeyondTheLine = [];
+                for (var key in cubes._app.moveMap.beyondTheSide) {
+                    var c = cubes._app.moveMap.beyondTheSide[key];
+                    if (c.field === cube.field && c[prop] === cube[prop]) {
+                        removeBeyondTheLine.push(c);
+                    }
+                }
+
+                console.log(allCubesToSideInThisLine, posInSide);
+                console.log(removeBeyondTheLine);
+
+                var pos = d.cubesWidth - posInSide - 2;
+
+                console.log("^^^", pos, this._get(line[pos]).color);
+
+                //третий кубик пропадает
+                this._get(line[pos - 2]).animate({action: "disapperanceInSide", duration: 1});
+
                 //остальные два сдвигаются ближе к линии
-                this._get(line[7]).animate({action: "forth", duration: 1});
-                this._get(line[8]).animate({action: "forth", duration: 1});
+                this._get(line[pos - 1]).animate({action: "forth", duration: 1});
+                this._get(line[pos]).animate({action: "forth", duration: 1});
+                break;
+            default:
+                throw new Error("Неизвестная анимация в массиве кубиков: ", action);
                 break;
         }
+        ;
     };
 
     return cubes;

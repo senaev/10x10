@@ -11,6 +11,9 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
 
+        //уровень
+        this.level = 1;
+
         //variables
         var appContainer;
 
@@ -72,7 +75,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 });
             });
             //генерируем кубики на главном поле
-            for (var number = 0, len = d.levels[d.level].cubesCount; number < len; number++) {
+            for (var number = 0, len = d.f.level(this.level).cubesCount; number < len; number++) {
                 if (d.firstCubesPosition[number] !== undefined) {
                     var pos = d.firstCubesPosition[number];
                     var cube;
@@ -81,7 +84,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                         y: pos[1],
                         field: 'main',
                         app: tenOnTen,
-                        color: d.colors[number % d.levels[d.level].colorsCount]
+                        color: d.colors[number % d.f.level(this.level).colorsCount]
                     });
                 }
                 else {

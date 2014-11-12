@@ -10,17 +10,6 @@ define(function () {
         fields: ["main", "top", "right", "bottom", "left"],
         //время одного шага анимации
         animTime: 55,
-        //распределение по уровням
-        levels: {
-            "1": {
-                colorsCount: 5,
-                cubesCount: 5
-            },
-            "10": {
-                colorsCount: 10,
-                cubesCount: 10
-            }
-        },
         //начальная позиция кубиков надоске
         firstCubesPosition: [
             [3, 4],
@@ -39,6 +28,20 @@ define(function () {
         //возможные цвета кубиков
         colors: ["blue", "green", "yellow", "red", "brown", "pink", "white", "purple", "lightblue", "orange"],
         f: {
+            //распределение по уровням
+            level: function(level){
+                levels = {
+                    "1": {
+                        colorsCount: 5,
+                            cubesCount: 5
+                    },
+                    "10": {
+                        colorsCount: 10,
+                            cubesCount: 10
+                    }
+                };
+                return levels[level];
+            },
             rand: function rand(min, max) {
                 return min + ((max - min + 1) * Math.random() ^ 0);
             },

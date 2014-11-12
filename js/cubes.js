@@ -115,6 +115,7 @@ define(['data', 'cube'], function (d, Cube) {
     };
     //добавляем в линию кубик, по кубику мы должны определить, в какую линию
     cubes._pushInLine = function (cube) {
+        //console.log(cube.color);
         //меняем значения кубика
         cube.field = cube.direction;
         cube.direction = d.f.reverseField(cube.field);
@@ -189,6 +190,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
         }
         //убираем в боковые поля кубики, которые ушли туда во время хода
+        //console.log(moveMap.toSideActions);
         for (var key in moveMap.toSideActions) {
             var mCube = moveMap.toSideActions[key];
             //если клетку, с которой сошел кубик, ещё не занял другой кубик
@@ -234,12 +236,13 @@ define(['data', 'cube'], function (d, Cube) {
             //при входе кубика в линию, анимируем линию
             case "inLine":
 
-                for(var key in line){
-                    console.log(cubes._get(line[key]).color);
-                }
+                /*for(var key in line){
+                 console.log(cubes._get(line[key]).color);
+                 }*/
 
                 //массив, в который по порядку попадут все кубики,
                 //которые войдут в эту же линию того же поля во время хода
+                //0 - который входит первым
                 var allCubesToSideInThisLine = [];
                 //все кубики, которые попадают во время хода в боковую панель
                 var toSideActions = cubes._app.moveMap.toSideActions;
@@ -249,7 +252,7 @@ define(['data', 'cube'], function (d, Cube) {
                     prop = "x";
                 }
                 //позиция кубика среди тех, которые во время данного хода
-                //попадают в данную линию данного поля 0-ближний к майн
+                //попадают в данную линию данного поля 0-дальний от mainField
                 var posInSide;
                 for (var key in toSideActions) {
                     var c = toSideActions[key].cube;
@@ -271,12 +274,12 @@ define(['data', 'cube'], function (d, Cube) {
                     }
                 }
 
-                console.log(allCubesToSideInThisLine, posInSide);
-                console.log(removeBeyondTheLine);
+                console.log(allCubesToSideInThisLine, posInSide, cube);
+                //console.log(removeBeyondTheLine);
 
-                var pos = d.cubesWidth - posInSide - 2;
+                var pos = ((d.cubesWidth - allCubesToSideInThisLine.length) + posInSide) - 1;
 
-                console.log("^^^", pos, this._get(line[pos]).color);
+                //console.log("^^^", pos, this._get(line[pos]).color);
 
                 //третий кубик пропадает
                 this._get(line[pos - 2]).animate({action: "disapperanceInSide", duration: 1});

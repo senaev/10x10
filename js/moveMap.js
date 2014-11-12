@@ -72,6 +72,9 @@ define(['data', 'mainMask'], function (d, MainMask) {
                             case "toSide":
                                 lastAction.action = "toSide";
                                 lastAction.duration++;
+                                //для сортиравки попаданий в боковое поле
+                                mCube.toSideTime = key1;
+                                //заносим м-кубик в массив попадания в боковое поле
                                 this.toSideActions.push(mCube);
                                 break;
                             case null:
@@ -117,6 +120,10 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     });
                 }
             }
+            //сортируем попавшие в боковое поле м-кубики по времени попадания
+            this.toSideActions.sort(function(a, b){
+                return a.toSideTime - b.toSideTime;
+            });
         };
 
         //когда ход прощитан, запускаем саму анимацию

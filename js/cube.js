@@ -132,7 +132,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 .appendTo(this.app.container)
                 .transition({
                     scale: 1,
-                    duration: d.animTime * 2
+                    duration: d.animTime * 4
                 });
             console.log("DISAPPERANCE");
             delete this.disapperance;

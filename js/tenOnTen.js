@@ -119,7 +119,14 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             }
             else {
                 //блокируем приложение до тех пор, пока не закончим анимацию
-                //this.blockApp = true;
+                this.blockApp = true;
+                setTimeout(
+                    function(app){
+                        app.blockApp = false;
+                    },
+                    d.animTime * 4,
+                    this
+                );
 
                 previousButton.addClass("blocked");
 
@@ -206,7 +213,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                         case "remove":
                             //удаляем нафиг кубик
                             this.cubes._set({field: changed[key].field, x: changed[key].x, y: changed[key].y}, null);
-                            cube.animate({action: "remove", duration: 2, delay: 0});
+                            cube.animate({action: "remove", duration: 4, delay: 0});
                             break;
                         case "change":
                             cube.change({

@@ -9,7 +9,7 @@ define(function () {
         //список полей
         fields: ["main", "top", "right", "bottom", "left"],
         //время одного шага анимации
-        animTime: 500,
+        animTime: 55,
         //распределение по уровням
         levels: {
             "1": {

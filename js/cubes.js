@@ -266,27 +266,49 @@ define(['data', 'cube'], function (d, Cube) {
 
                 //массив кубиков, которые удалились за пределами этой линии во время хода
                 //0 - первый удалённый(самый дальний)
-                var removeBeyondTheLine = [];
+                var removeBS = [];
                 for (var key in cubes._app.moveMap.beyondTheSide) {
                     var c = cubes._app.moveMap.beyondTheSide[key];
                     if (c.field === cube.field && c[prop] === cube[prop]) {
-                        removeBeyondTheLine.push(c);
+                        removeBS.push(c);
                     }
                 }
 
-                console.log(allCubesToSideInThisLine, posInSide, cube);
-                //console.log(removeBeyondTheLine);
-
+                //вычисляем, какие кубики будем двигать при вставке в линию
                 var pos = ((d.cubesWidth - allCubesToSideInThisLine.length) + posInSide) - 1;
+                var c1, c2, cr;
 
-                //console.log("^^^", pos, this._get(line[pos]).color);
+                //смысл этих условий в том, что если кубик, который надо анимировать,
+                //еще присутствует в линии, мы берем этот кубик оттуда, если же
+                //он уже удален из линии, но его нужно анимировать, мы берем его
+                //из массива удаленных кубиков этой линии
+                if (pos - 2 > -1) {
+                    cr = this._get(line[pos - 2]);
+                }
+                else {
+                    cr = removeBS[removeBS.length + (pos - 2)];
+                }
+
+                if (pos > -1) {
+                    c1 = this._get(line[pos]);
+                }
+                else {
+                    c1 = removeBS[removeBS.length + pos];
+                }
+
+                if (pos - 1 > -1) {
+                    c2 = this._get(line[pos - 1]);
+                }
+                else {
+                    c2 = removeBS[removeBS.length + (pos - 1)];
+                }
 
                 //третий кубик пропадает
-                this._get(line[pos - 2]).animate({action: "disapperanceInSide", duration: 1});
+                cr.animate({action: "disapperanceInSide", duration: 1});
 
                 //остальные два сдвигаются ближе к линии
-                this._get(line[pos - 1]).animate({action: "forth", duration: 1});
-                this._get(line[pos]).animate({action: "forth", duration: 1});
+                c2.animate({action: "forth", duration: 1});
+                c1.animate({action: "forth", duration: 1});
                 break;
             default:
                 throw new Error("Неизвестная анимация в массиве кубиков: ", action);

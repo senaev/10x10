@@ -137,6 +137,10 @@ define(['data', 'mainMask'], function (d, MainMask) {
             setTimeout(
                 function (app) {
                     app.blockApp = false;
+
+                    for(var key in moveMap.beyondTheSide){
+                        moveMap.beyondTheSide[key].remove();
+                    }
                 },
                 this.animationLength * d.animTime - 1,
                 o.app

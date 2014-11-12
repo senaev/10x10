@@ -1,6 +1,7 @@
 //Cubes collection
 define(['data', 'cube'], function (d, Cube) {
     var cubes = {};
+    var undefined;
 
     for (var key in d.fields) {
         cubes[d.fields[key]] = {};
@@ -23,6 +24,9 @@ define(['data', 'cube'], function (d, Cube) {
     };
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
+        if(o === undefined || value === undefined){
+            throw new Error("cubes._set не получил параметры: o: ", o, " value: ", value);
+        }
         //console.log(o, value);
         cubes[o.field][o.x][o.y] = value;
         /*if (value !== null && value instanceof Cube) {

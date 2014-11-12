@@ -1,7 +1,7 @@
 /**
  * Created by Admin on 11.11.2014.
  */
-define(['data'], function(d){
+define(['data'], function (d) {
     var cubeAnimation = function (o) {
 
         var action,
@@ -35,12 +35,12 @@ define(['data'], function(d){
                 var prop = "left";
                 if (field === "top" || field === "bottom") {
                     prop = "top";
-                    if(field === "bottom"){
+                    if (field === "bottom") {
                         sign = "+";
                     }
                 }
                 else {
-                    if(field === "right"){
+                    if (field === "right") {
                         sign = "+";
                     }
                 }
@@ -67,6 +67,17 @@ define(['data'], function(d){
             //передвигаем кубик в боковой панели дальше от mainField
             case "boom":
                 boom();
+                break;
+            //уменьшаем и в конце удаляем
+            case "remove":
+                cube.$el.transition({
+                    scale: 0,
+                    opacity: 0,
+                    duration: duration * d.animTime,
+                    easing: "out"
+                }, function () {
+                    cube.remove();
+                });
                 break;
             default:
                 console.log("Неизвестная анимация: " + action);
@@ -225,17 +236,17 @@ define(['data'], function(d){
                     scale: 1,
                     opacity: 1
                 }).addClass("cubeHidden");
-            },duration * d.animTime,cube);
+            }, duration * d.animTime, cube);
         }
 
-        function boom(){
+        function boom() {
             //console.log("boom:",cube.color, cube.x, cube.y);
             cube.$el.transition({
                 scale: 1.5,
                 opacity: 0,
                 duration: d.animTime,
                 easing: "out"
-            },function(){
+            }, function () {
                 cube.remove();
             });
         }

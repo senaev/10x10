@@ -20,8 +20,8 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
             this.beyondTheSide = [];
 
+            this.app = o.app;
 
-            localStorage["tenOnTenLastMask"] = this.generateJSONMask();
 
             //создаем класс маски
             this.mainMask = new MainMask({
@@ -127,23 +127,28 @@ define(['data', 'mainMask'], function (d, MainMask) {
         };
 
         //когда ход прощитан, запускаем саму анимацию
-        this.animate = function (o) {
+        this.animate = function () {
             var map;
             var startCube = this.startCube;
 
             //блокируем приложение от начала до конца анимации
             //минус один - потому, что в последний такт обычно анимация чисто символическая
-            o.app.blockApp = true;
+            this.app.blockApp = true;
             setTimeout(
                 function (app) {
                     app.blockApp = false;
 
+                    //удаляем ненужные html-элементы
                     for(var key in moveMap.beyondTheSide){
                         moveMap.beyondTheSide[key].remove();
                     }
+
+                    //разблокируем кнопку назад
+                    var previousButton = app.container.find(".panel.topRightPanel>.previousButton");
+                    previousButton.removeClass("blocked");
                 },
                 this.animationLength * d.animTime - 1,
-                o.app
+                this.app
             );
 
             this.cubes.animate({action: "fromLine", cube: startCube});
@@ -169,40 +174,6 @@ define(['data', 'mainMask'], function (d, MainMask) {
         /**
          * Функции, которым могут понадобиться в дальнейшем
          */
-            //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
-        this.generateJSONMask = function () {
-
-            var cubes;
-            var mask;
-            var main;
-
-            mask = {};
-            for (var key in d.fields) {
-                mask[d.fields[key]] = [];
-            }
-            mask.main = [];
-            cubes = this.cubes;
-
-            //сначала генерируем боковые поля, где направление кубиков зависит исключительно от поля
-            cubes._sideEach(function (cube) {
-                mask[cube.field].push({
-                    color: cube.color,
-                    x: cube.x,
-                    y: cube.y
-                });
-            });
-            //затем основное поле, с указателем направления, если направления нет - ноль
-            cubes._mainEach(function (cube) {
-                mask.main.push({
-                    color: cube.color,
-                    direction: cube.direction,
-                    x: cube.x,
-                    y: cube.y
-                });
-            });
-
-            return mask;
-        };
         //создание цветовой схемы, в которой каждому цвету присваивается число
         this.generateColorSheme = function () {
             var colors = {};

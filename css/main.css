@@ -44,6 +44,9 @@
     color: white;
     cursor: pointer;
 }
+.tenOnTenContainer>.panel.topRightPanel>.previousButton.blocked{
+    color: #cccccc;
+}
 
 /*сам кубик*/
 

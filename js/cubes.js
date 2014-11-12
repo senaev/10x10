@@ -108,6 +108,8 @@ define(['data', 'cube'], function (d, Cube) {
         for (var key = line.length - 1; key > 0; key--) {
             var prevCube = this._get(line[key - 1]);
             this._set(line[key], prevCube);
+            prevCube.x = line[key].x;
+            prevCube.y = line[key].y;
         }
         //генерируем кубик для крайнего значения в линии
         cubes._set(line[0], new Cube({

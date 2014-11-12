@@ -97,7 +97,6 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
             //создаем маску для возможности возврата хода
             this.previousStepMap = this.generateMask();
-            console.log(this.previousStepMap);
 
             this.moveMap.generate({
                 startCube: o.startCube,
@@ -110,7 +109,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             //в реальную коллекцию cubes
             this.cubes._mergeMoveMap(this.moveMap);
 
-            console.log("//////////ITOG CUBES:", this.cubes);
+            //console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
         this.undo = function () {

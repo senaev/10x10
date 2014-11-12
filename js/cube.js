@@ -233,15 +233,35 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         var cube = this;
 
         if (this._inFieldIsVisible()) {
-
-            setTimeout(function () {
-                changeParams();
-            }, d.animTime);
-
-            this.$el.transition({
-                rotateY: '180deg',
-                duration: d.animTime * 4
-            });
+            var prop;
+            //для красотенюшки задаем разную анимацию для разных полей
+            if (this.field === "main") {
+                prop = "rotate3d";
+            }
+            else if (this.field === "top" || this.field === "bottom") {
+                prop = "rotateX";
+            }
+            else {
+                prop = "rotateY";
+            }
+            //анимация скрытия/открытия
+            var trans1,
+                trans2;
+            trans1 = {duration: d.animTime * 2};
+            trans2 = {duration: d.animTime * 2};
+            if(this.field === "main"){
+                trans1[prop] = '1,1,0,90deg';
+                trans2[prop] = '1,1,0,0deg';
+            }
+            else {
+                trans1[prop] = 90;
+                trans2[prop] = 0;
+            }
+            //сама анимация с изменением состояния по ходу
+            this.$el.transition(trans1, function () {
+                changeParams()
+            })
+                .transition(trans2);
         }
         else {
             changeParams();

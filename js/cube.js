@@ -46,7 +46,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         }
         //задаем цвет кубика
         if (o.color === undefined) {
-            color = d.colors[d.f.rand(0, d.f.level(this.app.level).colorsCount - 1)];
+            color = d.colors[d.f.rand(0, d.f.level.colorsCount(this.app.level) - 1)];
         }
         else {
             color = o.color;

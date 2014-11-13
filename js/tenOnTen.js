@@ -75,16 +75,17 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 });
             });
             //генерируем кубики на главном поле
-            for (var number = 0, len = d.f.level(this.level).cubesCount; number < len; number++) {
-                if (d.firstCubesPosition[number] !== undefined) {
-                    var pos = d.firstCubesPosition[number];
+            var firstCubesPosition = d.f.level.getPositions(this.level);
+            for (var number = 0, len = d.f.level.cubesCount(this.level); number < len; number++) {
+                if (firstCubesPosition[number] !== undefined) {
+                    var pos = firstCubesPosition[number];
                     var cube;
                     cube = new Cube({
                         x: pos[0],
                         y: pos[1],
                         field: 'main',
                         app: tenOnTen,
-                        color: d.colors[number % d.f.level(this.level).colorsCount]
+                        color: d.colors[number % d.f.level.colorsCount(this.level)]
                     });
                 }
                 else {

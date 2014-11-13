@@ -221,7 +221,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                                 app: this,
                                 disapperance: "cool"
                             });
-                            console.log(cube);
+                            //console.log(cube);
                             break;
                         case "remove":
                             //удаляем нафиг кубик
@@ -239,6 +239,8 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                             break;
                     }
                 }
+
+                console.log("//////////after back kubes: ", this.cubes);
             }
         };
         //генерируем маску для предидущего хода

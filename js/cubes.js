@@ -209,14 +209,6 @@ define(['data', 'cube'], function (d, Cube) {
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
-        //убираем с поля кубики, которые взорвались во время хода
-        /*for (var key in moveMap.mainMask.boomActions) {
-         var mCube = moveMap.mainMask.boomActions[key];
-         var gettingMCube = cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y});
-         if (gettingMCube === mCube.cube) {
-         cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
-         }
-         }*/
     };
     //массовая анимация для кубиков, вспомогательная
     //функция для удобства анимации сразу нескольких кубиков

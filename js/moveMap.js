@@ -143,9 +143,15 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         moveMap.beyondTheSide[key].remove();
                     }
 
-                    //разблокируем кнопку назад
+                    //разблокируем кнопку назад, если не случился переход на новый уровень
+                    //иначе - блокируем
                     var previousButton = app.container.find(".panel.topRightPanel>.previousButton");
-                    previousButton.removeClass("blocked");
+                    if(app.end !== "next_level") {
+                        previousButton.removeClass("blocked");
+                    }
+                    else{
+                        previousButton.addClass("blocked");
+                    }
 
                     if(app.end !== null){
                         switch (app.end){

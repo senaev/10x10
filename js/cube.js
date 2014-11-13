@@ -134,7 +134,6 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                     scale: 1,
                     duration: d.animTime * 4
                 });
-            console.log("DISAPPERANCE");
             delete this.disapperance;
         }
         else {

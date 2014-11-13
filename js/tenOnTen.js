@@ -12,7 +12,9 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         this.blockApp = false;
 
         //уровень
-        this.level = 1;
+        this.level = 150;
+        console.log(d.f.level.colorsCount(this.level));
+        console.log(d.f.level.cubesCount(this.level));
 
         //датчик конца хода
         this.end = null;
@@ -83,20 +85,73 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         //генерируем кубики на главном поле
         this.generateMainCubes = function(){
             var firstCubesPosition = d.f.level.getPositions(this.level);
+            var nullCells;
+            var rand;
             for (var number = 0, len = d.f.level.cubesCount(this.level); number < len; number++) {
+
+                var cube;
+
                 if (firstCubesPosition[number] !== undefined) {
                     var pos = firstCubesPosition[number];
-                    var cube;
                     cube = new Cube({
                         x: pos[0],
                         y: pos[1],
                         field: 'main',
                         app: tenOnTen,
-                        color: d.colors[number % d.f.level.colorsCount(this.level)]
+                        color: d.colors[number % d.f.level.colorsCount(this.level)],
+                        disapperance: "cool"
                     });
                 }
                 else {
-                    throw new Error("Необходимо создать функцию генерации кубов в случайных местах и внедрить в initialize");
+                    //создаем массив из свободных ячеек, перемешиваем его
+                    if(nullCells === undefined) {
+                        nullCells = [];
+                        for (var x = 0; x < d.cubesWidth; x++) {
+                            for (var y = 0; y < d.cubesWidth; y++) {
+                                if (cubes["main"][x][y] === null) {
+                                    nullCells.push({x: x, y: y});
+                                }
+                            }
+                        }
+                        d.f.shuffle(nullCells);
+                    }
+
+                    //шанс попадания кубика в крайнее поле - чем больше, тем ниже
+                    var chance = 2;
+
+                    for(var key = 0; key < chance; key++){
+                        var cell = nullCells.shift();
+                        if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1){
+                            nullCells.push(cell);
+                        }
+                        else{
+                            break;
+                        }
+                    }
+
+                    cube = new Cube({
+                        x: cell.x,
+                        y: cell.y,
+                        field: 'main',
+                        app: tenOnTen,
+                        color: d.colors[number % d.f.level.colorsCount(this.level)],
+                        disapperance: "cool"
+                    });
+                    /*var cell = nullCells.shift();
+                    //если это крайний кубик, помещаем его в конец, берем следующий
+                    if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1){
+                        nullCells.push(cell);
+                        cell = nullCells.shift();
+                        cube = new Cube({
+                            x: cell.x,
+                            y: cell.y,
+                            field: 'main',
+                            app: tenOnTen,
+                            color: d.colors[number % d.f.level.colorsCount(this.level)],
+                            disapperance: "cool"
+                        });
+                    }*/
+
                 }
             }
         };

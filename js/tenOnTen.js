@@ -113,6 +113,8 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             //в реальную коллекцию cubes
             this.cubes._mergeMoveMap(this.moveMap);
 
+            this.checkStepEnd();
+
             //console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
@@ -125,7 +127,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 //блокируем приложение до тех пор, пока не закончим анимацию
                 this.blockApp = true;
                 setTimeout(
-                    function(app){
+                    function (app) {
                         app.blockApp = false;
                     },
                     d.animTime * 4,
@@ -265,6 +267,50 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
             return mask;
         };
+        //проверяем в конце хода на конец уровня или конец изры
+        this.checkStepEnd = function () {
+            /**
+             * если нет - заканчиваем ход
+             * и проверяем, это просто ход или пользователь проиграл или
+             * пользователь перешел на новый уровень
+             * записываем в this.end:
+             * null - просто ход,
+             * game_over - конец игры,
+             * next_level - конец уровня, переход на следующий
+             */
+            var cubes = this.cubes;
+            var game_over = true;
+            var next_level = true;
+
+            for (var x = 0; x < d.cubesWidth; x++) {
+                for (var y = 0; y < d.cubesWidth; y++) {
+                    var cube = cubes["main"][x][y];
+
+                    //если на поле еще остались кубики, уровень не завершен
+                    if (cube !== null) {
+                        next_level = false;
+                    }
+
+                    //если все крайние панели заполнены - конец игры,
+                    //если хоть один пустой - игра продолжается
+                    if (x === 0 || y === 0 || x === d.cubesWidth - 1 || y === d.cubesWidth - 1) {
+                        if (cube === null) {
+                            game_over = false;
+                        }
+                    }
+                }
+                if (!next_level && !game_over) {
+                    break;
+                }
+            }
+
+            if(next_level){
+                //запускаем следующий уровень
+            }
+            else if(game_over){
+                //запускаем конец игры
+            }
+        }
     };
 
     return TenOnTen;

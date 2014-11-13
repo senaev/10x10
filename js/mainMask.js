@@ -20,6 +20,8 @@ define(['mCube', 'data'], function (MCube, d) {
         cubes = o.cubes;
         startCube = o.startCube;
 
+        this.moveMap = o.moveMap;
+
         //основной массив со значениями
         //сюда будут попадать м-кубики, учавствующие в анимации
         this.arr = [];
@@ -113,7 +115,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     this.step();
                 }
                 else {
-                    //если нет - заканчиваем ход
+                    //заканчиваем ход
                 }
             }
         };

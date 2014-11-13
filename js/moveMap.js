@@ -22,11 +22,11 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
             this.app = o.app;
 
-
             //создаем класс маски
             this.mainMask = new MainMask({
                 startCube: this.startCube,
-                cubes: this.cubes
+                cubes: this.cubes,
+                moveMap: this
             });
 
             //генерируем из м-кубиков маски карту анимации

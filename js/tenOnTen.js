@@ -14,6 +14,9 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         //уровень
         this.level = 1;
 
+        //датчик конца хода
+        this.end = null;
+
         //variables
         var appContainer;
 
@@ -74,7 +77,11 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                     app: tenOnTen
                 });
             });
-            //генерируем кубики на главном поле
+
+            this.generateMainCubes();
+        };
+        //генерируем кубики на главном поле
+        this.generateMainCubes = function(){
             var firstCubesPosition = d.f.level.getPositions(this.level);
             for (var number = 0, len = d.f.level.cubesCount(this.level); number < len; number++) {
                 if (firstCubesPosition[number] !== undefined) {
@@ -115,7 +122,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
             this.checkStepEnd();
 
-            //console.log("//////////ITOG CUBES:", this.cubes);
+            console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
         this.undo = function () {
@@ -305,12 +312,24 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             }
 
             if(next_level){
-                //запускаем следующий уровень
+                //меняем датчик на следующий уровень
+                this.end = "next_level";
             }
             else if(game_over){
-                //запускаем конец игры
+                //меняем датчик на конец игры
+                this.end = "game_over";
             }
-        }
+            else{
+                //иначе - ничего не делаем
+                this.end = null;
+            }
+        };
+        //переводим игру на следующий уровень
+        this.nextLevel = function(){
+            console.log("nextLevel func");
+            this.level++;
+            this.generateMainCubes();
+        };
     };
 
     return TenOnTen;

@@ -146,6 +146,20 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     //разблокируем кнопку назад
                     var previousButton = app.container.find(".panel.topRightPanel>.previousButton");
                     previousButton.removeClass("blocked");
+
+                    if(app.end !== null){
+                        switch (app.end){
+                            case "next_level":
+                                app.nextLevel();
+                                break;
+                            case "game_over":
+                                app.endOfGame();
+                                break;
+                            default:
+                                throw new Error("Неверное значение в app.end: ", app.end);
+                                break;
+                        }
+                    }
                 },
                 this.animationLength * d.animTime - 1,
                 this.app

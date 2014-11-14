@@ -1,4 +1,4 @@
-define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) {
+define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes, d, MoveMap, UndoButton) {
     var TenOnTen = function (args) {
         var undefined;
         var tenOnTen = this;
@@ -11,10 +11,10 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
 
-        //уровень
-        this.level = 20//65;
-        console.log(d.f.level.colorsCount(this.level));
-        console.log(d.f.level.cubesCount(this.level));
+        //уровень 1-10 11-60(16-65)
+        this.level = 60;
+        //console.log(d.f.level.colorsCount(this.level));
+        console.log("cubesCount:", d.f.level.cubesCount(this.level));
 
         //датчик конца хода
         this.end = null;
@@ -40,12 +40,13 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
         //Initialize container function
         (function () {
-            var topRightPanel = '<div class="panel topRightPanel"><div class="previousButton blocked">undo</div></div>';
+            var topRightPanel = '<div class="panel topRightPanel"></div>';//
             var background = '<div class="backgroungField">';
             for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
                 background += '<div class="dCube"></div>';
             }
             background += '</div>';
+
             var backgroundField = $(background).css({
                 height: d.oneWidth * d.cubesWidth,
                 width: d.oneWidth * d.cubesWidth,
@@ -53,6 +54,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 left: d.oneWidth * -3 - 3,
                 top: d.oneWidth * -3 - 3
             });
+
             this.container.css({
                 height: d.oneWidth * d.cubesWidth,
                 width: d.oneWidth * d.cubesWidth,
@@ -61,12 +63,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             }).addClass("tenOnTenContainer")
                 .append(backgroundField)
                 .append(topRightPanel);
-
-            $(".tenOnTenContainer>.panel.topRightPanel>.previousButton").click(function () {
-                tenOnTen.undo()
-            });
         }).apply(this);
-
 
         //Initialize map function
         this.initialize = function () {
@@ -149,20 +146,20 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                     }
 
                     var noApperanceColors = [];
-                    for(var key = 0; key < colorsCount; key++){
-                        if( apperanceColors.indexOf(d.colors[key]) === -1){
+                    for (var key = 0; key < colorsCount; key++) {
+                        if (apperanceColors.indexOf(d.colors[key]) === -1) {
                             noApperanceColors.push(d.colors[key]);
                         }
                     }
 
                     /*console.log(cell);
-                    console.log(apperanceColors);
-                    console.log(noApperanceColors);*/
+                     console.log(apperanceColors);
+                     console.log(noApperanceColors);*/
 
 
                     var color = noApperanceColors[d.f.rand(0, noApperanceColors.length - 1)];
                     /*console.log(color);
-                    console.log("////////");*/
+                     console.log("////////");*/
 
                     cube = new Cube({
                         x: cell.x,
@@ -197,12 +194,12 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
 
             this.checkStepEnd();
 
-            console.log("//////////ITOG CUBES:", this.cubes);
+            //console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
         this.undo = function () {
-            var previousButton = this.container.find(".panel.topRightPanel>.previousButton");
-            if (previousButton.hasClass("blocked")) {
+            console.log(this.undoButton._get("active"));
+            if (!this.undoButton._get("active")) {
                 //console.log("blocked");
             }
             else {
@@ -216,7 +213,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                     this
                 );
 
-                previousButton.addClass("blocked");
+                this.undoButton._set({active: false});
 
                 //массив, в котором описаны все различия между текущим и предидущим состоянием
                 var changed = [];
@@ -315,7 +312,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                     }
                 }
 
-                console.log("//////////after back kubes: ", this.cubes);
+                //console.log("//////////after back kubes: ", this.cubes);
             }
         };
         //генерируем маску для предидущего хода
@@ -407,6 +404,9 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             this.level++;
             this.generateMainCubes();
         };
+
+        //добавляем кнопку "назад"
+        this.undoButton = new UndoButton({app: tenOnTen});
     };
 
     return TenOnTen;

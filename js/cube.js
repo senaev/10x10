@@ -83,9 +83,11 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 }
                 else {
                     //cube.findFirstInLine().$el.addClass("firstInHoverLine");
-                    var allToFirstInLine = cube.findAllToFirstInLine();
-                    for (var key in allToFirstInLine) {
-                        allToFirstInLine[key].$el.addClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllInLineCanGoToMain();
+                    if (typeof allToFirstInLine !== "string") {
+                        for (var key in allToFirstInLine) {
+                            allToFirstInLine[key].$el.addClass("firstInHoverLine");
+                        }
                     }
                 }
             },
@@ -97,9 +99,11 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 }
                 else {
                     //cube.findFirstInLine().$el.removeClass("firstInHoverLine");
-                    var allToFirstInLine = cube.findAllToFirstInLine();
-                    for (var key in allToFirstInLine) {
-                        allToFirstInLine[key].$el.removeClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllInLineCanGoToMain();
+                    if (typeof allToFirstInLine !== "string") {
+                        for (var key in allToFirstInLine) {
+                            allToFirstInLine[key].$el.removeClass("firstInHoverLine");
+                        }
                     }
                 }
             })
@@ -120,10 +124,22 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 }
                 //если по боковому
                 else {
-                    //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
-                    var startCubes = cube.findAllToFirstInLine();
-                    //и отправляем его в путь-дорогу
-                    if(startCubes.length) {
+                    //ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
+                    //которые могут выйти из поля
+                    var startCubes = cube.findAllInLineCanGoToMain();
+                    //если пришел не массив - выполняем анимацию
+                    if (typeof startCubes === "string") {
+                        var scale = (cube.field === "left" || cube.field === "right") ? [0.8, 1.2] : [1.2, 0.8];
+                        cube.$el.transition({
+                            scale: scale,
+                            duration: d.animTime
+                        }).transition({
+                            scale: 1,
+                            duration: d.animTime
+                        });
+                    }
+                    //и отправляем их в путь-дорогу
+                    else {
                         cube.app.run({startCubes: startCubes});
                     }
                 }
@@ -164,7 +180,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         return this.app.cubes._get(o);
     };
     //находим все кубики от этого до ближнего к майн в линии относительно этого
-    Cube.prototype.findAllToFirstInLine = function () {
+    Cube.prototype.findAllInLineCanGoToMain = function () {
         var statProp = "y";
         var dynamicProp = "x";
         if (this.field === "top" || this.field === "bottom") {
@@ -180,42 +196,48 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         var count = 0;
         for (var key in cellsMain) {
             pos[dynamicProp] = cellsMain[key];
-            if(this.app.cubes._get(pos) === null){
+            if (this.app.cubes._get(pos) === null) {
                 count++;
             }
-            else{
+            else {
+                break;
+            }
+        }
+
+        //проверяем, если линия пустая, ходить вообще нельзя
+        var allNullInLine = true;
+        for (var key = 0; key < d.cubesWidth; key++) {
+            pos[dynamicProp] = key;
+            if (this.app.cubes._get(pos) !== null) {
+                allNullInLine = false;
                 break;
             }
         }
 
         var arr = [];
-        //если сразу за полем кубик - ничего не возвращаем
-        if(count !== 0) {
-            pos = {field: this.field};
-            pos[statProp] = this[statProp];
-            for (var key = 0; key < 3 && key < count; key++) {
-                pos[dynamicProp] = cellsSide[key];
-                arr.push(this.app.cubes._get(pos));
-                //если доходим до кубика, над которым курсор - заканчиваем маневр
-                if(this.app.cubes._get(pos) === this){
-                    break;
-                }
-            }
-            /*if (this.field === "top" || this.field === "left") {
-             pos[dynamicProp] = this[dynamicProp] + 1;
-             for (pos[dynamicProp]; pos[dynamicProp] < d.cubesWidth; pos[dynamicProp]++) {
-             arr.push(this.app.cubes._get(pos));
-             }
-             }
-             else {
-             pos[dynamicProp] = this[dynamicProp] - 1;
-             for (pos[dynamicProp]; pos[dynamicProp] > -1; pos[dynamicProp]--) {
-             arr.push(this.app.cubes._get(pos));
-             }
-             }*/
+        //если все нули в линии - возвращаем индикатор пустоты
+        if (allNullInLine) {
+            return "empty";
         }
-
-        return arr;
+        else {
+            if (count !== 0) {
+                pos = {field: this.field};
+                pos[statProp] = this[statProp];
+                for (var key = 0; key < 3 && key < count; key++) {
+                    pos[dynamicProp] = cellsSide[key];
+                    arr.push(this.app.cubes._get(pos));
+                    //если доходим до кубика, над которым курсор - заканчиваем маневр
+                    if (this.app.cubes._get(pos) === this) {
+                        break;
+                    }
+                }
+                return arr;
+            }
+            //если сразу за полем кубик - ничего не возвращаем
+            else {
+                return "block";
+            }
+        }
     };
     //задаем html-элементу кубика положение на доске
     //если параметры не переданы, устанавливаем текущую позицию кубика

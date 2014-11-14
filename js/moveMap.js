@@ -63,8 +63,8 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     var lastAction = actions[actions.length - 1];
                     //если это такой же шаг, как и предидущий
                     if (step.do === lastAction.action) {
-                            //иначе просто увеличиваем продолжительность предидущего
-                            lastAction.duration++;
+                        //иначе просто увеличиваем продолжительность предидущего
+                        lastAction.duration++;
                     }
                     else {
                         //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
@@ -92,7 +92,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         }
                     }
                 }
-                if(actions.length === 1 && actions[0].action === null) {
+                if (actions.length === 1 && actions[0].action === null) {
                     actions.shift();
                 }
 
@@ -121,7 +121,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                 }
             }
             //сортируем попавшие в боковое поле м-кубики по времени попадания
-            this.toSideActions.sort(function(a, b){
+            this.toSideActions.sort(function (a, b) {
                 return a.toSideTime - b.toSideTime;
             });
         };
@@ -139,22 +139,27 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     app.blockApp = false;
 
                     //удаляем ненужные html-элементы
-                    for(var key in moveMap.beyondTheSide){
+                    for (var key in moveMap.beyondTheSide) {
                         moveMap.beyondTheSide[key].remove();
                     }
 
                     //разблокируем кнопку назад, если не случился переход на новый уровень
                     //иначе - блокируем
-                    var previousButton = app.container.find(".panel.topRightPanel>.previousButton");
-                    if(app.end !== "next_level") {
-                        previousButton.removeClass("blocked");
-                    }
-                    else{
-                        previousButton.addClass("blocked");
-                    }
+                    app.undoButton._set({
+                        active: app.end !== "next_level",
+                        func: app.undo,
+                        caption: "undo"
+                    });
+                    /*var undoButton = app.container.find(".panel.topRightPanel>.undoButton");
+                     if(app.end !== "next_level") {
+                     undoButton.removeClass("blocked");
+                     }
+                     else{
+                     undoButton.addClass("blocked");
+                     }*/
 
-                    if(app.end !== null){
-                        switch (app.end){
+                    if (app.end !== null) {
+                        switch (app.end) {
                             case "next_level":
                                 app.nextLevel();
                                 break;
@@ -174,7 +179,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
             this.cubes.animate({action: "fromLine", cube: startCubes});
 
             //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
-            for(var key in startCubes) {
+            for (var key in startCubes) {
                 startCubes[key].$el.addClass("d" + startCubes[key].direction);
             }
 
@@ -196,7 +201,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
         /**
          * Функции, которым могут понадобиться в дальнейшем
          */
-        //создание цветовой схемы, в которой каждому цвету присваивается число
+            //создание цветовой схемы, в которой каждому цвету присваивается число
         this.generateColorSheme = function () {
             var colors = {};
             for (var key = 0; key < d.colors.length; key++) {

@@ -110,7 +110,7 @@ define(['data', 'cube'], function (d, Cube) {
         }
         //генерируем кубики для крайних значений в линии
         for (var key = 0; key < startCubes.length; key++) {
-            console.log(line[key])
+            //console.log(line[key])
             cubes._set(line[key], new Cube({
                 x: line[key].x,
                 y: line[key].y,

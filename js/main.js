@@ -10,7 +10,8 @@ require.config({
         'transit': 'jquery.transit.min',
         'mainMask': 'mainMask',
         'mCube': 'mCube',
-        'cubeAnimation': 'cubeAnimation'
+        'cubeAnimation': 'cubeAnimation',
+        'undoButton': 'undoButton'
     }
 });
 

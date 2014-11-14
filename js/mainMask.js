@@ -67,7 +67,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     }
                     startMCubeY = startCube.y;
                 }
-                console.log(startMCubeX, startMCubeY);
+                //console.log(startMCubeX, startMCubeY);
                 startMCube = new MCube({
                     x: startMCubeX,
                     y: startMCubeY,

@@ -16,12 +16,8 @@ define(function () {
                     colorsCount: function (level) {
                         if (level > 0 && level < 11) {
                             return 5;
-                        }
-                        else if (level < 201) {
-                            return Math.ceil(level / 50) + 5;
-                        }
-                        else {
-                            return 10;
+                        }else{
+                            return 6;
                         }
                     },
                     cubesCount: function (level) {
@@ -42,15 +38,7 @@ define(function () {
                             return cubesCount[level];
                         }
                         else {
-                            if (level < 51) {
-                                return level - 11 + 16;
-                            }
-                            else if (level < 201) {
-                                return (level + 1) % 50 + 15;
-                            }
-                            else {
-                                return level - 200 + 15;
-                            }
+                            return level - 11 + 16;
                         }
                     },
                     getPositions: function (level) {

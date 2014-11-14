@@ -12,7 +12,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         this.blockApp = false;
 
         //уровень
-        this.level = 150;
+        this.level = 65;
         console.log(d.f.level.colorsCount(this.level));
         console.log(d.f.level.cubesCount(this.level));
 
@@ -83,7 +83,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             this.generateMainCubes();
         };
         //генерируем кубики на главном поле
-        this.generateMainCubes = function(){
+        this.generateMainCubes = function () {
             var firstCubesPosition = d.f.level.getPositions(this.level);
             var nullCells;
             var rand;
@@ -104,7 +104,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 }
                 else {
                     //создаем массив из свободных ячеек, перемешиваем его
-                    if(nullCells === undefined) {
+                    if (nullCells === undefined) {
                         nullCells = [];
                         for (var x = 0; x < d.cubesWidth; x++) {
                             for (var y = 0; y < d.cubesWidth; y++) {
@@ -119,39 +119,59 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                     //шанс попадания кубика в крайнее поле - чем больше, тем ниже
                     var chance = 2;
 
-                    for(var key = 0; key < chance; key++){
+                    for (var key = 0; key < chance; key++) {
                         var cell = nullCells.shift();
-                        if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1){
+                        if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1) {
                             nullCells.push(cell);
                         }
-                        else{
+                        else {
                             break;
                         }
                     }
+
+                    //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
+                    var colorsCount = d.f.level.colorsCount(this.level)
+                    var colorNumber = d.f.rand(0, colorsCount - 1);
+
+                    var apperanceColors = []
+
+                    for (var key = 0; key < 4; key++) {
+                        var pos = {x: cell.x, y: cell.y, field: "main"};
+                        var prop = key % 2 == 0 ? "x" : "y";
+                        pos[prop] = key < 2 ? pos[prop] + 1 : pos[prop] - 1;
+                        if (pos.x > -1 && pos.y > -1 && pos.x < 10 && pos.y < 10) {
+                            var c = this.cubes._get(pos);
+                            if (c !== null) {
+                                apperanceColors.push(c.color);
+                            }
+                        }
+                        //console.log(pos.x, pos.y);
+                    }
+
+                    var noApperanceColors = [];
+                    for(var key = 0; key < colorsCount; key++){
+                        if( apperanceColors.indexOf(d.colors[key]) === -1){
+                            noApperanceColors.push(d.colors[key]);
+                        }
+                    }
+
+                    /*console.log(cell);
+                    console.log(apperanceColors);
+                    console.log(noApperanceColors);*/
+
+
+                    var color = noApperanceColors[d.f.rand(0, noApperanceColors.length - 1)];
+                    /*console.log(color);
+                    console.log("////////");*/
 
                     cube = new Cube({
                         x: cell.x,
                         y: cell.y,
                         field: 'main',
                         app: tenOnTen,
-                        color: d.colors[number % d.f.level.colorsCount(this.level)],
+                        color: color,
                         disapperance: "cool"
                     });
-                    /*var cell = nullCells.shift();
-                    //если это крайний кубик, помещаем его в конец, берем следующий
-                    if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1){
-                        nullCells.push(cell);
-                        cell = nullCells.shift();
-                        cube = new Cube({
-                            x: cell.x,
-                            y: cell.y,
-                            field: 'main',
-                            app: tenOnTen,
-                            color: d.colors[number % d.f.level.colorsCount(this.level)],
-                            disapperance: "cool"
-                        });
-                    }*/
-
                 }
             }
         };
@@ -368,21 +388,21 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
                 }
             }
 
-            if(next_level){
+            if (next_level) {
                 //меняем датчик на следующий уровень
                 this.end = "next_level";
             }
-            else if(game_over){
+            else if (game_over) {
                 //меняем датчик на конец игры
                 this.end = "game_over";
             }
-            else{
+            else {
                 //иначе - ничего не делаем
                 this.end = null;
             }
         };
         //переводим игру на следующий уровень
-        this.nextLevel = function(){
+        this.nextLevel = function () {
             console.log("nextLevel func");
             this.level++;
             this.generateMainCubes();

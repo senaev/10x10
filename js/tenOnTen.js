@@ -12,7 +12,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         this.blockApp = false;
 
         //уровень
-        this.level = 65;
+        this.level = 20//65;
         console.log(d.f.level.colorsCount(this.level));
         console.log(d.f.level.cubesCount(this.level));
 
@@ -177,7 +177,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
         };
         //запускаем инициализацию приложения
         this.initialize();
-        //запускаем ход, начиная движение со startCube
+        //запускаем ход, начиная движение со startCubes
         this.run = function (o) {
             this.moveMap = new MoveMap();
 
@@ -185,7 +185,7 @@ define(['cube', 'cubes', 'data', 'movemap'], function (Cube, cubes, d, MoveMap) 
             this.previousStepMap = this.generateMask();
 
             this.moveMap.generate({
-                startCube: o.startCube,
+                startCubes: o.startCubes,
                 cubes: this.cubes,
                 app: tenOnTen
             });

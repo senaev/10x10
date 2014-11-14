@@ -82,7 +82,11 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
 
                 }
                 else {
-                    cube.findFirstInLine().$el.addClass("firstInHoverLine");
+                    //cube.findFirstInLine().$el.addClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllToFirstInLine();
+                    for (var key in allToFirstInLine) {
+                        allToFirstInLine[key].$el.addClass("firstInHoverLine");
+                    }
                 }
             },
             function (e) {
@@ -92,7 +96,11 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
 
                 }
                 else {
-                    cube.findFirstInLine().$el.removeClass("firstInHoverLine");
+                    //cube.findFirstInLine().$el.removeClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllToFirstInLine();
+                    for (var key in allToFirstInLine) {
+                        allToFirstInLine[key].$el.removeClass("firstInHoverLine");
+                    }
                 }
             })
             .click(function (e) {
@@ -113,9 +121,11 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 //если по боковому
                 else {
                     //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
-                    var startCube = cube.findFirstInLine();
+                    var startCubes = cube.findAllToFirstInLine();
                     //и отправляем его в путь-дорогу
-                    cube.app.run({startCube: startCube});
+                    if(startCubes.length) {
+                        cube.app.run({startCubes: startCubes});
+                    }
                 }
             });
 
@@ -152,6 +162,60 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
             o.y = this.y;
         }
         return this.app.cubes._get(o);
+    };
+    //находим все кубики от этого до ближнего к майн в линии относительно этого
+    Cube.prototype.findAllToFirstInLine = function () {
+        var statProp = "y";
+        var dynamicProp = "x";
+        if (this.field === "top" || this.field === "bottom") {
+            statProp = "x";
+            dynamicProp = "y";
+        }
+        //проверяем, сколько кубиков можно достать из боковой линии
+        //по количеству свободных клеток в поле майн
+        var cellsMain = (this.field === "top" || this.field === "left") ? [0, 1, 2] : [9, 8, 7];
+        var cellsSide = (this.field === "top" || this.field === "left") ? [9, 8, 7] : [0, 1, 2];
+        var pos = {field: "main"};
+        pos[statProp] = this[statProp];
+        var count = 0;
+        for (var key in cellsMain) {
+            pos[dynamicProp] = cellsMain[key];
+            if(this.app.cubes._get(pos) === null){
+                count++;
+            }
+            else{
+                break;
+            }
+        }
+
+        var arr = [];
+        //если сразу за полем кубик - ничего не возвращаем
+        if(count !== 0) {
+            pos = {field: this.field};
+            pos[statProp] = this[statProp];
+            for (var key = 0; key < 3 && key < count; key++) {
+                pos[dynamicProp] = cellsSide[key];
+                arr.push(this.app.cubes._get(pos));
+                //если доходим до кубика, над которым курсор - заканчиваем маневр
+                if(this.app.cubes._get(pos) === this){
+                    break;
+                }
+            }
+            /*if (this.field === "top" || this.field === "left") {
+             pos[dynamicProp] = this[dynamicProp] + 1;
+             for (pos[dynamicProp]; pos[dynamicProp] < d.cubesWidth; pos[dynamicProp]++) {
+             arr.push(this.app.cubes._get(pos));
+             }
+             }
+             else {
+             pos[dynamicProp] = this[dynamicProp] - 1;
+             for (pos[dynamicProp]; pos[dynamicProp] > -1; pos[dynamicProp]--) {
+             arr.push(this.app.cubes._get(pos));
+             }
+             }*/
+        }
+
+        return arr;
     };
     //задаем html-элементу кубика положение на доске
     //если параметры не переданы, устанавливаем текущую позицию кубика
@@ -248,7 +312,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                 trans2;
             trans1 = {duration: d.animTime * 2};
             trans2 = {duration: d.animTime * 2};
-            if(this.field === "main"){
+            if (this.field === "main") {
                 trans1[prop] = '1,1,0,90deg';
                 trans2[prop] = '1,1,0,0deg';
             }

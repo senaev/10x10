@@ -12,13 +12,13 @@ define(['mCube', 'data'], function (MCube, d) {
      */
     function MainMask(o) {
         var cubes,
-            startCube,
+            startCubes,
             mainMask,
             undefined;
 
         mainMask = this;
         cubes = o.cubes;
-        startCube = o.startCube;
+        startCubes = o.startCubes;
 
         this.moveMap = o.moveMap;
 
@@ -27,8 +27,7 @@ define(['mCube', 'data'], function (MCube, d) {
         this.arr = [];
         //создаем маску, берем значения из коллекции кубес
         this.initialize = function () {
-            var startMCube,
-                startMCubeX,
+            var startMCubeX,
                 startMCubeY;
 
 
@@ -45,24 +44,54 @@ define(['mCube', 'data'], function (MCube, d) {
                 }));
             });
             //добавляем в маску кубик, с которого начинаем анимацию
-            if (startCube.field === "top" || startCube.field === "bottom") {
-                startMCubeX = startCube.x;
-                startMCubeY = (startCube.field === "top") ? -1 : 10;
+            var startMCubes = [];
+            for(var key in startCubes) {
+                var startMCube;
+                var startCube = startCubes[key];
+
+                if (startCube.field === "top" || startCube.field === "bottom") {
+                    startMCubeX = startCube.x;
+                    if(startCube.field === "top") {
+                        startMCubeY = (startCubes.length - key) - 1;
+                    }
+                    else{
+                        startMCubeY = (d.cubesWidth - startCubes.length) + parseInt(key);
+                    }
+                }
+                else {
+                    if(startCube.field === "left") {
+                        startMCubeX = (startCubes.length - key) - 1;
+                    }
+                    else{
+                        startMCubeX = (d.cubesWidth - startCubes.length) + parseInt(key);
+                    }
+                    startMCubeY = startCube.y;
+                }
+                console.log(startMCubeX, startMCubeY);
+                startMCube = new MCube({
+                    x: startMCubeX,
+                    y: startMCubeY,
+                    color: startCube.color,
+                    direction: startCube.direction,
+                    extra: startCube.extra,
+                    mainMask: mainMask,
+                    cube: startCube
+                });
+                this.arr.push(startMCube);
+                startMCubes.push(startMCube);
             }
-            else {
-                startMCubeX = (startCube.field === "left") ? -1 : 10;
-                startMCubeY = startCube.y;
+
+            //добавим шаги анимации для выплывающих из боковой линии кубиков
+            for(var step in startMCubes) {
+                for (var key in this.arr) {
+                    if(startMCubes.indexOf(this.arr[key]) === -1){
+                        this.arr[key].steps.push({do: null});
+                    }
+                    else{
+                        this.arr[key].steps.push({do: "s" + this.arr[key].direction.charAt(0)});
+                    }
+                }
             }
-            startMCube = new MCube({
-                x: startMCubeX,
-                y: startMCubeY,
-                color: startCube.color,
-                direction: startCube.direction,
-                extra: startCube.extra,
-                mainMask: mainMask,
-                cube: startCube
-            });
-            this.arr.push(startMCube);
         };
         //вызываем инициализацию
         this.initialize();
@@ -103,7 +132,7 @@ define(['mCube', 'data'], function (MCube, d) {
                                 this.arr[key].steps.push({do: null});
                             }
                             else {
-                                console.log("add boom in:",this.arr[key]);
+                                //console.log("add boom in:",this.arr[key]);
                                 this.arr[key].steps.push({do: "boom"});
                                 //взорвавшимся м-кубикам присваиваем координаты -1 -1,
                                 //чтобы в дальнейшей анимации они не учавствовали

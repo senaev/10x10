@@ -24,7 +24,7 @@ define(['data', 'cube'], function (d, Cube) {
     };
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     cubes._set = function (o, value) {
-        if(o === undefined || value === undefined){
+        if (o === undefined || value === undefined) {
             throw new Error("cubes._set не получил параметры: o: ", o, " value: ", value);
         }
         //console.log(o, value);
@@ -97,27 +97,33 @@ define(['data', 'cube'], function (d, Cube) {
         }
         return line;
     };
-    //вырезаем кубик из боковой линии и заполняем последний элемент в этой линии
-    cubes._cutFromLine = function (cube) {
-        var x = cube.x;
-        var y = cube.y;
-        var field = cube.field;
+    //вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+    cubes._cutFromLine = function (startCubes) {
         //получаем линию
-        var line = this._getLine({x: x, y: y, field: field});
+        var line = this._getLine({x: startCubes[0].x, y: startCubes[0].y, field: startCubes[0].field});
         //пробегаемся, меняем значения в коллекции
-        for (var key = line.length - 1; key > 0; key--) {
-            var prevCube = this._get(line[key - 1]);
+        for (var key = line.length - 1; key >= startCubes.length; key--) {
+            var prevCube = this._get(line[key - startCubes.length]);
             this._set(line[key], prevCube);
             prevCube.x = line[key].x;
             prevCube.y = line[key].y;
         }
-        //генерируем кубик для крайнего значения в линии
-        cubes._set(line[0], new Cube({
-            x: line[0].x,
-            y: line[0].y,
-            field: line[0].field,
-            app: this._app
-        }));
+        //генерируем кубики для крайних значений в линии
+        for (var key = 0; key < startCubes.length; key++) {
+            console.log(line[key])
+            cubes._set(line[key], new Cube({
+                x: line[key].x,
+                y: line[key].y,
+                field: line[key].field,
+                app: this._app
+            }));
+        }
+        /**
+         * при отладке может возникать забавная ошибка, когда почему-то
+         * случайно добавляются не последние значения линии, а предидущие из них
+         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
+         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
+         */
     };
     //добавляем в линию кубик, по кубику мы должны определить, в какую линию
     cubes._pushInLine = function (cube) {
@@ -152,13 +158,15 @@ define(['data', 'cube'], function (d, Cube) {
     };
     cubes._mergeMoveMap = function (moveMap) {
         var arr = moveMap.mainMask.arr;
-        var startCube = moveMap.startCube;
+        var startCubes = moveMap.startCubes;
         //извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
         //могут меняться только при вхождении их в боковую панель
         //вытаскиваем кубик из боковой панели коллекции
-        this._cutFromLine(startCube);
+        this._cutFromLine(startCubes);
         //меняем значение field
-        startCube.field = "main";
+        for (var key in startCubes) {
+            startCubes[key].field = "main";
+        }
 
         //пробегаемся по массиву м-кубиков и если м-кубик вошел в боковое поле,
         //меняем его свойства direction, field, x, y в соответствии со значениями
@@ -189,7 +197,7 @@ define(['data', 'cube'], function (d, Cube) {
             }
             //если кубик взорвался во время хода, убираем его с доски
             else if (mCube.x === -1 && mCube.y === -1) {
-                console.log("убираем: ", {color: mCube.color, x: mCube.cube.x, y: mCube.cube.y},cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube ? true : cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}));
+                //console.log("убираем: ", {color: mCube.color, x: mCube.cube.x, y: mCube.cube.y},cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube ? true : cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}));
                 if (cubes._get({field: "main", x: mCube.cube.x, y: mCube.cube.y}) === mCube.cube) {
                     cubes._set({field: "main", x: mCube.cube.x, y: mCube.cube.y}, null);
                 }
@@ -213,27 +221,57 @@ define(['data', 'cube'], function (d, Cube) {
     //массовая анимация для кубиков, вспомогательная
     //функция для удобства анимации сразу нескольких кубиков
     cubes.animate = function (o) {
-        var action,
-            cube;
-
+        var action;
+        var line;
         action = o.action;
-        cube = o.cube;
-        //получаем линию кубика
-        var line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
 
         //в зависимости от типа действия
         switch (action) {
             //при выходе одного кубика из линии, анимируем линию
             case "fromLine":
+                var startCubes = o.cube;
+
+                //получаем линию кубика
+                //коллекция пока в начальном состоянии (до хода)
+                line = this._getLine({x: startCubes[0].x, y: startCubes[0].y, field: startCubes[0].field});
+
+                //номер в линии первого кубика, который будет пододвинут
+                var first = (line.length - startCubes.length) - 1;
+
+                //массив из возможных комбинаций анимаций
+                var arr;
+                switch (startCubes.length) {
+                    case 1:
+                        arr = [[6, 7, 8]];
+                        break;
+                    case 2:
+                        arr = [[6, 7], [5, 6, 7]];
+                        break;
+                    case 3:
+                        arr = [[6], [5, 6], [4, 5, 6]];
+                        break;
+                    default:
+                        throw new Error("Неверное значение длинны startCubes: ", startCubes.length);
+                }
+                var anims = ["apperanceInSide", "nearer", "nearer"];
+                for (var key in arr) {
+                    for (var num in arr[key]) {
+                        this._get(line[arr[key][num]]).addAnimate({action: anims[num], duration: 1, delay: key});
+                    }
+                }
+
+
                 //первый кубик появляется
-                this._get(line[6]).animate({action: "apperanceInSide", duration: 1});
-                //остальные два сдвигаются ближе к линии
-                this._get(line[7]).animate({action: "nearer", duration: 1});
-                this._get(line[8]).animate({action: "nearer", duration: 1});
+                /*this._get(line[6]).animate({action: "apperanceInSide", duration: 1});
+                 //остальные два сдвигаются ближе к линии
+                 this._get(line[7]).animate({action: "nearer", duration: 1});
+                 this._get(line[8]).animate({action: "nearer", duration: 1});*/
                 break;
             //при входе кубика в линию, анимируем линию
             case "inLine":
-
+                var cube = o.cube;
+                //получаем линию кубика
+                line = this._getLine({x: cube.x, y: cube.y, field: cube.field});
                 /*for(var key in line){
                  console.log(cubes._get(line[key]).color);
                  }*/

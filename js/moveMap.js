@@ -16,7 +16,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
 
             this.cubes = o.cubes;
-            this.startCube = o.startCube;
+            this.startCubes = o.startCubes;
 
             this.beyondTheSide = [];
 
@@ -24,7 +24,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
             //создаем класс маски
             this.mainMask = new MainMask({
-                startCube: this.startCube,
+                startCubes: this.startCubes,
                 cubes: this.cubes,
                 moveMap: this
             });
@@ -129,7 +129,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
         //когда ход прощитан, запускаем саму анимацию
         this.animate = function () {
             var map;
-            var startCube = this.startCube;
+            var startCubes = this.startCubes;
 
             //блокируем приложение от начала до конца анимации
             //минус один - потому, что в последний такт обычно анимация чисто символическая
@@ -171,10 +171,12 @@ define(['data', 'mainMask'], function (d, MainMask) {
                 this.app
             );
 
-            this.cubes.animate({action: "fromLine", cube: startCube});
+            this.cubes.animate({action: "fromLine", cube: startCubes});
 
             //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
-            startCube.$el.addClass("d" + startCube.direction);
+            for(var key in startCubes) {
+                startCubes[key].$el.addClass("d" + startCubes[key].direction);
+            }
 
             //перебираем карту анимации и передаем каждому кубику объект действия,
             //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,

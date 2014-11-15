@@ -12,7 +12,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.blockApp = false;
 
         //уровень 1-10 11-60(16-65)
-        this.level = 60;
+        this.level = 1;
         //console.log(d.f.level.colorsCount(this.level));
         console.log("cubesCount:", d.f.level.cubesCount(this.level));
 
@@ -87,19 +87,22 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
             for (var number = 0, len = d.f.level.cubesCount(this.level); number < len; number++) {
 
                 var cube;
+                var cell;
+                var pos;
 
                 if (firstCubesPosition[number] !== undefined) {
-                    var pos = firstCubesPosition[number];
-                    cube = new Cube({
-                        x: pos[0],
-                        y: pos[1],
-                        field: 'main',
-                        app: tenOnTen,
-                        color: d.colors[number % d.f.level.colorsCount(this.level)],
-                        disapperance: "cool"
-                    });
+                    pos = firstCubesPosition[number];
+                    /*cube = new Cube({
+                     x: pos[0],
+                     y: pos[1],
+                     field: 'main',
+                     app: tenOnTen,
+                     color: d.colors[number % d.f.level.colorsCount(this.level)],
+                     disapperance: "cool"
+                     });*/
                 }
-                else {
+
+                if (pos === undefined) {
                     //создаем массив из свободных ячеек, перемешиваем его
                     if (nullCells === undefined) {
                         nullCells = [];
@@ -115,9 +118,8 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
 
                     //шанс попадания кубика в крайнее поле - чем больше, тем ниже
                     var chance = 2;
-
                     for (var key = 0; key < chance; key++) {
-                        var cell = nullCells.shift();
+                        cell = nullCells.shift();
                         if (cell.x === 0 || cell.y === 0 || cell.x === d.cubesWidth - 1 || cell.y === d.cubesWidth - 1) {
                             nullCells.push(cell);
                         }
@@ -125,51 +127,49 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                             break;
                         }
                     }
-
-                    //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
-                    var colorsCount = d.f.level.colorsCount(this.level)
-                    var colorNumber = d.f.rand(0, colorsCount - 1);
-
-                    var apperanceColors = []
-
-                    for (var key = 0; key < 4; key++) {
-                        var pos = {x: cell.x, y: cell.y, field: "main"};
-                        var prop = key % 2 == 0 ? "x" : "y";
-                        pos[prop] = key < 2 ? pos[prop] + 1 : pos[prop] - 1;
-                        if (pos.x > -1 && pos.y > -1 && pos.x < 10 && pos.y < 10) {
-                            var c = this.cubes._get(pos);
-                            if (c !== null) {
-                                apperanceColors.push(c.color);
-                            }
-                        }
-                        //console.log(pos.x, pos.y);
-                    }
-
-                    var noApperanceColors = [];
-                    for (var key = 0; key < colorsCount; key++) {
-                        if (apperanceColors.indexOf(d.colors[key]) === -1) {
-                            noApperanceColors.push(d.colors[key]);
-                        }
-                    }
-
-                    /*console.log(cell);
-                     console.log(apperanceColors);
-                     console.log(noApperanceColors);*/
-
-
-                    var color = noApperanceColors[d.f.rand(0, noApperanceColors.length - 1)];
-                    /*console.log(color);
-                     console.log("////////");*/
-
-                    cube = new Cube({
-                        x: cell.x,
-                        y: cell.y,
-                        field: 'main',
-                        app: tenOnTen,
-                        color: color,
-                        disapperance: "cool"
-                    });
                 }
+                else {
+                    cell = {x: pos[0], y: pos[1]};
+                }
+
+
+                //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
+                var colorsCount = d.f.level.colorsCount(this.level)
+                var colorNumber = d.f.rand(0, colorsCount - 1);
+
+                //цвета, которые есть в смежных кубиках
+                var apperanceColors = [];
+                for (var key = 0; key < 4; key++) {
+                    var pos = {x: cell.x, y: cell.y, field: "main"};
+                    var prop = key % 2 == 0 ? "x" : "y";
+                    pos[prop] = key < 2 ? pos[prop] + 1 : pos[prop] - 1;
+                    if (pos.x > -1 && pos.y > -1 && pos.x < 10 && pos.y < 10) {
+                        var c = this.cubes._get(pos);
+                        if (c !== null) {
+                            apperanceColors.push(c.color);
+                        }
+                    }
+                }
+
+                //цвета, которых нету в смежных
+                var noApperanceColors = [];
+                for (var key = 0; key < colorsCount; key++) {
+                    if (apperanceColors.indexOf(d.colors[key]) === -1) {
+                        noApperanceColors.push(d.colors[key]);
+                    }
+                }
+
+                //получаем итоговый цвет
+                var color = noApperanceColors[d.f.rand(0, noApperanceColors.length - 1)];
+                cube = new Cube({
+                    x: cell.x,
+                    y: cell.y,
+                    field: 'main',
+                    app: tenOnTen,
+                    color: color,
+                    disapperance: "cool"
+                });
+
             }
         };
         //запускаем инициализацию приложения
@@ -198,123 +198,132 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         };
         //делаем возврат хода
         this.undo = function () {
-            console.log(this.undoButton._get("active"));
-            if (!this.undoButton._get("active")) {
-                //console.log("blocked");
-            }
-            else {
-                //блокируем приложение до тех пор, пока не закончим анимацию
-                this.blockApp = true;
-                setTimeout(
-                    function (app) {
-                        app.blockApp = false;
-                    },
-                    d.animTime * 4,
-                    this
-                );
+            //блокируем приложение до тех пор, пока не закончим анимацию
+            this.blockApp = true;
+            setTimeout(
+                function (app) {
+                    app.blockApp = false;
+                },
+                d.animTime * 4,
+                this
+            );
 
-                this.undoButton._set({active: false});
+            this.undoButton._set({active: false});
 
-                //массив, в котором описаны все различия между текущим и предидущим состоянием
-                var changed = [];
-                //пробегаем в массиве по каждому кубику предидущего массива
-                for (var fieldName in this.previousStepMap) {
-                    for (var x in this.previousStepMap[fieldName]) {
-                        for (var y in this.previousStepMap[fieldName][x]) {
-                            x = parseInt(x);
-                            y = parseInt(y);
-                            var pCube = this.previousStepMap[fieldName][x][y];
-                            //берем соответствующее значение текущей маски для сравнения
-                            var cube = this.cubes._get({field: fieldName, x: x, y: y});
-                            //если предидущее - null
-                            if (pCube === null) {
-                                //а новое - что-то другое
-                                //удаляем кубик из нового значения
-                                if (cube !== null) {
-                                    changed.push({
-                                        field: fieldName,
-                                        x: x,
-                                        y: y,
-                                        pCube: null,
-                                        cube: cube,
-                                        action: "remove"
-                                    });
-                                }
+            //массив, в котором описаны все различия между текущим и предидущим состоянием
+            var changed = [];
+            //пробегаем в массиве по каждому кубику предидущего массива
+            for (var fieldName in this.previousStepMap) {
+                for (var x in this.previousStepMap[fieldName]) {
+                    for (var y in this.previousStepMap[fieldName][x]) {
+                        x = parseInt(x);
+                        y = parseInt(y);
+                        var pCube = this.previousStepMap[fieldName][x][y];
+                        //берем соответствующее значение текущей маски для сравнения
+                        var cube = this.cubes._get({field: fieldName, x: x, y: y});
+                        //если предидущее - null
+                        if (pCube === null) {
+                            //а новое - что-то другое
+                            //удаляем кубик из нового значения
+                            if (cube !== null) {
+                                changed.push({
+                                    field: fieldName,
+                                    x: x,
+                                    y: y,
+                                    pCube: null,
+                                    cube: cube,
+                                    action: "remove"
+                                });
                             }
-                            //если же раньше тут тоже был кубик
+                        }
+                        //если же раньше тут тоже был кубик
+                        else {
+                            //а сейчас кубика нету
+                            //заполняем клетку кубиком
+                            if (cube === null) {
+                                changed.push({
+                                    field: fieldName,
+                                    x: x,
+                                    y: y,
+                                    pCube: pCube,
+                                    cube: null,
+                                    action: "add"
+                                });
+                            }
+                            //если и раньше и сейчас - нужно сравнить эти значения
                             else {
-                                //а сейчас кубика нету
-                                //заполняем клетку кубиком
-                                if (cube === null) {
-                                    changed.push({
-                                        field: fieldName,
-                                        x: x,
-                                        y: y,
-                                        pCube: pCube,
-                                        cube: null,
-                                        action: "add"
-                                    });
-                                }
-                                //если и раньше и сейчас - нужно сравнить эти значения
-                                else {
-                                    //пробегаемся по каждому параметру
-                                    for (var prop in pCube) {
-                                        //если какие-то параметры различаются,
-                                        //меняем параметры кубика
-                                        if (cube[prop] !== pCube[prop]) {
-                                            changed.push({
-                                                field: fieldName,
-                                                x: x,
-                                                y: y,
-                                                pCube: pCube,
-                                                cube: cube,
-                                                action: "change"
-                                            });
-                                            break;
-                                        }
+                                //пробегаемся по каждому параметру
+                                for (var prop in pCube) {
+                                    //если какие-то параметры различаются,
+                                    //меняем параметры кубика
+                                    if (cube[prop] !== pCube[prop]) {
+                                        changed.push({
+                                            field: fieldName,
+                                            x: x,
+                                            y: y,
+                                            pCube: pCube,
+                                            cube: cube,
+                                            action: "change"
+                                        });
+                                        break;
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                for (var key in changed) {
-                    var cube = changed[key].cube;
-                    switch (changed[key].action) {
-                        case "add":
-                            //создаем новый кубик с теми же параметрами и подменяем им предидущий
-                            cube = new Cube({
-                                x: changed[key].x,
-                                y: changed[key].y,
-                                field: changed[key].field,
-                                color: changed[key].pCube.color,
-                                direction: changed[key].pCube.direction,
-                                app: this,
-                                disapperance: "cool"
-                            });
-                            //console.log(cube);
-                            break;
-                        case "remove":
-                            //удаляем нафиг кубик
-                            this.cubes._set({field: changed[key].field, x: changed[key].x, y: changed[key].y}, null);
-                            cube.animate({action: "remove", duration: 4, delay: 0});
-                            break;
-                        case "change":
-                            cube.change({
-                                color: changed[key].pCube.color,
-                                direction: changed[key].pCube.direction
-                            });
-                            break;
-                        default :
-                            throw new Error("Неизвествое значение в changed[key].action: ", changed[key].action);
-                            break;
-                    }
+            for (var key in changed) {
+                var cube = changed[key].cube;
+                switch (changed[key].action) {
+                    case "add":
+                        //создаем новый кубик с теми же параметрами и подменяем им предидущий
+                        cube = new Cube({
+                            x: changed[key].x,
+                            y: changed[key].y,
+                            field: changed[key].field,
+                            color: changed[key].pCube.color,
+                            direction: changed[key].pCube.direction,
+                            app: this,
+                            disapperance: "cool"
+                        });
+                        //console.log(cube);
+                        break;
+                    case "remove":
+                        //удаляем нафиг кубик
+                        this.cubes._set({field: changed[key].field, x: changed[key].x, y: changed[key].y}, null);
+                        cube.animate({action: "remove", duration: 4, delay: 0});
+                        break;
+                    case "change":
+                        cube.change({
+                            color: changed[key].pCube.color,
+                            direction: changed[key].pCube.direction
+                        });
+                        break;
+                    default :
+                        throw new Error("Неизвествое значение в changed[key].action: ", changed[key].action);
+                        break;
                 }
-
-                //console.log("//////////after back kubes: ", this.cubes);
             }
         };
+        //даем возможность пользователю при переходе на новый уровень выбрать из случайных
+        //комбинаций начальную
+        this.refresh = function () {
+            this.blockApp = true;
+            var cubes = this.cubes;
+            //удаляем нафиг кубики с главного поля
+            cubes._mainEach(function (cube, field, x, y) {
+                cubes._set({field: field, x: x, y: y}, null);
+                cube.animate({action: "remove", duration: 4, delay: 0});
+            });
+            setTimeout(function (app) {
+                app.generateMainCubes();
+                setTimeout(function(app){
+                    app.blockApp = false;
+                }, d.animTime, app);
+            }, d.animTime, this);
+        }
         //генерируем маску для предидущего хода
         this.generateMask = function () {
             var cubes;

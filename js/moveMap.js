@@ -145,18 +145,20 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
                     //разблокируем кнопку назад, если не случился переход на новый уровень
                     //иначе - блокируем
-                    app.undoButton._set({
-                        active: app.end !== "next_level",
-                        func: app.undo,
-                        caption: "undo"
-                    });
-                    /*var undoButton = app.container.find(".panel.topRightPanel>.undoButton");
-                     if(app.end !== "next_level") {
-                     undoButton.removeClass("blocked");
-                     }
-                     else{
-                     undoButton.addClass("blocked");
-                     }*/
+                    if (app.end === "next_level") {
+                        app.undoButton._set({
+                            active: true,
+                            func: app.refresh,
+                            caption: "refresh"
+                        });
+                    }
+                    else {
+                        app.undoButton._set({
+                            active: true,
+                            func: app.undo,
+                            caption: "undo"
+                        });
+                    }
 
                     if (app.end !== null) {
                         switch (app.end) {

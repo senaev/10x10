@@ -12,7 +12,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.blockApp = false;
 
         //уровень 1-10 11-60(16-65)
-        this.level = 1;
+        this.level = 59;
+
+        //язык
+        this.lang = "ru";
+
         //console.log(d.f.level.colorsCount(this.level));
         console.log("cubesCount:", d.f.level.cubesCount(this.level));
 
@@ -84,25 +88,18 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
             var firstCubesPosition = d.f.level.getPositions(this.level);
             var nullCells;
             var rand;
+            var fPos;
             for (var number = 0, len = d.f.level.cubesCount(this.level); number < len; number++) {
 
                 var cube;
                 var cell;
-                var pos;
+                fPos = null;
 
                 if (firstCubesPosition[number] !== undefined) {
-                    pos = firstCubesPosition[number];
-                    /*cube = new Cube({
-                     x: pos[0],
-                     y: pos[1],
-                     field: 'main',
-                     app: tenOnTen,
-                     color: d.colors[number % d.f.level.colorsCount(this.level)],
-                     disapperance: "cool"
-                     });*/
+                    fPos = firstCubesPosition[number];
                 }
 
-                if (pos === undefined) {
+                if (fPos === null) {
                     //создаем массив из свободных ячеек, перемешиваем его
                     if (nullCells === undefined) {
                         nullCells = [];
@@ -127,9 +124,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                             break;
                         }
                     }
+                    console.log("!pos",cell)
                 }
                 else {
-                    cell = {x: pos[0], y: pos[1]};
+                    cell = {x: fPos[0], y: fPos[1]};
+                    console.log("pos",cell)
                 }
 
 
@@ -321,7 +320,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                 app.generateMainCubes();
                 setTimeout(function(app){
                     app.blockApp = false;
-                }, d.animTime, app);
+                }, d.animTime * 8, app);
             }, d.animTime, this);
         }
         //генерируем маску для предидущего хода
@@ -412,7 +411,12 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
             console.log("nextLevel func");
             this.level++;
             this.generateMainCubes();
-        };
+        }
+
+        //возвращяем слово в необходимом переводе
+        this.word = function(w){
+            return d.lang[w][tenOnTen.lang];
+        }
 
         //добавляем кнопку "назад"
         this.undoButton = new UndoButton({app: tenOnTen});

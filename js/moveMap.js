@@ -149,14 +149,14 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         app.undoButton._set({
                             active: true,
                             func: app.refresh,
-                            caption: "refresh"
+                            caption: app.word("refresh")
                         });
                     }
                     else {
                         app.undoButton._set({
                             active: true,
                             func: app.undo,
-                            caption: "undo"
+                            caption: app.word("undo")
                         });
                     }
 

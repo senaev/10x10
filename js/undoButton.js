@@ -6,10 +6,10 @@ define(function () {
 
         this.app = o.app;
         this.active = false;
-        this.caption = "undo";
+        this.caption = this.app.word("undo");
         this.func = undoButton.app.undo;
 
-        this.$el = $('<div class="undoButton blocked">undo</div>').click(function (e) {
+        this.$el = $('<div class="undoButton blocked">' + undoButton.app.word("undo") + '</div>').click(function (e) {
             //не даем продолжить выполнение событий
             e.preventDefault();
 

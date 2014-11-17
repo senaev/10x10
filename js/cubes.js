@@ -110,14 +110,15 @@ define(['data', 'cube'], function (d, Cube) {
         }
         //генерируем кубики для крайних значений в линии
         for (var key = 0; key < startCubes.length; key++) {
-            //console.log(line[key])
             cubes._set(line[key], new Cube({
                 x: line[key].x,
                 y: line[key].y,
                 field: line[key].field,
-                app: this._app
+                app: this._app,
+                toMine: cubes._app.mainCounter()
             }));
         }
+
         /**
          * при отладке может возникать забавная ошибка, когда почему-то
          * случайно добавляются не последние значения линии, а предидущие из них

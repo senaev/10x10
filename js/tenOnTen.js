@@ -12,13 +12,22 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.blockApp = false;
 
         //уровень 1-10 11-60(16-65)
-        this.level = 59;
+        this.level = 1;
 
         //язык
         this.lang = "ru";
 
         //console.log(d.f.level.colorsCount(this.level));
         console.log("cubesCount:", d.f.level.cubesCount(this.level));
+        console.log("colorsCount:", d.f.level.colorsCount(this.level));
+
+        //счетчик для значений toMine кубиков, попадающих в главное поле
+        this.mainCounter = (function() {
+            var numberOfCalls = 0;
+            return function() {
+                return ++numberOfCalls;
+            }
+        })();
 
         //датчик конца хода
         this.end = null;
@@ -124,11 +133,9 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                             break;
                         }
                     }
-                    console.log("!pos",cell)
                 }
                 else {
                     cell = {x: fPos[0], y: fPos[1]};
-                    console.log("pos",cell)
                 }
 
 
@@ -193,7 +200,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
 
             this.checkStepEnd();
 
-            //console.log("//////////ITOG CUBES:", this.cubes);
+            console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
         this.undo = function () {
@@ -305,6 +312,15 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                         break;
                 }
             }
+
+            //меняем значения ту майн всех кубиков на поле
+            for(var x in this.previousStepMap["main"]){
+                for(var y in this.previousStepMap["main"][x]){
+                    if(this.previousStepMap["main"][x][y] !== null){
+                        this.cubes._get({field: "main", x: x, y: y}).toMine = this.previousStepMap["main"][x][y].toMine;
+                    }
+                }
+            }
         };
         //даем возможность пользователю при переходе на новый уровень выбрать из случайных
         //комбинаций начальную
@@ -349,6 +365,10 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                                 color: c.color,
                                 direction: c.direction
                             };
+                            //для корректной обработки порядка попадания в главное поле
+                            if(field === "main"){
+                                mask[field][x][y].toMine = c.toMine;
+                            }
                         }
                     }
                 }
@@ -408,15 +428,31 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         };
         //переводим игру на следующий уровень
         this.nextLevel = function () {
-            console.log("nextLevel func");
+            var colorsCount = d.f.level.colorsCount(this.level);
             this.level++;
+            if(d.f.level.colorsCount(this.level) >  colorsCount) {
+                this.plusColor();
+            }
             this.generateMainCubes();
-        }
+        };
+
+        //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
+        this.plusColor = function(){
+            var colorsCount = d.f.level.colorsCount(this.level);
+            var newColor = d.colors[colorsCount - 1];
+            this.cubes._sideEach(function(cube){
+                if(d.f.rand(0, colorsCount - 1) === 0){
+                    cube.change({
+                        color: newColor
+                    });
+                }
+            });
+        };
 
         //возвращяем слово в необходимом переводе
         this.word = function(w){
             return d.lang[w][tenOnTen.lang];
-        }
+        };
 
         //добавляем кнопку "назад"
         this.undoButton = new UndoButton({app: tenOnTen});

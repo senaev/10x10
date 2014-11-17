@@ -14,7 +14,13 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
             this.disapperance = o.disapperance;
         }
 
-        this.rand = d.f.rand(0, 1000000);
+        //время попадания в главное поле
+        if(o.toMine === undefined){
+            this.toMine = null;
+        }
+        else {
+            this.toMine = o.toMine;
+        }
 
         this.field = o.field;
         //указатель на игру, к которой кубик привязан
@@ -151,6 +157,12 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
     //отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
     Cube.prototype.toField = function () {
         this.app.cubes._add(this);
+
+        //время попадания в поле майн
+        if(this.field === "main"){
+            this.toMine = this.app.mainCounter();
+        }
+
         this.toState();
 
         if (this.disapperance !== undefined && this.disapperance === "cool") {

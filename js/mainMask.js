@@ -49,6 +49,8 @@ define(['mCube', 'data'], function (MCube, d) {
                 var startMCube;
                 var startCube = startCubes[key];
 
+                startCube.toMine = startCube.app.mainCounter();
+
                 if (startCube.field === "top" || startCube.field === "bottom") {
                     startMCubeX = startCube.x;
                     if(startCube.field === "top") {
@@ -92,6 +94,12 @@ define(['mCube', 'data'], function (MCube, d) {
                     }
                 }
             }
+
+            mainMask.arr.sort(function(a,b){
+                return a.cube.toMine - b.cube.toMine;
+            });
+
+            console.log(startMCubes)
         };
         //вызываем инициализацию
         this.initialize();

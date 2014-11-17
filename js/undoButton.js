@@ -9,12 +9,14 @@ define(function () {
         this.caption = "undo";
         this.func = undoButton.app.undo;
 
-        this.$el = $('<div class="undoButton blocked">undo</div>').click(function () {
-            if (undoButton.active) {
+        this.$el = $('<div class="undoButton blocked">undo</div>').click(function (e) {
+            //не даем продолжить выполнение событий
+            e.preventDefault();
+
+            if (undoButton.active && !undoButton.app.blockApp) {
                 undoButton.func.apply(undoButton.app);
             }
-        });
-        this.$el.appendTo(undoButton.app.container.children(".panel.topRightPanel").first());
+        }).appendTo(undoButton.app.container.children(".panel.topRightPanel").first());
 
         this._set = function (o) {
             if (o.func !== undefined && undoButton.func !== o.func) {

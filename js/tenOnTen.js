@@ -11,7 +11,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
 
-        //уровень 1-10 11-60(16-65)
+        //уровень
         this.level = 7;
 
         //язык
@@ -456,6 +456,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
 
         //добавляем кнопку "назад"
         this.undoButton = new UndoButton({app: tenOnTen});
+
+        //конец игры
+        this.gameOver = function(){
+            al("GameOver");
+        };
     };
 
     return TenOnTen;

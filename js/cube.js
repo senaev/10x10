@@ -15,7 +15,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         }
 
         //время попадания в главное поле
-        if(o.toMine === undefined){
+        if (o.toMine === undefined) {
             this.toMine = null;
         }
         else {
@@ -113,7 +113,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                     }
                 }
             })
-            .click(function (e) {
+            .mousedown(function (e) {
                 //не даем продолжить выполнение событий
                 e.preventDefault();
                 //и снимаем курсор с элемента
@@ -124,12 +124,8 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                     return;
                 }
 
-                //если щелчек произошол по главному полю - ничего не делаем
-                if (cube.field === "main") {
-
-                }
-                //если по боковому
-                else {
+                //если щелчек произошол не по главному полю
+                if (cube.field !== "main") {
                     //ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
                     //которые могут выйти из поля
                     var startCubes = cube.findAllInLineCanGoToMain();
@@ -139,10 +135,16 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
                         cube.$el.transition({
                             scale: scale,
                             duration: d.animTime
-                        }).transition({
-                            scale: 1,
-                            duration: d.animTime
                         });
+                        cube.$el.one("mouseup", function () {
+                            cube.$el.transition({
+                                scale: 1,
+                                duration: d.animTime
+                            })
+                        })
+                        setTimeout(function () {
+                            cube.$el.trigger("mouseup");
+                        }, d.animTime * 3);
                     }
                     //и отправляем их в путь-дорогу
                     else {
@@ -159,7 +161,7 @@ define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
         this.app.cubes._add(this);
 
         //время попадания в поле майн
-        if(this.field === "main"){
+        if (this.field === "main") {
             this.toMine = this.app.mainCounter();
         }
 

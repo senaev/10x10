@@ -12,6 +12,11 @@
     display: inline-block;
     font-family: sans-serif;
 }
+/*выделенный текст внутри приложения будет прозрачным
+и не будет создавать дискомфорта пользователю*/
+.tenOnTenContainer *::selection {
+    background-color: transparent;
+}
 /* само главное поле бэкграунда*/
 .tenOnTenContainer>.backgroungField {
     position: absolute;

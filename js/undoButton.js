@@ -5,11 +5,11 @@ define(function () {
         var undefined;
 
         this.app = o.app;
-        this.active = false;
-        this.caption = this.app.word("undo");
-        this.func = undoButton.app.undo;
+        this.active = true;
+        this.caption = this.app.word("refresh");
+        this.func = undoButton.app.refresh;
 
-        this.$el = $('<div class="undoButton blocked">' + undoButton.app.word("undo") + '</div>').click(function (e) {
+        this.$el = $('<div class="undoButton">' + undoButton.app.word("refresh") + '</div>').click(function (e) {
             //не даем продолжить выполнение событий
             e.preventDefault();
 

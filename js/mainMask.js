@@ -69,7 +69,7 @@ define(['mCube', 'data'], function (MCube, d) {
                     }
                     startMCubeY = startCube.y;
                 }
-                //console.log(startMCubeX, startMCubeY);
+
                 startMCube = new MCube({
                     x: startMCubeX,
                     y: startMCubeY,
@@ -98,8 +98,6 @@ define(['mCube', 'data'], function (MCube, d) {
             mainMask.arr.sort(function(a,b){
                 return a.cube.toMine - b.cube.toMine;
             });
-
-            console.log(startMCubes)
         };
         //вызываем инициализацию
         this.initialize();

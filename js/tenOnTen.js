@@ -12,7 +12,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.blockApp = false;
 
         //уровень 1-10 11-60(16-65)
-        this.level = 1;
+        this.level = 7;
 
         //язык
         this.lang = "ru";
@@ -200,7 +200,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
 
             this.checkStepEnd();
 
-            console.log("//////////ITOG CUBES:", this.cubes);
+            //console.log("//////////ITOG CUBES:", this.cubes);
         };
         //делаем возврат хода
         this.undo = function () {

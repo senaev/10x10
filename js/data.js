@@ -25,17 +25,24 @@ define(function () {
                 //распределение по уровням
                 level: {
                     colorsCount: function (level) {
-                        if(level === 1){
+                        if (level === 1) {
                             return 5;
+                        }
+                        else if (level < 66) {
+                            return 6;
+                        }
+                        else if(level < 101){
+                            return 7
+                        }
+                        else if(level < 126){
+                            return 8
+                        }
+                        else if(level < 151){
+                            return 9
                         }
                         else{
-                            return 6;
+                            return 10;
                         }
-                        /*if (level > 0 && level < 11) {
-                            return 5;
-                        } else {
-                            return 6;
-                        }*/
                     },
                     cubesCount: function (level) {
                         if ((level > 0 && level < 11) || level === 100) {
@@ -54,8 +61,20 @@ define(function () {
                             };
                             return cubesCount[level];
                         }
-                        else {
+                        else if (level < 66) {
                             return level - 11 + 16;
+                        }
+                        else if (level < 101){
+                            return level - 66 + 16;
+                        }
+                        else if (level < 126){
+                            return level - 101 + 16;
+                        }
+                        else if (level < 151){
+                            return level - 126 + 16;
+                        }
+                        else{
+                            return level - 151 + 16;
                         }
                     },
                     getPositions: function (level) {
@@ -99,7 +118,7 @@ define(function () {
                 4: [[4, 2], [4, 3], [4, 4], [5, 4], [6, 4], [6, 3], [6, 5], [6, 2], [6, 6]],
                 5: [[6, 3], [5, 3], [4, 3], [4, 4], [4, 5], [5, 5], [6, 5], [6, 6], [6, 7], [5, 7], [4, 7]],
                 6: [[3, 2], [3, 3], [4, 2], [3, 4], [5, 2], [4, 4], [3, 5], [5, 4], [3, 6], [5, 5], [4, 6], [5, 6]],
-                7: [[3, 3], [4, 3], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8]],
+                7: [[3, 3], [4, 3], [5, 3], [5, 4], [4, 5], [3, 6], [3, 7], [3, 8]],
                 8: [[4, 2], [5, 2], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [5, 6], [4, 6], [4, 5], [4, 4], [4, 3], [5, 4]],
                 9: [[3, 2], [4, 2], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [4, 6], [3, 6], [3, 3], [3, 4], [4, 4]],
                 10: [[2, 3], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [6, 7], [7, 7], [7, 6], [7, 5], [7, 4], [7, 3], [6, 3]],

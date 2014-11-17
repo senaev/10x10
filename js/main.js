@@ -11,7 +11,8 @@ require.config({
         'mainMask': 'mainMask',
         'mCube': 'mCube',
         'cubeAnimation': 'cubeAnimation',
-        'undoButton': 'undoButton'
+        'undoButton': 'undoButton',
+        'myAlert': 'myAlert'
     }
 });
 

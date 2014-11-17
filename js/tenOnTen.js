@@ -1,4 +1,4 @@
-define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes, d, MoveMap, UndoButton) {
+define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (Cube, cubes, d, MoveMap, UndoButton, MyAlert) {
     var TenOnTen = function (args) {
         var undefined;
         var tenOnTen = this;
@@ -17,14 +17,20 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         //язык
         this.lang = "ru";
 
+        //включаем/выключаем звук
+        this.soundOn = false;
+
+        //скорость анимации
+        this.speed = 45;
+
         //console.log(d.f.level.colorsCount(this.level));
         console.log("cubesCount:", d.f.level.cubesCount(this.level));
         console.log("colorsCount:", d.f.level.colorsCount(this.level));
 
         //счетчик для значений toMine кубиков, попадающих в главное поле
-        this.mainCounter = (function() {
+        this.mainCounter = (function () {
             var numberOfCalls = 0;
-            return function() {
+            return function () {
                 return ++numberOfCalls;
             }
         })();
@@ -53,8 +59,16 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
 
         //Initialize container function
         (function () {
-            var topRightPanel = '<div class="panel topRightPanel"></div>';//
-            var background = '<div class="backgroungField">';
+
+            var topRightPanel = $('<div class="panel topRightPanel"></div>');
+            $('<div class="hamburgerIcon"><div></div><div></div><div></div></div>')
+                .appendTo(topRightPanel)
+                .click(function (e) {
+                    e.preventDefault();
+                    tenOnTen.al.alert({action: "menu"});
+                });
+
+            var background = '<div class="backgroundField">';
             for (var key = 0; key < d.cubesWidth * d.cubesWidth; key++) {
                 background += '<div class="dCube"></div>';
             }
@@ -314,9 +328,9 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
             }
 
             //меняем значения ту майн всех кубиков на поле
-            for(var x in this.previousStepMap["main"]){
-                for(var y in this.previousStepMap["main"][x]){
-                    if(this.previousStepMap["main"][x][y] !== null){
+            for (var x in this.previousStepMap["main"]) {
+                for (var y in this.previousStepMap["main"][x]) {
+                    if (this.previousStepMap["main"][x][y] !== null) {
                         this.cubes._get({field: "main", x: x, y: y}).toMine = this.previousStepMap["main"][x][y].toMine;
                     }
                 }
@@ -334,7 +348,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
             });
             setTimeout(function (app) {
                 app.generateMainCubes();
-                setTimeout(function(app){
+                setTimeout(function (app) {
                     app.blockApp = false;
                 }, d.animTime * 8, app);
             }, d.animTime, this);
@@ -366,7 +380,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
                                 direction: c.direction
                             };
                             //для корректной обработки порядка попадания в главное поле
-                            if(field === "main"){
+                            if (field === "main") {
                                 mask[field][x][y].toMine = c.toMine;
                             }
                         }
@@ -430,18 +444,18 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.nextLevel = function () {
             var colorsCount = d.f.level.colorsCount(this.level);
             this.level++;
-            if(d.f.level.colorsCount(this.level) >  colorsCount) {
+            if (d.f.level.colorsCount(this.level) > colorsCount) {
                 this.plusColor();
             }
             this.generateMainCubes();
         };
 
         //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
-        this.plusColor = function(){
+        this.plusColor = function () {
             var colorsCount = d.f.level.colorsCount(this.level);
             var newColor = d.colors[colorsCount - 1];
-            this.cubes._sideEach(function(cube){
-                if(d.f.rand(0, colorsCount - 1) === 0){
+            this.cubes._sideEach(function (cube) {
+                if (d.f.rand(0, colorsCount - 1) === 0) {
                     cube.change({
                         color: newColor
                     });
@@ -450,7 +464,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         };
 
         //возвращяем слово в необходимом переводе
-        this.word = function(w){
+        this.word = function (w) {
             return d.lang[w][tenOnTen.lang];
         };
 
@@ -458,8 +472,23 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton'], function (Cube, cubes
         this.undoButton = new UndoButton({app: tenOnTen});
 
         //конец игры
-        this.gameOver = function(){
-            al("GameOver");
+        this.gameOver = function () {
+            this.al.alert({action: "game_over"});
+        };
+
+        //алерт
+        this.al = new MyAlert({app: this});
+
+        //начинаем игру заново
+        this.newGame = function () {
+            this.level = 1;
+
+            this.cubes._sideEach(function (cube) {
+                cube.change({
+                    color: d.colors[d.f.rand(0, d.f.level.colorsCount(1)) - 1]
+                });
+            });
+            this.refresh();
         };
     };
 

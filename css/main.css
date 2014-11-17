@@ -1,5 +1,4 @@
 /*temporary*/
-
 .app-container {
     display: block;
     text-align: center;
@@ -17,14 +16,15 @@
 .tenOnTenContainer *::selection {
     background-color: transparent;
 }
+
 /* само главное поле бэкграунда*/
-.tenOnTenContainer>.backgroungField {
+.tenOnTenContainer>.backgroundField {
     position: absolute;
     background-color: #999;
     border-radius: 3px;
 }
 /*кубики бэкграунда на главном поле*/
-.tenOnTenContainer>.backgroungField>.dCube{
+.tenOnTenContainer>.backgroundField>.dCube{
     height: 30px;
     width: 30px;
     margin: 1px;
@@ -39,22 +39,90 @@
     width: 96px;
     position: absolute;
 }
+/*правая верхняя панель*/
 .tenOnTenContainer>.panel.topRightPanel{
     right: -96px;
     top: -96px;
 }
+/*кнопка назад*/
 .tenOnTenContainer>.panel.topRightPanel>.undoButton{
     font-weight: bold;
     margin-top: 7px;
     color: white;
     cursor: pointer;
 }
+/*для скрытия кнопки назад*/
 .tenOnTenContainer>.panel.topRightPanel>.undoButton.blocked{
     color: #cccccc;
 }
+/*иконка меню*/
+.tenOnTenContainer>.panel.topRightPanel>.hamburgerIcon{
+    cursor: pointer;
+    margin: 17px 0;
+}
+.tenOnTenContainer>.panel.topRightPanel>.hamburgerIcon>div{
+    width: 40%;
+    background: #fff;
+    height: 7px;
+    margin: 7px 30%;
+    border-radius: 10px;
+}
+
+/*алерт*/
+.tenOnTenContainer>.alertContainer{
+    position: absolute;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    z-index: -1;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer{
+    color: #ffffff;
+    padding: 10px 0;
+    background: rgba(244, 144, 0, 0.90);
+    margin-top: auto;
+    height: auto;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer.menuContent{
+
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuPunct{
+    cursor: pointer;
+    padding: 7px 0;
+    font-size: 25px;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuPunct>.value{
+    font-weight: bold;
+    color: #ddd;
+    font-size: 23px;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons{
+    height: 40px;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton{
+    width: 30%;
+    float: left;
+    margin: 3px 10%;
+    font-size: 25px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton.menuButtonLeft{
+    text-align: right;
+}
+.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton.menuButtonRight{
+    text-align: left;
+}
 
 /*сам кубик*/
-
 .tenOnTenContainer>.cube {
     position: absolute;
     height: 30px;
@@ -62,24 +130,16 @@
     border-radius: 10px;
     border-width: 0px;
     border-style: solid;
-    /*background: grey;*/
     margin-top: 1px;
     margin-right: 1px;
     margin-bottom: 1px;
     margin-left: 1px;
 }
 
-
-
-/*
-для скрытия кубиков в боковых панелях
-*/
+/* для скрытия кубиков в боковых панелях */
 .tenOnTenContainer>.cube.cubeHidden{
     display: none;
 }
-
-
-
 
 /*классы стрелок - могут быть у первого кубика под наведенной строкой в боковом меню,
 либо у кубика на главном поле, имеющего направление*/

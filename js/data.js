@@ -19,13 +19,69 @@ define(function () {
                 refresh: {
                     en: "refresh",
                     ru: "обновить"
+                },
+                resume: {
+                    en: "Resume",
+                    ru: "Продолжить"
+                },
+                new_game: {
+                    en: "New Game",
+                    ru: "Начать заново"
+                },
+                statistics: {
+                    en: "Statistics",
+                    ru: "Статистика"
+                },
+                top_gamers: {
+                    en: "Top Gamers",
+                    ru: "Лучшие игроки"
+                },
+                sound: {
+                    en: "Sound",
+                    ru: "Звук"
+                },
+                speed: {
+                    en: "Speed",
+                    ru: "Скорость"
+                },
+                fast: {
+                    en: "fast",
+                    ru: "быстрая"
+                },
+                slow: {
+                    en: "slow",
+                    ru: "медленная"
+                },
+                middle: {
+                    en: "middle",
+                    ru: "средняя"
+                },
+                yes: {
+                    en: "Yes",
+                    ru: "Да"
+                },
+                no: {
+                    en: "No",
+                    ru: "Нет"
+                },
+                on: {
+                    en: "on",
+                    ru: "вкл."
+                },
+                off: {
+                    en: "off",
+                    ru: "выкл."
+                },
+                play_again: {
+                    en: "You really want to play again?",
+                    ru: "Вы действительно хотите начать сначала?"
                 }
             },
             f: {
                 //распределение по уровням
                 level: {
                     colorsCount: function (level) {
-                        if (level === 1) {
+                        if (level < 11) {
                             return 5;
                         }
                         else if (level < 66) {

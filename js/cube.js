@@ -1,5 +1,5 @@
 //Cube class
-define(['data'], function (d) {
+define(['data', 'cubeAnimation'], function (d, cubeAnimation) {
     function Cube(o) {
         var undefined,
             cube,
@@ -10,8 +10,17 @@ define(['data'], function (d) {
         this.x = o.x;
         this.y = o.y;
 
+        if (o.disapperance !== undefined) {
+            this.disapperance = o.disapperance;
+        }
 
-        this.rand = d.f.rand(0, 1000000);
+        //время попадания в главное поле
+        if(o.toMine === undefined){
+            this.toMine = null;
+        }
+        else {
+            this.toMine = o.toMine;
+        }
 
         this.field = o.field;
         //указатель на игру, к которой кубик привязан
@@ -19,27 +28,31 @@ define(['data'], function (d) {
         //понадобится дополнительно для дополнительных функций кубика
         this.extra = {};
         //направнение движения
-        this.direction = (function (field) {
-            if (field === "top") {
-                return "bottom";
-            }
-            else if (field === "bottom") {
-                return "top";
-            }
-            else if (field === "left") {
-                return "right";
-            }
-            else if (field === "right") {
-                return "left";
-            }
-            else {
-                return null;
-            }
-        })(this.field);
-
+        if (o.direction === undefined) {
+            this.direction = (function (field) {
+                if (field === "top") {
+                    return "bottom";
+                }
+                else if (field === "bottom") {
+                    return "top";
+                }
+                else if (field === "left") {
+                    return "right";
+                }
+                else if (field === "right") {
+                    return "left";
+                }
+                else {
+                    return null;
+                }
+            })(this.field);
+        }
+        else {
+            this.direction = o.direction;
+        }
         //задаем цвет кубика
         if (o.color === undefined) {
-            color = d.colors[d.f.rand(0, d.levels[d.level].colorsCount - 1)];
+            color = d.colors[d.f.rand(0, d.f.level.colorsCount(this.app.level) - 1)];
         }
         else {
             color = o.color;
@@ -59,9 +72,14 @@ define(['data'], function (d) {
             visibleModeClasses = " ";
         }
 
+        var directionClass = "";
+        if (this.field === "main" && this.direction !== null) {
+            directionClass = "d" + this.direction;
+        }
+
         //указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
-            .addClass(this.color + " f" + this.field + visibleModeClasses)
+            .addClass(this.color + " f" + this.field + visibleModeClasses + directionClass)
             .hover(
             function (e) {
                 e.preventDefault();
@@ -70,7 +88,13 @@ define(['data'], function (d) {
 
                 }
                 else {
-                    cube.findFirstInLine().$el.addClass("firstInHoverLine");
+                    //cube.findFirstInLine().$el.addClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllInLineCanGoToMain();
+                    if (typeof allToFirstInLine !== "string") {
+                        for (var key in allToFirstInLine) {
+                            allToFirstInLine[key].$el.addClass("firstInHoverLine");
+                        }
+                    }
                 }
             },
             function (e) {
@@ -80,7 +104,13 @@ define(['data'], function (d) {
 
                 }
                 else {
-                    cube.findFirstInLine().$el.removeClass("firstInHoverLine");
+                    //cube.findFirstInLine().$el.removeClass("firstInHoverLine");
+                    var allToFirstInLine = cube.findAllInLineCanGoToMain();
+                    if (typeof allToFirstInLine !== "string") {
+                        for (var key in allToFirstInLine) {
+                            allToFirstInLine[key].$el.removeClass("firstInHoverLine");
+                        }
+                    }
                 }
             })
             .click(function (e) {
@@ -100,10 +130,24 @@ define(['data'], function (d) {
                 }
                 //если по боковому
                 else {
-                    //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
-                    var startCube = cube.findFirstInLine();
-                    //и отправляем его в путь-дорогу
-                    cube.app.run({startCube: startCube});
+                    //ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
+                    //которые могут выйти из поля
+                    var startCubes = cube.findAllInLineCanGoToMain();
+                    //если пришел не массив - выполняем анимацию
+                    if (typeof startCubes === "string") {
+                        var scale = (cube.field === "left" || cube.field === "right") ? [0.8, 1.2] : [1.2, 0.8];
+                        cube.$el.transition({
+                            scale: scale,
+                            duration: d.animTime
+                        }).transition({
+                            scale: 1,
+                            duration: d.animTime
+                        });
+                    }
+                    //и отправляем их в путь-дорогу
+                    else {
+                        cube.app.run({startCubes: startCubes});
+                    }
                 }
             });
 
@@ -113,8 +157,26 @@ define(['data'], function (d) {
     //отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
     Cube.prototype.toField = function () {
         this.app.cubes._add(this);
+
+        //время попадания в поле майн
+        if(this.field === "main"){
+            this.toMine = this.app.mainCounter();
+        }
+
         this.toState();
-        this.app.container.append(this.$el);
+
+        if (this.disapperance !== undefined && this.disapperance === "cool") {
+            this.$el.css({scale: 0})
+                .appendTo(this.app.container)
+                .transition({
+                    scale: 1,
+                    duration: d.animTime * 4
+                });
+            delete this.disapperance;
+        }
+        else {
+            this.$el.appendTo(this.app.container);
+        }
     };
     //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
     Cube.prototype.findFirstInLine = function () {
@@ -128,6 +190,66 @@ define(['data'], function (d) {
             o.y = this.y;
         }
         return this.app.cubes._get(o);
+    };
+    //находим все кубики от этого до ближнего к майн в линии относительно этого
+    Cube.prototype.findAllInLineCanGoToMain = function () {
+        var statProp = "y";
+        var dynamicProp = "x";
+        if (this.field === "top" || this.field === "bottom") {
+            statProp = "x";
+            dynamicProp = "y";
+        }
+        //проверяем, сколько кубиков можно достать из боковой линии
+        //по количеству свободных клеток в поле майн
+        var cellsMain = (this.field === "top" || this.field === "left") ? [0, 1, 2] : [9, 8, 7];
+        var cellsSide = (this.field === "top" || this.field === "left") ? [9, 8, 7] : [0, 1, 2];
+        var pos = {field: "main"};
+        pos[statProp] = this[statProp];
+        var count = 0;
+        for (var key in cellsMain) {
+            pos[dynamicProp] = cellsMain[key];
+            if (this.app.cubes._get(pos) === null) {
+                count++;
+            }
+            else {
+                break;
+            }
+        }
+
+        //проверяем, если линия пустая, ходить вообще нельзя
+        var allNullInLine = true;
+        for (var key = 0; key < d.cubesWidth; key++) {
+            pos[dynamicProp] = key;
+            if (this.app.cubes._get(pos) !== null) {
+                allNullInLine = false;
+                break;
+            }
+        }
+
+        var arr = [];
+        //если все нули в линии - возвращаем индикатор пустоты
+        if (allNullInLine) {
+            return "empty";
+        }
+        else {
+            if (count !== 0) {
+                pos = {field: this.field};
+                pos[statProp] = this[statProp];
+                for (var key = 0; key < 3 && key < count; key++) {
+                    pos[dynamicProp] = cellsSide[key];
+                    arr.push(this.app.cubes._get(pos));
+                    //если доходим до кубика, над которым курсор - заканчиваем маневр
+                    if (this.app.cubes._get(pos) === this) {
+                        break;
+                    }
+                }
+                return arr;
+            }
+            //если сразу за полем кубик - ничего не возвращаем
+            else {
+                return "block";
+            }
+        }
     };
     //задаем html-элементу кубика положение на доске
     //если параметры не переданы, устанавливаем текущую позицию кубика
@@ -177,7 +299,7 @@ define(['data'], function (d) {
         cube = this;
         setTimeout(function (o) {
             cube.animate(o);
-        },delay* d.animTime,{action: action, duration: duration});
+        }, delay * d.animTime, {action: action, duration: duration});
     };
     //добавляем объект анимации на обработку через время, полученное в атрибутах
     Cube.prototype.remove = function () {
@@ -185,242 +307,14 @@ define(['data'], function (d) {
     };
     //сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     //преобразования html-элемента кубика
-    Cube.prototype.animate = function (o) {
+    Cube.prototype.animate = cubeAnimation;
 
-        var action,
-            duration,
-            dur,
-            cube;
-        cube = this;
-        action = o.action;
-        duration = o.duration;
-        switch (action) {
-            //движение вправо со столкновением
-            case "srBump":
-                slideWithBump("left", "+");
-                break;
-            //движение вправо со столкновением
-            case "sbBump":
-                slideWithBump("top", "+");
-                break;
-            //движение вправо со столкновением
-            case "slBump":
-                slideWithBump("left", "-");
-                break;
-            //движение вправо со столкновением
-            case "stBump":
-                slideWithBump("top", "-");
-                break;
-            //движение с последующим вливанием в поле
-            case "toSide":
-                var field = cube.field;
-                var sign = "-";
-                var prop = "left";
-                if (field === "top" || field === "bottom") {
-                    prop = "top";
-                    if(field === "bottom"){
-                        sign = "+";
-                    }
-                }
-                else {
-                    if(field === "right"){
-                        sign = "+";
-                    }
-                }
-                slideToSide(prop, sign);
-                break;
-            //передвигаем кубик в боковом поле ближе к mainField
-            case "nearer":
-                nearer();
-                break;
-            //кубик появляется третим в боковом поле
-            case "apperanceInSide":
-                apperance();
-                break;
-            //третий кубик в боковой линии пропадает
-            case "disapperanceInSide":
-                disapperance();
-                break;
-                e();
-                break;
-            //передвигаем кубик в боковой панели дальше от mainField
-            case "forth":
-                forth();
-                break;
-            //передвигаем кубик в боковой панели дальше от mainField
-            case "boom":
-                boom();
-                break;
-            default:
-                console.log("Неизвестная анимация: " + action);
-                break
-        }
-
-
-        function bezier(duration) {
-            var o = {
-                1: 99,
-                2: 58,
-                3: 42,
-                4: 34,
-                5: 27,
-                6: 23,
-                7: 19,
-                8: 15,
-                9: 12,
-                10: 11,
-                11: 10
-            }
-            return o[duration];
-        }
-
-        function slideWithBump(prop, sign) {
-            dur = duration - 1;
-            var scale = (prop === "left") ? [0.9, 1.1] : [1.1, 0.9];
-            var trans0 = {
-                duration: d.animTime * dur,
-                easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)'
-            };
-            trans0[prop] = sign + '=' + dur * d.oneWidth;
-            var trans1 = {
-                scale: scale,
-                duration: d.animTime / 2
-            };
-            trans1[prop] = (sign === "+" ? "+" : "-") + "=4";
-            var trans2 = {
-                scale: 1,
-                duration: d.animTime / 2
-            };
-            trans2[prop] = (sign === "+" ? "-" : "+") + "=4";
-            cube.$el.transition(trans0)
-                .transition(trans1)
-                .transition(trans2);
-        }
-
-        function slideToSide(prop, sign) {
-            /*
-            * движение в боковую панель без разрывов анимации,
-            * чтобы сохранить максимальную плавность анимации, делать
-            * именно так
-            * */
-            dur = duration;
-            var easing = 'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
-            var trans = {
-                duration: d.animTime * dur,
-                easing: easing
-            };
-            trans[prop] = sign + '=' + dur * d.oneWidth;
-
-            setTimeout(function (cube) {
-                cube.app.cubes.animate({action: "inLine", cube: cube});
-            }, d.animTime * (dur - 1), cube);
-
-            cube.$el.transition(trans, function () {
-                var dir = d.f.reverseField(cube.field);
-                cube.$el.removeClass("d" + cube.field + " f" + dir)
-                    .addClass("f" + cube.field);
-            });
-        }
-
-        function nearer() {
-            var prop,
-                sign = "-",
-                trans = {duration: d.animTime};
-
-            if (cube.field === "top" || cube.field === "bottom") {
-                prop = "top";
-                if (cube.field === "top") {
-                    sign = "+";
-                }
-            }
-            else {
-                prop = "left";
-                if (cube.field === "left") {
-                    sign = "+";
-                }
-            }
-            trans[prop] = sign + "=" + duration * d.oneWidth;
-            cube.$el.transition(trans)
-        }
-
-        function forth() {
-            var prop,
-                sign = "+",
-                trans = {duration: d.animTime};
-
-            if (cube.field === "top" || cube.field === "bottom") {
-                prop = "top";
-                if (cube.field === "top") {
-                    sign = "-";
-                }
-            }
-            else {
-                prop = "left";
-                if (cube.field === "left") {
-                    sign = "-";
-                }
-            }
-            trans[prop] = sign + "=" + duration * d.oneWidth;
-            cube.$el.transition(trans)
-        }
-
-        function apperance() {
-            var pos = {x: cube.x, y: cube.y};
-            switch (cube.field) {
-                case "top":
-                    pos.y = d.cubesWidth - 3;
-                    break;
-                case "right":
-                    pos.x = 2;
-                    break;
-                case "bottom":
-                    pos.y = 2;
-                    break;
-                case "left":
-                    pos.x = d.cubesWidth - 3;
-                    break;
-            }
-            cube.toState(pos);
-            cube.$el.removeClass("cubeHidden")
-                .css({scale: 0, opacity: 0.4})
-                .transition({
-                    scale: 1,
-                    opacity: 1,
-                    duration: duration * d.animTime,
-                    delay: duration * d.animTime,
-                    easing: "out"
-                });
-        }
-
-        function disapperance() {
-            cube.$el.transition({
-                    scale: 0,
-                    opacity: 0,
-                    duration: duration * d.animTime,
-                    easing: "out"
-                });
-            setTimeout(function (cube) {
-                cube.$el.css({
-                    scale: 1,
-                    opacity: 1
-                }).addClass("cubeHidden");
-            },duration * d.animTime,cube);
-        }
-
-        function boom(){
-            //console.log("boom:",cube.color, cube.x, cube.y);
-            cube.$el.transition({
-                scale: 1.5,
-                opacity: 0,
-                duration: d.animTime,
-                easing: "out"
-            },function(){
-                cube.remove();
-            });
-        }
-    };
+    //проверка, показывать кубик или нет в поле
     Cube.prototype._inFieldIsVisible = function () {
         var pos;
+        if (this.field === "main") {
+            return true;
+        }
         if (this.field === "top" || this.field === "bottom") {
             pos = this["y"];
             return (this.field === "top") ? pos > 6 : pos < 3;
@@ -428,6 +322,70 @@ define(['data'], function (d) {
         else {
             pos = this["x"];
             return (this.field === "left") ? pos > 6 : pos < 3;
+        }
+    };
+
+    //меняем параметры кубика, при этом его анимируем
+    Cube.prototype.change = function (o) {
+        var cube = this;
+
+        if (this._inFieldIsVisible()) {
+            var prop;
+            //для красотенюшки задаем разную анимацию для разных полей
+            if (this.field === "main") {
+                prop = "rotate3d";
+            }
+            else if (this.field === "top" || this.field === "bottom") {
+                prop = "rotateX";
+            }
+            else {
+                prop = "rotateY";
+            }
+            //анимация скрытия/открытия
+            var trans1,
+                trans2;
+            trans1 = {duration: d.animTime * 2};
+            trans2 = {duration: d.animTime * 2};
+            if (this.field === "main") {
+                trans1[prop] = '1,1,0,90deg';
+                trans2[prop] = '1,1,0,0deg';
+            }
+            else {
+                trans1[prop] = 90;
+                trans2[prop] = 0;
+            }
+            //сама анимация с изменением состояния по ходу
+            this.$el.transition(trans1, function () {
+                changeParams()
+            })
+                .transition(trans2);
+        }
+        else {
+            changeParams();
+        }
+
+        function changeParams() {
+            //если меняем цвет и это не тот же цвет, что сейчас
+            if (o.color !== undefined && o.color !== cube.color) {
+                var prevColor = cube.color;
+                cube.color = o.color;
+                cube.$el.removeClass(prevColor)
+                    .addClass(cube.color);
+            }
+            //если меняем направление и это не то же направление, что сейчас
+            if (o.direction !== undefined && o.direction !== cube.direction) {
+                var prevDirection = cube.direction;
+                cube.direction = o.direction;
+
+                //стили следует менять только у кубиков на главном поле, так как
+                //слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
+                if (cube.field === "main") {
+                    cube.$el.removeClass("d" + prevDirection);
+                    if (cube.direction !== null) {
+                        cube.$el.addClass("d" + cube.direction);
+                    }
+                }
+            }
         }
     };
     return Cube;

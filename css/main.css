@@ -38,11 +38,14 @@
     right: -96px;
     top: -96px;
 }
-.tenOnTenContainer>.panel.topRightPanel>.previousButton{
+.tenOnTenContainer>.panel.topRightPanel>.undoButton{
     font-weight: bold;
     margin-top: 7px;
     color: white;
     cursor: pointer;
+}
+.tenOnTenContainer>.panel.topRightPanel>.undoButton.blocked{
+    color: #cccccc;
 }
 
 /*сам кубик*/

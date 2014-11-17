@@ -16,15 +16,17 @@ define(['data', 'mainMask'], function (d, MainMask) {
 
 
             this.cubes = o.cubes;
-            this.startCube = o.startCube;
+            this.startCubes = o.startCubes;
 
+            this.beyondTheSide = [];
 
-            localStorage["tenOnTenLastMask"] = this.generateJSONMask();
+            this.app = o.app;
 
             //создаем класс маски
             this.mainMask = new MainMask({
-                startCube: this.startCube,
-                cubes: this.cubes
+                startCubes: this.startCubes,
+                cubes: this.cubes,
+                moveMap: this
             });
 
             //генерируем из м-кубиков маски карту анимации
@@ -61,8 +63,8 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     var lastAction = actions[actions.length - 1];
                     //если это такой же шаг, как и предидущий
                     if (step.do === lastAction.action) {
-                            //иначе просто увеличиваем продолжительность предидущего
-                            lastAction.duration++;
+                        //иначе просто увеличиваем продолжительность предидущего
+                        lastAction.duration++;
                     }
                     else {
                         //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
@@ -70,6 +72,9 @@ define(['data', 'mainMask'], function (d, MainMask) {
                             case "toSide":
                                 lastAction.action = "toSide";
                                 lastAction.duration++;
+                                //для сортиравки попаданий в боковое поле
+                                mCube.toSideTime = key1;
+                                //заносим м-кубик в массив попадания в боковое поле
                                 this.toSideActions.push(mCube);
                                 break;
                             case null:
@@ -87,7 +92,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
                         }
                     }
                 }
-                if(actions.length === 1 && actions[0].action === null) {
+                if (actions.length === 1 && actions[0].action === null) {
                     actions.shift();
                 }
 
@@ -115,28 +120,70 @@ define(['data', 'mainMask'], function (d, MainMask) {
                     });
                 }
             }
+            //сортируем попавшие в боковое поле м-кубики по времени попадания
+            this.toSideActions.sort(function (a, b) {
+                return a.toSideTime - b.toSideTime;
+            });
         };
 
         //когда ход прощитан, запускаем саму анимацию
-        this.animate = function (o) {
+        this.animate = function () {
             var map;
-            var startCube = this.startCube;
+            var startCubes = this.startCubes;
 
             //блокируем приложение от начала до конца анимации
             //минус один - потому, что в последний такт обычно анимация чисто символическая
-            o.app.blockApp = true;
+            this.app.blockApp = true;
             setTimeout(
                 function (app) {
                     app.blockApp = false;
+
+                    //удаляем ненужные html-элементы
+                    for (var key in moveMap.beyondTheSide) {
+                        moveMap.beyondTheSide[key].remove();
+                    }
+
+                    //разблокируем кнопку назад, если не случился переход на новый уровень
+                    //иначе - блокируем
+                    if (app.end === "next_level") {
+                        app.undoButton._set({
+                            active: true,
+                            func: app.refresh,
+                            caption: app.word("refresh")
+                        });
+                    }
+                    else {
+                        app.undoButton._set({
+                            active: true,
+                            func: app.undo,
+                            caption: app.word("undo")
+                        });
+                    }
+
+                    if (app.end !== null) {
+                        switch (app.end) {
+                            case "next_level":
+                                app.nextLevel();
+                                break;
+                            case "game_over":
+                                app.endOfGame();
+                                break;
+                            default:
+                                throw new Error("Неверное значение в app.end: ", app.end);
+                                break;
+                        }
+                    }
                 },
                 this.animationLength * d.animTime - 1,
-                o.app
+                this.app
             );
 
-            this.cubes.animate({action: "fromLine", cube: startCube});
+            this.cubes.animate({action: "fromLine", cube: startCubes});
 
             //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
-            startCube.$el.addClass("d" + startCube.direction);
+            for (var key in startCubes) {
+                startCubes[key].$el.addClass("d" + startCubes[key].direction);
+            }
 
             //перебираем карту анимации и передаем каждому кубику объект действия,
             //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
@@ -156,41 +203,7 @@ define(['data', 'mainMask'], function (d, MainMask) {
         /**
          * Функции, которым могут понадобиться в дальнейшем
          */
-            //функция нужна исключительно для передачи кубиков по сети в виде JSON объекта
-        this.generateJSONMask = function () {
-
-            var cubes;
-            var mask;
-            var main;
-
-            mask = {};
-            for (var key in d.fields) {
-                mask[d.fields[key]] = [];
-            }
-            mask.main = [];
-            cubes = this.cubes;
-
-            //сначала генерируем боковые поля, где направление кубиков зависит исключительно от поля
-            cubes._sideEach(function (cube) {
-                mask[cube.field].push({
-                    color: cube.color,
-                    x: cube.x,
-                    y: cube.y
-                });
-            });
-            //затем основное поле, с указателем направления, если направления нет - ноль
-            cubes._mainEach(function (cube) {
-                mask.main.push({
-                    color: cube.color,
-                    direction: cube.direction,
-                    x: cube.x,
-                    y: cube.y
-                });
-            });
-
-            return mask;
-        };
-        //создание цветовой схемы, в которой каждому цвету присваивается число
+            //создание цветовой схемы, в которой каждому цвету присваивается число
         this.generateColorSheme = function () {
             var colors = {};
             for (var key = 0; key < d.colors.length; key++) {

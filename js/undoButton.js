@@ -9,7 +9,7 @@ define(function () {
         this.caption = this.app.word("refresh");
         this.func = undoButton.app.refresh;
 
-        this.$el = $('<div class="undoButton">' + undoButton.app.word("refresh") + '</div>').click(function (e) {
+        this.$el = $('<div class="panelButton">' + undoButton.app.word("refresh") + '</div>').click(function (e) {
             //не даем продолжить выполнение событий
             e.preventDefault();
 

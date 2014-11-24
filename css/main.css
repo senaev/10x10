@@ -1,3 +1,5 @@
+@import url(../fonts/clear-sans.css);
+
 /*temporary*/
 .app-container {
     display: block;
@@ -9,8 +11,9 @@
 он же срановится корневым для всех элементов игры*/
 .tenOnTenContainer {
     display: inline-block;
-    font-family: sans-serif;
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
 }
+
 /*выделенный текст внутри приложения будет прозрачным
 и не будет создавать дискомфорта пользователю*/
 .tenOnTenContainer *::selection {
@@ -18,13 +21,14 @@
 }
 
 /* само главное поле бэкграунда*/
-.tenOnTenContainer>.backgroundField {
+.tenOnTenContainer > .backgroundField {
     position: absolute;
     background-color: #999;
     border-radius: 3px;
 }
+
 /*кубики бэкграунда на главном поле*/
-.tenOnTenContainer>.backgroundField>.dCube{
+.tenOnTenContainer > .backgroundField > .dCube {
     height: 30px;
     width: 30px;
     margin: 1px;
@@ -34,33 +38,64 @@
 }
 
 /*панели с информацией и кнопками*/
-.tenOnTenContainer>.panel{
+.tenOnTenContainer > .panel {
     height: 96px;
     width: 96px;
     position: absolute;
 }
+
 /*правая верхняя панель*/
-.tenOnTenContainer>.panel.topRightPanel{
+.tenOnTenContainer > .panel.topRightPanel {
     right: -96px;
     top: -96px;
 }
+
+/*кнопки в боковой панели*/
+.tenOnTenContainer > .panel.topRightPanel > .panelButton {
+    border: 1px solid #888;
+    color: #fff;
+    cursor: pointer;
+    width: 80%;
+    margin: 5px 10% 0px 10%;
+    font-size: 14px;
+    padding: 6px 1px 1px 1px;
+    border-radius: 3px;
+    background: #aaa;
+}
+
+.tenOnTenContainer > .panel.topRightPanel > .panelButton.blocked {
+    color: #aaa;
+    background-color: #999;
+}
+
+.tenOnTenContainer > .panel.topRightPanel > .panelButton:hover {
+    background-color: #bbb;
+}
+
+.tenOnTenContainer > .panel.topRightPanel > .panelButton.blocked:hover {
+    background-color: #999;
+}
+
 /*кнопка назад*/
-.tenOnTenContainer>.panel.topRightPanel>.undoButton{
+.tenOnTenContainer > .panel.topRightPanel > .undoButton {
     font-weight: bold;
     margin-top: 7px;
     color: white;
     cursor: pointer;
 }
+
 /*для скрытия кнопки назад*/
-.tenOnTenContainer>.panel.topRightPanel>.undoButton.blocked{
+.tenOnTenContainer > .panel.topRightPanel > .undoButton.blocked {
     color: #cccccc;
 }
+
 /*иконка меню*/
-.tenOnTenContainer>.panel.topRightPanel>.hamburgerIcon{
+.tenOnTenContainer > .panel.topRightPanel > .hamburgerIcon {
     cursor: pointer;
     margin: 17px 0;
 }
-.tenOnTenContainer>.panel.topRightPanel>.hamburgerIcon>div{
+
+.tenOnTenContainer > .panel.topRightPanel > .hamburgerIcon > div {
     width: 40%;
     background: #fff;
     height: 7px;
@@ -69,61 +104,63 @@
 }
 
 /*алерт*/
-.tenOnTenContainer>.alertContainer{
+.tenOnTenContainer > .alertContainer {
     position: absolute;
     border-radius: 3px;
-    background: rgba(0,0,0,0.6);
     opacity: 0;
     z-index: -1;
     transition-property: opacity;
     transition-duration: 0.2s;
+    background: rgba(100, 100, 100, 0.6);
 }
-.tenOnTenContainer>.alertContainer>.punctsContainer{
-    color: #ffffff;
-    padding: 10px 0;
-    background: rgba(244, 144, 0, 0.90);
-    margin-top: auto;
-    height: auto;
-    border-top: 2px solid #fff;
-    border-bottom: 2px solid #fff;
+
+.tenOnTenContainer > .alertContainer > .content {
+}
+
+.tenOnTenContainer > .alertContainer > .content > .question {
+    position: absolute;
+    width: 70%;
+    left: 15%;
+    bottom: 52%;
+    color: #fff;
+    font-size: 35px;
+}
+
+.tenOnTenContainer > .alertContainer > .content > .buttons {
     position: absolute;
     top: 50%;
-    left: 0;
-    right: 0;
+    width: 70%;
+    left: 15%;
 }
-.tenOnTenContainer>.alertContainer>.punctsContainer.menuContent{
 
-}
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuPunct{
-    cursor: pointer;
-    padding: 7px 0;
-    font-size: 25px;
-}
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuPunct>.value{
+.tenOnTenContainer > .alertContainer > .content > .buttons > .button {
+    font-size: 31px;
     font-weight: bold;
-    color: #ddd;
-    font-size: 23px;
+    color: #ccc;
+    cursor: pointer;
+    padding: 0px 0 10px 0;
 }
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons{
-    height: 40px;
+
+.tenOnTenContainer > .alertContainer > .content > .buttons > .button.buttonMin {
+    font-size: 20px;
 }
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton{
-    width: 30%;
+
+.tenOnTenContainer > .alertContainer > .content > .buttons > .button:hover {
+    color: #fff;
+}
+
+.tenOnTenContainer > .alertContainer > .content > .buttons > .button.rightButton {
+    width: 50%;
+    float: right;
+}
+
+.tenOnTenContainer > .alertContainer > .content > .buttons > .button.leftButton {
+    width: 50%;
     float: left;
-    margin: 3px 10%;
-    font-size: 25px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton.menuButtonLeft{
-    text-align: right;
-}
-.tenOnTenContainer>.alertContainer>.punctsContainer>.menuContent>.menuButtons>.menuButton.menuButtonRight{
-    text-align: left;
 }
 
 /*сам кубик*/
-.tenOnTenContainer>.cube {
+.tenOnTenContainer > .cube {
     position: absolute;
     height: 30px;
     width: 30px;
@@ -137,71 +174,83 @@
 }
 
 /* для скрытия кубиков в боковых панелях */
-.tenOnTenContainer>.cube.cubeHidden{
+.tenOnTenContainer > .cube.cubeHidden {
     display: none;
 }
 
 /*классы стрелок - могут быть у первого кубика под наведенной строкой в боковом меню,
 либо у кубика на главном поле, имеющего направление*/
-.tenOnTenContainer>.cube.firstInHoverLine, .tenOnTenContainer>.cube.dright{
+.tenOnTenContainer > .cube.firstInHoverLine, .tenOnTenContainer > .cube.dright {
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
     background-position: -1px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.ftop, .tenOnTenContainer>.cube.dbottom{
+
+.tenOnTenContainer > .cube.firstInHoverLine.ftop, .tenOnTenContainer > .cube.dbottom {
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
     background-position: -33px -1px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.fright, .tenOnTenContainer>.cube.dleft{
+
+.tenOnTenContainer > .cube.firstInHoverLine.fright, .tenOnTenContainer > .cube.dleft {
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
     background-position: -65px -1px;
 }
-.tenOnTenContainer>.cube.firstInHoverLine.fbottom, .tenOnTenContainer>.cube.dtop{
+
+.tenOnTenContainer > .cube.firstInHoverLine.fbottom, .tenOnTenContainer > .cube.dtop {
     background-image: url(../img/arrow.png);
     background-repeat: no-repeat;
     background-position: -97px -1px;
 }
 
 /*расцветка кубиков*/
-.tenOnTenContainer>.cube.blue{
+.tenOnTenContainer > .cube.blue {
     background-color: #4e7cff;
     border-color: #7a9cff;
 }
-.tenOnTenContainer>.cube.green{
+
+.tenOnTenContainer > .cube.green {
     background-color: #0e9f0e;
     border-color: #12b012;
 }
-.tenOnTenContainer>.cube.yellow{
+
+.tenOnTenContainer > .cube.yellow {
     background-color: #e7df00;
     border-color: #fff600;
 }
-.tenOnTenContainer>.cube.red{
+
+.tenOnTenContainer > .cube.red {
     background-color: #ff4949;
     border-color: #ff6f6f;
 }
-.tenOnTenContainer>.cube.brown{
+
+.tenOnTenContainer > .cube.brown {
     background-color: #df690a;
     border-color: #ee710b;
 }
-.tenOnTenContainer>.cube.pink{
+
+.tenOnTenContainer > .cube.pink {
     background-color: #ffc0cb;
     border-color: #fed6dd;
 }
-.tenOnTenContainer>.cube.white{
+
+.tenOnTenContainer > .cube.white {
     background-color: #ddd;
     border-color: #e0e0e0;
 }
-.tenOnTenContainer>.cube.purple{
+
+.tenOnTenContainer > .cube.purple {
     background-color: #ff46ff;
     border-color: #fc69fc;
 }
-.tenOnTenContainer>.cube.lightblue{
+
+.tenOnTenContainer > .cube.lightblue {
     background-color: #9bcada;
     border-color: #add8e6;
 }
-.tenOnTenContainer>.cube.orange{
+
+.tenOnTenContainer > .cube.orange {
     background-color: #ffb121;
     border-color: #ffbb3f;
 }

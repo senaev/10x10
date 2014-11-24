@@ -12,7 +12,7 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
         this.blockApp = false;
 
         //уровень
-        this.level = 7;
+        this.level = 10;
 
         //язык
         this.lang = "ru";
@@ -26,6 +26,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
         //console.log(d.f.level.colorsCount(this.level));
         console.log("cubesCount:", d.f.level.cubesCount(this.level));
         console.log("colorsCount:", d.f.level.colorsCount(this.level));
+
+        //возвращяем слово в необходимом переводе
+        this.word = function (w) {
+            return d.lang[w][tenOnTen.lang];
+        };
 
         //счетчик для значений toMine кубиков, попадающих в главное поле
         this.mainCounter = (function () {
@@ -61,11 +66,25 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
         (function () {
 
             var topRightPanel = $('<div class="panel topRightPanel"></div>');
-            $('<div class="hamburgerIcon"><div></div><div></div><div></div></div>')
+            /*$('<div class="hamburgerIcon"><div></div><div></div><div></div></div>')
                 .appendTo(topRightPanel)
                 .click(function (e) {
                     e.preventDefault();
                     tenOnTen.al.alert({action: "menu"});
+                });*/
+
+            $('<div class="panelButton">' + this.word("new_game") + '</div>')
+                .appendTo(topRightPanel)
+                .click(function (e) {
+                    e.preventDefault();
+                    tenOnTen.al.alert({action: "new_game"});
+                });
+
+            $('<div class="panelButton">' + this.word("statistics") + '</div>')
+                .appendTo(topRightPanel)
+                .click(function (e) {
+                    e.preventDefault();
+                    tenOnTen.al.alert({action: "statistics"});
                 });
 
             var background = '<div class="backgroundField">';
@@ -463,11 +482,6 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
             });
         };
 
-        //возвращяем слово в необходимом переводе
-        this.word = function (w) {
-            return d.lang[w][tenOnTen.lang];
-        };
-
         //добавляем кнопку "назад"
         this.undoButton = new UndoButton({app: tenOnTen});
 
@@ -482,6 +496,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
         //начинаем игру заново
         this.newGame = function () {
             this.level = 1;
+            this.undoButton._set({
+                caption: this.word("refresh"),
+                func: this.refresh,
+                active: true
+            });
 
             this.cubes._sideEach(function (cube) {
                 cube.change({
@@ -489,6 +508,11 @@ define(['cube', 'cubes', 'data', 'movemap', 'undoButton', "myAlert"], function (
                 });
             });
             this.refresh();
+        };
+
+        //конец игры
+        this.endOfGame = function(){
+            this.al.alert({action: "end_of_game"});
         };
     };
 

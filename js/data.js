@@ -26,7 +26,7 @@ define(function () {
                 },
                 new_game: {
                     en: "New Game",
-                    ru: "Начать заново"
+                    ru: "Новая игра"
                 },
                 statistics: {
                     en: "Statistics",
@@ -75,6 +75,15 @@ define(function () {
                 play_again: {
                     en: "You really want to play again?",
                     ru: "Вы действительно хотите начать сначала?"
+                },
+                end_of_game: {
+                    en: "Game over",
+                    ru: "Игра окончена"
+
+                },
+                try_again: {
+                    en: "Try again",
+                    ru: "Начать заново"
                 }
             },
             f: {
@@ -87,16 +96,16 @@ define(function () {
                         else if (level < 66) {
                             return 6;
                         }
-                        else if(level < 101){
+                        else if (level < 101) {
                             return 7
                         }
-                        else if(level < 126){
+                        else if (level < 126) {
                             return 8
                         }
-                        else if(level < 151){
+                        else if (level < 151) {
                             return 9
                         }
-                        else{
+                        else {
                             return 10;
                         }
                     },
@@ -120,16 +129,16 @@ define(function () {
                         else if (level < 66) {
                             return level - 11 + 16;
                         }
-                        else if (level < 101){
+                        else if (level < 101) {
                             return level - 66 + 16;
                         }
-                        else if (level < 126){
+                        else if (level < 126) {
                             return level - 101 + 16;
                         }
-                        else if (level < 151){
+                        else if (level < 151) {
                             return level - 126 + 16;
                         }
-                        else{
+                        else {
                             return level - 151 + 16;
                         }
                     },
@@ -164,6 +173,9 @@ define(function () {
                     for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x) {
                     }
                     return o;
+                },
+                firstToUp: function (s) {
+                    return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
                 }
             },
             //координаты кубиков для уровней с рисунками

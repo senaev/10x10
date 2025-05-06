@@ -1,48 +1,56 @@
 import $ from "jquery";
+import { TenOnTen } from "./TenOnTen";
 
-export function UndoButton(o) {
-  var undoButton = this;
-  var undefined;
+export class UndoButton {
+  private app: TenOnTen;
+  private active: boolean;
+  private caption: string;
+  private func: () => void;
+  private $el: JQuery<HTMLElement>;
 
-  this.app = o.app;
-  this.active = true;
-  this.caption = this.app.word("refresh");
-  this.func = undoButton.app.refresh;
+  constructor(params: { app: TenOnTen }) {
+    var undoButton = this;
 
-  this.$el = $(
-    '<div class="undoButton">' + undoButton.app.word("refresh") + "</div>"
-  )
-    .click(function (e) {
-      //не даем продолжить выполнение событий
-      e.preventDefault();
+    this.app = params.app;
+    this.active = true;
+    this.caption = this.app.word("refresh");
+    this.func = undoButton.app.refresh;
 
-      if (undoButton.active && !undoButton.app.blockApp) {
-        undoButton.func.apply(undoButton.app);
-      }
-    })
-    .appendTo(
-      undoButton.app.container.children(".panel.topRightPanel").first()
-    );
+    this.$el = $(
+      '<div class="undoButton">' + undoButton.app.word("refresh") + "</div>"
+    )
+      .click(function (e) {
+        //не даем продолжить выполнение событий
+        e.preventDefault();
 
-  this._set = function (o) {
-    if (o.func !== undefined && undoButton.func !== o.func) {
-      undoButton.func = o.func;
+        if (undoButton.active && !undoButton.app.blockApp) {
+          undoButton.func.apply(undoButton.app);
+        }
+      })
+      .appendTo(
+        undoButton.app.container.children(".panel.topRightPanel").first()
+      );
+  }
+
+  private _set = (o) => {
+    if (o.func !== undefined && this.func !== o.func) {
+      this.func = o.func;
     }
-    if (o.caption !== undefined && undoButton.caption !== o.caption) {
-      undoButton.caption = o.caption;
-      undoButton.$el.html(o.caption);
+    if (o.caption !== undefined && this.caption !== o.caption) {
+      this.caption = o.caption;
+      this.$el.html(o.caption);
     }
-    if (o.active !== undefined && undoButton.active !== o.active) {
-      undoButton.active = o.active;
-      if (undoButton.active) {
-        undoButton.$el.removeClass("blocked");
+    if (o.active !== undefined && this.active !== o.active) {
+      this.active = o.active;
+      if (this.active) {
+        this.$el.removeClass("blocked");
       } else {
-        undoButton.$el.addClass("blocked");
+        this.$el.addClass("blocked");
       }
     }
   };
 
-  this._get = function (prop) {
+  private _get = (prop) => {
     return undoButton[prop];
   };
 }

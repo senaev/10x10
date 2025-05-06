@@ -289,4 +289,4 @@ export const data = {
     [4, 7],
     [2, 4],
   ],
-};
+} as const;

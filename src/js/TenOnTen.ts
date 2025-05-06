@@ -6,13 +6,14 @@ import { MoveMap } from "./moveMap";
 import { UndoButton } from "./undoButton";
 
 export class TenOnTen {
-  private cubes: any;
-  private blockApp: boolean;
+  public container: JQuery<HTMLElement>;
+  public blockApp: boolean;
+
+  private cubes: typeof cubes;
   private level: number;
-  private lang: string;
+  private lang: keyof (typeof data.lang)[keyof typeof data.lang];
   private mainCounter: () => number;
   private end: string | null;
-  private container: JQuery<HTMLElement>;
 
   private undoButton: UndoButton;
 
@@ -87,7 +88,7 @@ export class TenOnTen {
 
   //даем возможность пользователю при переходе на новый уровень выбрать из случайных
   //комбинаций начальную
-  private refresh() {
+  public refresh = () => {
     this.blockApp = true;
     var cubes = this.cubes;
     //удаляем нафиг кубики с главного поля
@@ -109,7 +110,7 @@ export class TenOnTen {
       data.animTime,
       this
     );
-  }
+  };
 
   //генерируем маску для предидущего хода
   private generateMask() {
@@ -170,8 +171,8 @@ export class TenOnTen {
     });
   }
 
-  //возвращяем слово в необходимом переводе
-  private word(w) {
+  // Возвращаем слово в необходимом переводе
+  public word(w: keyof typeof data.lang) {
     return data.lang[w][this.lang];
   }
 

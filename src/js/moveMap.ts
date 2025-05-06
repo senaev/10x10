@@ -8,33 +8,19 @@ import { MainMask } from "./mainMask";
  * предаставляет удобрый интерфейс для доступа к методам построения хода
  * для основного приложения
  */
-export function MoveMap() {
-  var undefined;
-
-  var moveMap = this;
-  this.generate = function (o) {
-    var cubes, mainMask;
-
-    this.cubes = o.cubes;
-    this.startCubes = o.startCubes;
-
-    this.beyondTheSide = [];
-
-    this.app = o.app;
-
-    //создаем класс маски
-    this.mainMask = new MainMask({
-      startCubes: this.startCubes,
-      cubes: this.cubes,
-      moveMap: this,
-    });
-
-    //генерируем из м-кубиков маски карту анимации
-    this.createAnimationMap();
-  };
+export class MoveMap {
+  private animationMap: any[];
+  private toSideActions: any[];
+  private beyondTheSide: any[];
+  private app: any;
+  private mainMask: any;
+  private startCubes: any[];
+  private cubes: any;
+  private animationLength: number;
+  private colorSheme: Record<string, number>;
 
   //строим анимацию для каждого кубика одтельно на основе steps каждого м-кубика
-  this.createAnimationMap = function () {
+  private createAnimationMap() {
     this.animationMap = [];
     var noEmptyActions = [];
 
@@ -52,8 +38,14 @@ export function MoveMap() {
     for (var key in this.mainMask.arr) {
       var mCube = this.mainMask.arr[key];
       var steps = mCube.steps;
+
       //массив с действиями одного кубика
-      var actions = [{ action: null, duration: 0 }];
+      var actions: {
+        action: string | null;
+        duration: number;
+        delay?: number;
+      }[] = [{ action: null, duration: 0 }];
+
       //пробегаемся по массиву шагов анимации
       for (var key1 = 0; key1 < steps.length; key1++) {
         //один шаг анимации
@@ -77,7 +69,7 @@ export function MoveMap() {
               this.toSideActions.push(mCube);
               break;
             case null:
-              if (["st", "sr", "sl", "sb"].indexOf(lastAction.action) > -1) {
+              if (["st", "sr", "sl", "sb"].indexOf(lastAction.action!) > -1) {
                 lastAction.action = lastAction.action + "Bump";
                 lastAction.duration++;
               } else {
@@ -122,10 +114,10 @@ export function MoveMap() {
     this.toSideActions.sort(function (a, b) {
       return a.toSideTime - b.toSideTime;
     });
-  };
+  }
 
   //когда ход прощитан, запускаем саму анимацию
-  this.animate = function () {
+  private animate() {
     var map;
     var startCubes = this.startCubes;
 
@@ -133,12 +125,12 @@ export function MoveMap() {
     //минус один - потому, что в последний такт обычно анимация чисто символическая
     this.app.blockApp = true;
     setTimeout(
-      function (app) {
+      (app) => {
         app.blockApp = false;
 
         //удаляем ненужные html-элементы
-        for (var key in moveMap.beyondTheSide) {
-          moveMap.beyondTheSide[key].remove();
+        for (var key in this.beyondTheSide) {
+          this.beyondTheSide[key].remove();
         }
 
         //разблокируем кнопку назад, если не случился переход на новый уровень
@@ -194,17 +186,38 @@ export function MoveMap() {
         cube.addAnimate(action);
       }
     }
-  };
+  }
 
   /**
    * Функции, которым могут понадобиться в дальнейшем
    */
   //создание цветовой схемы, в которой каждому цвету присваивается число
-  this.generateColorSheme = function () {
-    var colors = {};
+  private generateColorSheme() {
+    var colors: Record<string, number> = {};
     for (var key = 0; key < data.colors.length; key++) {
       colors[data.colors[key]] = key;
     }
     this.colorSheme = colors;
-  };
+  }
+
+  private generate(o) {
+    var cubes, mainMask;
+
+    this.cubes = o.cubes;
+    this.startCubes = o.startCubes;
+
+    this.beyondTheSide = [];
+
+    this.app = o.app;
+
+    //создаем класс маски
+    this.mainMask = new MainMask({
+      startCubes: this.startCubes,
+      cubes: this.cubes,
+      moveMap: this,
+    });
+
+    //генерируем из м-кубиков маски карту анимации
+    this.createAnimationMap();
+  }
 }

@@ -32,7 +32,7 @@ export class UndoButton {
       );
   }
 
-  private _set = (o) => {
+  public _set = (o: { active: boolean }) => {
     if (o.func !== undefined && this.func !== o.func) {
       this.func = o.func;
     }
@@ -50,7 +50,7 @@ export class UndoButton {
     }
   };
 
-  private _get = (prop) => {
+  public _get = (prop) => {
     return undoButton[prop];
   };
 }

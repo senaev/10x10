@@ -1,17 +1,26 @@
 import { Cube } from "./cube";
-import { data, FIELDS } from "./data";
+import { data, Field, FIELDS } from "./data";
 
-export const cubes = {};
+export const cubes = {
+  ...(() => {
+    const cubes: Record<
+      Field,
+      Record<number, Record<number, Cube | null>>
+    > = {};
 
-for (var key in FIELDS) {
-  cubes[data.fields[key]] = {};
-  for (var x = 0; x < data.cubesWidth; x++) {
-    cubes[data.fields[key]][x] = {};
-    for (var y = 0; y < data.cubesWidth; y++) {
-      cubes[data.fields[key]][x][y] = null;
+    for (var key in FIELDS) {
+      cubes[FIELDS[key]] = {};
+      for (var x = 0; x < data.cubesWidth; x++) {
+        cubes[FIELDS[key]][x] = {};
+        for (var y = 0; y < data.cubesWidth; y++) {
+          cubes[FIELDS[key]][x][y] = null;
+        }
+      }
     }
-  }
-}
+
+    return cubes;
+  })(),
+};
 
 //добавляем в коллекцию кубик(необходимо для инициализации приложения)
 cubes._add = function (cube) {

@@ -5,98 +5,193 @@ import { data } from "./data";
 import { MoveMap } from "./moveMap";
 import { UndoButton } from "./undoButton";
 
-export function TenOnTen(args) {
-  var tenOnTen = this;
+export class TenOnTen {
+  private cubes: any;
+  private blockApp: boolean;
+  private level: number;
+  private lang: string;
+  private mainCounter: () => number;
+  private end: string | null;
+  private container: JQuery<HTMLElement>;
 
-  //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
-  //которому эти кубики принадлежат
-  this.cubes = cubes;
-  this.cubes._app = this;
+  private undoButton: UndoButton;
 
-  //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
-  this.blockApp = false;
+  constructor({ container }: { container: HTMLElement }) {
+    //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
+    //которому эти кубики принадлежат
+    this.cubes = cubes;
+    this.cubes._app = this;
 
-  //уровень 1-10 11-60(16-65)
-  this.level = 7;
+    //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
+    this.blockApp = false;
 
-  //язык
-  this.lang = "ru";
+    //уровень 1-10 11-60(16-65)
+    this.level = 1;
 
-  //console.log(d.f.level.colorsCount(this.level));
-  console.log("cubesCount:", data.f.level.cubesCount(this.level));
-  console.log("colorsCount:", data.f.level.colorsCount(this.level));
+    //язык
+    this.lang = "ru";
 
-  //счетчик для значений toMine кубиков, попадающих в главное поле
-  this.mainCounter = (function () {
-    var numberOfCalls = 0;
-    return function () {
-      return ++numberOfCalls;
-    };
-  })();
+    //console.log(d.f.level.colorsCount(this.level));
+    console.log("cubesCount:", data.f.level.cubesCount(this.level));
+    console.log("colorsCount:", data.f.level.colorsCount(this.level));
 
-  //датчик конца хода
-  this.end = null;
+    //счетчик для значений toMine кубиков, попадающих в главное поле
+    this.mainCounter = (function () {
+      var numberOfCalls = 0;
+      return function () {
+        return ++numberOfCalls;
+      };
+    })();
 
-  //variables
-  var appContainer;
+    //датчик конца хода
+    this.end = null;
 
-  //Find App Container
-  if (!args) {
-    throw new Error("tenOnTen: Add tenOnTen arguments");
-  } else if (typeof args === "string") {
-    appContainer = $(args).first();
-  } else if (typeof args === "object") {
-    appContainer = $(args.appContainer).first();
-  } else {
-    throw new Error("tenOnTen: app container type error");
-  }
-  this.container = appContainer;
+    this.container = $(container);
 
-  //Initialize container function
-  (function () {
-    var topRightPanel = '<div class="panel topRightPanel"></div>'; //
-    var background = '<div class="backgroungField">';
-    for (var key = 0; key < data.cubesWidth * data.cubesWidth; key++) {
-      background += '<div class="dCube"></div>';
-    }
-    background += "</div>";
+    //Initialize container function
+    (() => {
+      var topRightPanel = '<div class="panel topRightPanel"></div>'; //
+      var background = '<div class="backgroungField">';
+      for (var key = 0; key < data.cubesWidth * data.cubesWidth; key++) {
+        background += '<div class="dCube"></div>';
+      }
+      background += "</div>";
 
-    var backgroundField = $(background).css({
-      height: data.oneWidth * data.cubesWidth,
-      width: data.oneWidth * data.cubesWidth,
-      padding: data.oneWidth * 3 + 3,
-      left: data.oneWidth * -3 - 3,
-      top: data.oneWidth * -3 - 3,
-    });
-
-    this.container
-      .css({
+      var backgroundField = $(background).css({
         height: data.oneWidth * data.cubesWidth,
         width: data.oneWidth * data.cubesWidth,
-        margin: data.oneWidth * 3,
-        position: "relative",
-      })
-      .addClass("tenOnTenContainer")
-      .append(backgroundField)
-      .append(topRightPanel);
-  }).apply(this);
+        padding: data.oneWidth * 3 + 3,
+        left: data.oneWidth * -3 - 3,
+        top: data.oneWidth * -3 - 3,
+      });
+
+      this.container
+        .css({
+          height: data.oneWidth * data.cubesWidth,
+          width: data.oneWidth * data.cubesWidth,
+          margin: data.oneWidth * 3,
+          position: "relative",
+        })
+        .addClass("tenOnTenContainer")
+        .append(backgroundField)
+        .append(topRightPanel);
+    })();
+
+    //запускаем инициализацию приложения
+    this.initialize();
+    //запускаем ход, начиная движение со startCubes
+
+    //добавляем кнопку "назад"
+    this.undoButton = new UndoButton({ app: this });
+  }
+
+  //даем возможность пользователю при переходе на новый уровень выбрать из случайных
+  //комбинаций начальную
+  private refresh() {
+    this.blockApp = true;
+    var cubes = this.cubes;
+    //удаляем нафиг кубики с главного поля
+    cubes._mainEach(function (cube, field, x, y) {
+      cubes._set({ field: field, x: x, y: y }, null);
+      cube.animate({ action: "remove", duration: 4, delay: 0 });
+    });
+    setTimeout(
+      function (app) {
+        app.generateMainCubes();
+        setTimeout(
+          function (app) {
+            app.blockApp = false;
+          },
+          data.animTime * 8,
+          app
+        );
+      },
+      data.animTime,
+      this
+    );
+  }
+
+  //генерируем маску для предидущего хода
+  private generateMask() {
+    var cubes;
+    var mask;
+    var main;
+
+    mask = {};
+    cubes = this.cubes;
+
+    for (var fieldNumber in data.fields) {
+      var field = data.fields[fieldNumber];
+      mask[field] = [];
+      for (var x = 0; x < data.cubesWidth; x++) {
+        mask[field][x] = [];
+        for (var y = 0; y < data.cubesWidth; y++) {
+          var c = cubes._get({ field: field, x: x, y: y });
+
+          if (c === null) {
+            mask[field][x][y] = null;
+          } else {
+            mask[field][x][y] = {
+              color: c.color,
+              direction: c.direction,
+            };
+            //для корректной обработки порядка попадания в главное поле
+            if (field === "main") {
+              mask[field][x][y].toMine = c.toMine;
+            }
+          }
+        }
+      }
+    }
+
+    return mask;
+  }
+
+  //переводим игру на следующий уровень
+  private nextLevel() {
+    var colorsCount = data.f.level.colorsCount(this.level);
+    this.level++;
+    if (data.f.level.colorsCount(this.level) > colorsCount) {
+      this.plusColor();
+    }
+    this.generateMainCubes();
+  }
+
+  //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
+  private plusColor() {
+    var colorsCount = data.f.level.colorsCount(this.level);
+    var newColor = data.colors[colorsCount - 1];
+    this.cubes._sideEach(function (cube) {
+      if (data.f.rand(0, colorsCount - 1) === 0) {
+        cube.change({
+          color: newColor,
+        });
+      }
+    });
+  }
+
+  //возвращяем слово в необходимом переводе
+  private word(w) {
+    return data.lang[w][this.lang];
+  }
 
   //Initialize map function
-  this.initialize = function () {
+  private initialize() {
     //генерируем кубики в боковых панелях
-    cubes._sideEach(function (cube, field, x, y) {
+    cubes._sideEach((cube, field, x, y) => {
       cube = new Cube({
         x: x,
         y: y,
         field: field,
-        app: tenOnTen,
+        app: this,
       });
     });
 
     this.generateMainCubes();
-  };
+  }
+
   //генерируем кубики на главном поле
-  this.generateMainCubes = function () {
+  private generateMainCubes() {
     var firstCubesPosition = data.f.level.getPositions(this.level);
     var nullCells;
     var rand;
@@ -180,38 +275,69 @@ export function TenOnTen(args) {
         x: cell.x,
         y: cell.y,
         field: "main",
-        app: tenOnTen,
+        app: this,
         color: color,
         disapperance: "cool",
       });
     }
-  };
-  //запускаем инициализацию приложения
-  this.initialize();
-  //запускаем ход, начиная движение со startCubes
-  this.run = function (o) {
-    this.moveMap = new MoveMap();
+  }
 
-    //создаем маску для возможности возврата хода
-    this.previousStepMap = this.generateMask();
+  //проверяем в конце хода на конец уровня или конец изры
+  private checkStepEnd() {
+    /**
+     * если нет - заканчиваем ход
+     * и проверяем, это просто ход или пользователь проиграл или
+     * пользователь перешел на новый уровень
+     * записываем в this.end:
+     * null - просто ход,
+     * game_over - конец игры,
+     * next_level - конец уровня, переход на следующий
+     */
+    var cubes = this.cubes;
+    var game_over = true;
+    var next_level = true;
 
-    this.moveMap.generate({
-      startCubes: o.startCubes,
-      cubes: this.cubes,
-      app: tenOnTen,
-    });
-    //пошаговый запуск анимации
-    this.moveMap.animate();
-    //подитоживание - внесение изменений, произошедших в абстрактном moveMap
-    //в реальную коллекцию cubes
-    this.cubes._mergeMoveMap(this.moveMap);
+    for (var x = 0; x < data.cubesWidth; x++) {
+      for (var y = 0; y < data.cubesWidth; y++) {
+        var cube = cubes["main"][x][y];
 
-    this.checkStepEnd();
+        //если на поле еще остались кубики, уровень не завершен
+        if (cube !== null) {
+          next_level = false;
+        }
 
-    //console.log("//////////ITOG CUBES:", this.cubes);
-  };
+        //если все крайние панели заполнены - конец игры,
+        //если хоть один пустой - игра продолжается
+        if (
+          x === 0 ||
+          y === 0 ||
+          x === data.cubesWidth - 1 ||
+          y === data.cubesWidth - 1
+        ) {
+          if (cube === null) {
+            game_over = false;
+          }
+        }
+      }
+      if (!next_level && !game_over) {
+        break;
+      }
+    }
+
+    if (next_level) {
+      //меняем датчик на следующий уровень
+      this.end = "next_level";
+    } else if (game_over) {
+      //меняем датчик на конец игры
+      this.end = "game_over";
+    } else {
+      //иначе - ничего не делаем
+      this.end = null;
+    }
+  }
+
   //делаем возврат хода
-  this.undo = function () {
+  public undo() {
     //блокируем приложение до тех пор, пока не закончим анимацию
     this.blockApp = true;
     setTimeout(
@@ -307,7 +433,11 @@ export function TenOnTen(args) {
         case "remove":
           //удаляем нафиг кубик
           this.cubes._set(
-            { field: changed[key].field, x: changed[key].x, y: changed[key].y },
+            {
+              field: changed[key].field,
+              x: changed[key].x,
+              y: changed[key].y,
+            },
             null
           );
           cube.animate({ action: "remove", duration: 4, delay: 0 });
@@ -336,148 +466,27 @@ export function TenOnTen(args) {
         }
       }
     }
-  };
-  //даем возможность пользователю при переходе на новый уровень выбрать из случайных
-  //комбинаций начальную
-  this.refresh = function () {
-    this.blockApp = true;
-    var cubes = this.cubes;
-    //удаляем нафиг кубики с главного поля
-    cubes._mainEach(function (cube, field, x, y) {
-      cubes._set({ field: field, x: x, y: y }, null);
-      cube.animate({ action: "remove", duration: 4, delay: 0 });
+  }
+
+  private run(o) {
+    this.moveMap = new MoveMap();
+
+    //создаем маску для возможности возврата хода
+    this.previousStepMap = this.generateMask();
+
+    this.moveMap.generate({
+      startCubes: o.startCubes,
+      cubes: this.cubes,
+      app: this,
     });
-    setTimeout(
-      function (app) {
-        app.generateMainCubes();
-        setTimeout(
-          function (app) {
-            app.blockApp = false;
-          },
-          data.animTime * 8,
-          app
-        );
-      },
-      data.animTime,
-      this
-    );
-  };
-  //генерируем маску для предидущего хода
-  this.generateMask = function () {
-    var cubes;
-    var mask;
-    var main;
+    //пошаговый запуск анимации
+    this.moveMap.animate();
+    //подитоживание - внесение изменений, произошедших в абстрактном moveMap
+    //в реальную коллекцию cubes
+    this.cubes._mergeMoveMap(this.moveMap);
 
-    mask = {};
-    cubes = this.cubes;
+    this.checkStepEnd();
 
-    for (var fieldNumber in data.fields) {
-      var field = data.fields[fieldNumber];
-      mask[field] = [];
-      for (var x = 0; x < data.cubesWidth; x++) {
-        mask[field][x] = [];
-        for (var y = 0; y < data.cubesWidth; y++) {
-          var c = cubes._get({ field: field, x: x, y: y });
-
-          if (c === null) {
-            mask[field][x][y] = null;
-          } else {
-            mask[field][x][y] = {
-              color: c.color,
-              direction: c.direction,
-            };
-            //для корректной обработки порядка попадания в главное поле
-            if (field === "main") {
-              mask[field][x][y].toMine = c.toMine;
-            }
-          }
-        }
-      }
-    }
-
-    return mask;
-  };
-  //проверяем в конце хода на конец уровня или конец изры
-  this.checkStepEnd = function () {
-    /**
-     * если нет - заканчиваем ход
-     * и проверяем, это просто ход или пользователь проиграл или
-     * пользователь перешел на новый уровень
-     * записываем в this.end:
-     * null - просто ход,
-     * game_over - конец игры,
-     * next_level - конец уровня, переход на следующий
-     */
-    var cubes = this.cubes;
-    var game_over = true;
-    var next_level = true;
-
-    for (var x = 0; x < data.cubesWidth; x++) {
-      for (var y = 0; y < data.cubesWidth; y++) {
-        var cube = cubes["main"][x][y];
-
-        //если на поле еще остались кубики, уровень не завершен
-        if (cube !== null) {
-          next_level = false;
-        }
-
-        //если все крайние панели заполнены - конец игры,
-        //если хоть один пустой - игра продолжается
-        if (
-          x === 0 ||
-          y === 0 ||
-          x === data.cubesWidth - 1 ||
-          y === data.cubesWidth - 1
-        ) {
-          if (cube === null) {
-            game_over = false;
-          }
-        }
-      }
-      if (!next_level && !game_over) {
-        break;
-      }
-    }
-
-    if (next_level) {
-      //меняем датчик на следующий уровень
-      this.end = "next_level";
-    } else if (game_over) {
-      //меняем датчик на конец игры
-      this.end = "game_over";
-    } else {
-      //иначе - ничего не делаем
-      this.end = null;
-    }
-  };
-  //переводим игру на следующий уровень
-  this.nextLevel = function () {
-    var colorsCount = data.f.level.colorsCount(this.level);
-    this.level++;
-    if (data.f.level.colorsCount(this.level) > colorsCount) {
-      this.plusColor();
-    }
-    this.generateMainCubes();
-  };
-
-  //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
-  this.plusColor = function () {
-    var colorsCount = data.f.level.colorsCount(this.level);
-    var newColor = data.colors[colorsCount - 1];
-    this.cubes._sideEach(function (cube) {
-      if (data.f.rand(0, colorsCount - 1) === 0) {
-        cube.change({
-          color: newColor,
-        });
-      }
-    });
-  };
-
-  //возвращяем слово в необходимом переводе
-  this.word = function (w) {
-    return data.lang[w][tenOnTen.lang];
-  };
-
-  //добавляем кнопку "назад"
-  this.undoButton = new UndoButton({ app: tenOnTen });
+    //console.log("//////////ITOG CUBES:", this.cubes);
+  }
 }

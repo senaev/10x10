@@ -1,0 +1,33 @@
+{
+  "name": "10x10",
+  "version": "1.0.0",
+  "description": "10x10 =====",
+  "main": "index.js",
+  "scripts": {
+    "webpack:watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/senaev/10x10.git"
+  },
+  "author": "gsacryfice@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/senaev/10x10/issues"
+  },
+  "homepage": "https://github.com/senaev/10x10#readme",
+  "devDependencies": {
+    "@types/jquery": "^3.5.32",
+    "css-loader": "^7.1.2",
+    "jquery": "^3.7.1",
+    "jquery.transit": "^0.9.12",
+    "postcss-loader": "^8.1.1",
+    "serve": "^14.2.4",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1"
+  }
+}

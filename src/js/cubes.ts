@@ -1,9 +1,9 @@
 import { Cube } from "./cube";
-import { data } from "./data";
+import { data, FIELDS } from "./data";
 
 export const cubes = {};
 
-for (var key in data.fields) {
+for (var key in FIELDS) {
   cubes[data.fields[key]] = {};
   for (var x = 0; x < data.cubesWidth; x++) {
     cubes[data.fields[key]][x] = {};

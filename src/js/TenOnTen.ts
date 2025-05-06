@@ -1,18 +1,33 @@
 import $ from "jquery";
 import { Cube } from "./cube";
 import { cubes } from "./cubes";
-import { data } from "./data";
+import { data, Field } from "./data";
 import { MoveMap } from "./moveMap";
 import { UndoButton } from "./undoButton";
+
+export type Mask = Record<
+  Field,
+  (null | { color: string; direction: string; toMine?: number })[][]
+>;
 
 export class TenOnTen {
   public container: JQuery<HTMLElement>;
   public blockApp: boolean;
 
+  private moveMap: MoveMap | undefined;
+
   private cubes: typeof cubes;
   private level: number;
   private lang: keyof (typeof data.lang)[keyof typeof data.lang];
-  private mainCounter: () => number;
+
+  //счетчик для значений toMine кубиков, попадающих в главное поле
+  private mainCounter: () => number = (function () {
+    var numberOfCalls = 0;
+    return function () {
+      return ++numberOfCalls;
+    };
+  })();
+
   private end: string | null;
 
   private undoButton: UndoButton;
@@ -35,14 +50,6 @@ export class TenOnTen {
     //console.log(d.f.level.colorsCount(this.level));
     console.log("cubesCount:", data.f.level.cubesCount(this.level));
     console.log("colorsCount:", data.f.level.colorsCount(this.level));
-
-    //счетчик для значений toMine кубиков, попадающих в главное поле
-    this.mainCounter = (function () {
-      var numberOfCalls = 0;
-      return function () {
-        return ++numberOfCalls;
-      };
-    })();
 
     //датчик конца хода
     this.end = null;
@@ -113,13 +120,9 @@ export class TenOnTen {
   };
 
   //генерируем маску для предидущего хода
-  private generateMask() {
-    var cubes;
-    var mask;
-    var main;
-
-    mask = {};
-    cubes = this.cubes;
+  private generateMask(): Mask {
+    const mask: Mask = {};
+    const cubes = this.cubes;
 
     for (var fieldNumber in data.fields) {
       var field = data.fields[fieldNumber];
@@ -138,7 +141,7 @@ export class TenOnTen {
             };
             //для корректной обработки порядка попадания в главное поле
             if (field === "main") {
-              mask[field][x][y].toMine = c.toMine;
+              mask[field][x][y]!.toMine = c.toMine;
             }
           }
         }

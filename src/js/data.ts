@@ -1,10 +1,13 @@
+export const FIELDS = ["main", "top", "right", "bottom", "left"] as const;
+export type Field = (typeof FIELDS)[number];
+
 export const data = {
   //ширина доски в кубиках
   cubesWidth: 10,
   //ширина одного контейнера кубика
   oneWidth: 32,
   //список полей
-  fields: ["main", "top", "right", "bottom", "left"],
+  fields: FIELDS,
   //время одного шага анимации
   animTime: 45,
   //возможные цвета кубиков

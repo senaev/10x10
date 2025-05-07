@@ -1,4 +1,5 @@
 import "jquery.transit";
+import { initPlayGamaBridge } from "../PlayGama/initPlayGamaBridge";
 import { TenOnTen } from "./js/TenOnTen";
 
 import "./main.css";
@@ -14,3 +15,5 @@ var tenOnTen = new TenOnTen({
 });
 
 console.log("App is ready", tenOnTen);
+
+initPlayGamaBridge();

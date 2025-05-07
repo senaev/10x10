@@ -17,18 +17,18 @@ export class MainMask {
     public readonly arr: MCube[] = [];
     private moveMap: MoveMap;
 
-    constructor(o: { cubes: Cubes; startCubes: Cube[]; moveMap: MoveMap }) {
-        let cubes, startCubes;
+    constructor(params: { cubes: Cubes; startCubes: Cube[]; moveMap: MoveMap }) {
 
-        const mainMask = this;
-        cubes = o.cubes;
-        startCubes = o.startCubes;
+        const {
+            cubes, startCubes, moveMap,
+        } = params;
 
-        this.moveMap = o.moveMap;
+        this.moveMap = moveMap;
 
         //вызываем инициализацию
 
-        let startMCubeX, startMCubeY;
+        let startMCubeX;
+        let startMCubeY;
 
         //создаем массив из всех кубиков, которые есть на доске
         cubes._mainEach((cube) => {
@@ -43,8 +43,7 @@ export class MainMask {
         });
         //добавляем в маску кубик, с которого начинаем анимацию
         const startMCubes = [];
-        for (var key in startCubes) {
-            var startMCube;
+        for (const key in startCubes) {
             const startCube = startCubes[key];
 
             startCube.toMine = startCube.app.mainCounter();
@@ -65,7 +64,7 @@ export class MainMask {
                 startMCubeY = startCube.y;
             }
 
-            startMCube = new MCube({
+            const startMCube = new MCube({
                 x: startMCubeX,
                 y: startMCubeY,
                 color: startCube.color,
@@ -78,8 +77,8 @@ export class MainMask {
         }
 
         //добавим шаги анимации для выплывающих из боковой линии кубиков
-        for (const step in startMCubes) {
-            for (var key in this.arr) {
+        for (const _step in startMCubes) {
+            for (const key in this.arr) {
                 if (startMCubes.indexOf(this.arr[key]) === -1) {
                     this.arr[key].steps.push({ do: null });
                 } else {
@@ -105,9 +104,8 @@ export class MainMask {
         let somethingHappend;
 
         somethingHappend = false;
-        for (var key in this.arr) {
-            var oneStep;
-            oneStep = this.arr[key].oneStep();
+        for (const key in this.arr) {
+            const oneStep = this.arr[key].oneStep();
             if (oneStep.do !== null) {
                 somethingHappend = true;
             }
@@ -125,19 +123,19 @@ export class MainMask {
                 //если такие группы кубиков имеются, подрываем их и запускаем
                 //еще один шаг хода, при этом обновляем массив м-кубиков
                 //сюда попадут все кубики, которые будут взорваны
-                for (var key in adjacentCubes) {
+                for (const key in adjacentCubes) {
                     const group = adjacentCubes[key];
-                    //console.log(group);
-                    for (var key in this.arr) {
-                        if (group.indexOf(this.arr[key]) === -1) {
-                            this.arr[key].steps.push({ do: null });
+
+                    for (const key2 in this.arr) {
+                        if (group.indexOf(this.arr[key2]) === -1) {
+                            this.arr[key2].steps.push({ do: null });
                         } else {
                             //console.log("add boom in:",this.arr[key]);
-                            this.arr[key].steps.push({ do: 'boom' });
+                            this.arr[key2].steps.push({ do: 'boom' });
                             //взорвавшимся м-кубикам присваиваем координаты -1 -1,
                             //чтобы в дальнейшей анимации они не учавствовали
-                            this.arr[key].x = -1;
-                            this.arr[key].y = -1;
+                            this.arr[key2].x = -1;
+                            this.arr[key2].y = -1;
                         }
                     }
                 }
@@ -155,7 +153,7 @@ export class MainMask {
         const byColor: Record<string, MCube[]> = {};
 
         //создаем объект с массивами м-кубиков по цветам
-        for (var key in arr) {
+        for (const key in arr) {
             //неободимо сбрасывать каждый раз иначе может возникнуть ситтуация:
             //кубики летели, соприкоснулись, создалась группа, взорвались другие
             //кубики, один из кубиков полетел дальше, нашел кубик того же цвета
@@ -180,7 +178,7 @@ export class MainMask {
         }
         //если количество кубиков определенного цвета на доске меньшь двух,
         //исключаем эту группу кубиков из обработки
-        for (var key in byColorPrev) {
+        for (const key in byColorPrev) {
             if (byColorPrev[key].length > 2) {
                 byColor[key] = byColorPrev[key];
             }
@@ -188,7 +186,7 @@ export class MainMask {
 
         //ищем группы смежных кубиков и помещаем их в массив groups
         let groups: MCube[][] = [];
-        for (var key in byColor) {
+        for (const key in byColor) {
             groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
         }
         return groups;
@@ -196,7 +194,7 @@ export class MainMask {
 
     //функция поиска смежных в массиве по цветам
     searchAdjacentCubesByColor(arr: MCube[]): MCube[][] {
-        var group;
+        let group;
         for (let key = 0; key < arr.length - 1; key++) {
             //текущий кубик
             const current = arr[key];
@@ -208,7 +206,6 @@ export class MainMask {
                     Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) ===
           1
                 ) {
-                    var group;
                     //если текущий кубик не принадлежик групппе
                     if (current.inGroup === null) {
                         //и кубик, с которым сравниваем не принадлежит группе
@@ -218,16 +215,14 @@ export class MainMask {
                                 current,
                                 compare,
                             ];
-                        }
-                        //а если кубик, с которым сравниваем, принадлежит группе
-                        else {
+                        } else {
+                            //а если кубик, с которым сравниваем, принадлежит группе
                             //закидываем текущий кубик в группу кубика, с которым сравниваем
                             group = compare.inGroup;
                             compare.inGroup.push(current);
                         }
-                    }
-                    //если же текущий кубик принадлежит группе
-                    else {
+                    } else {
+                        //если же текущий кубик принадлежит группе
                         //а кубик, с которым савниваем принадлежит
                         if (compare.inGroup === null) {
                             //закидываем кубик, с которым сравниваем, в группу текущего
@@ -237,8 +232,8 @@ export class MainMask {
                             //иначе закидываем все кубики и группы сравниваемого в группу текущего
                             group = current.inGroup;
                             if (current.inGroup !== compare.inGroup) {
-                                for (var key2 in compare.inGroup) {
-                                    if (current.inGroup.indexOf(compare.inGroup[key]) === -1) {
+                                for (const key2 in compare.inGroup) {
+                                    if (current.inGroup.indexOf(compare.inGroup[key2]) === -1) {
                                         group.push(compare.inGroup[key2]);
                                     }
                                 }
@@ -247,7 +242,7 @@ export class MainMask {
                     }
                     //пробегаем в цикле по измененной или созданной группе
                     //и меняем значене принадлежности к группе кубиков на измененную группу
-                    for (var key2 in group) {
+                    for (const key2 in group) {
                         group[key2].inGroup = group;
                     }
                 }
@@ -258,10 +253,10 @@ export class MainMask {
         //существующие неповторяющиеся группы
         const groups: MCube[][] = [];
         for (const key in arr) {
-            const group = arr[key].inGroup;
+            const groupLocal = arr[key].inGroup;
             //добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
-            if (group !== null && group.length > 2 && groups.indexOf(group) === -1) {
-                groups.push(group);
+            if (groupLocal !== null && groupLocal.length > 2 && groups.indexOf(groupLocal) === -1) {
+                groups.push(groupLocal);
             }
         }
 

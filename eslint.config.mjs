@@ -27,6 +27,10 @@ export default [
         ],
 
         rules: {
+            'one-var': [
+                'error',
+                'never',
+            ],
             'import-x/no-unresolved': 'off',
             'import-x/named': 'off',
             'import-x/no-named-as-default': 'off',
@@ -324,6 +328,9 @@ export default [
 ].map((config) => {
     return {
         ...config,
-        ignores: ['dist/**/*'],
+        ignores: [
+            'dist/**/*',
+            'public/libs/**/*',
+        ],
     };
 });

@@ -1,50 +1,50 @@
 (()=>{
     var e = {
-            258: (e)=>{
-                !function(t){
-                    e.exports = t; var r = 'listeners', n = {
-                        on(e, t){
-                            return a(this, e).push(t), this;
-                        },
-                        once(e, t){
-                            var r = this; return n.originalListener = t, a(r, e).push(n), r; function n(){
-                                i.call(r, e, n), t.apply(this, arguments);
-                            }
-                        },
-                        off: i,
-                        emit(e, t){
-                            var r = this, n = a(r, e, !0); if (!n) return !1; var o = arguments.length; if (1 === o)n.forEach((function(e){
-                                e.call(r);
-                            })); else if (2 === o)n.forEach((function(e){
-                                e.call(r, t);
-                            })); else {
-                                var i = Array.prototype.slice.call(arguments, 1); n.forEach((function(e){
-                                    e.apply(r, i);
-                                }));
-                            } return !!n.length;
-                        },
-                    }; function o(e){
-                        for (var t in n)e[t] = n[t]; return e;
-                    } function i(e, t){
-                        var n, o = this; if (arguments.length){
-                            if (t){
-                                if (n = a(o, e, !0)){
-                                    if (!(n = n.filter((function(e){
-                                        return e !== t && e.originalListener !== t;
-                                    }))).length) return i.call(o, e); o[r][e] = n;
-                                }
-                            } else if ((n = o[r]) && (delete n[e], !Object.keys(n).length)) return i.call(o);
-                        } else delete o[r]; return o;
-                    } function a(e, t, n){
-                        if (!n || e[r]){
-                            var o = e[r] || (e[r] = {}); return o[t] || (o[t] = []);
+        258: (e)=>{
+            !function(t){
+                e.exports = t; var r = 'listeners'; var n = {
+                    on(e, t){
+                        return a(this, e).push(t), this;
+                    },
+                    once(e, t){
+                        var r = this; return n.originalListener = t, a(r, e).push(n), r; function n(){
+                            i.call(r, e, n), t.apply(this, arguments);
                         }
-                    }o(t.prototype), t.mixin = o;
-                }((function e(){
-                    if (!(this instanceof e)) return new e;
-                }));
-            },
-        }, t = {}; function r(n){
+                    },
+                    off: i,
+                    emit(e, t){
+                        var r = this; var n = a(r, e, !0); if (!n) return !1; var o = arguments.length; if (1 === o)n.forEach((function(e){
+                            e.call(r);
+                        })); else if (2 === o)n.forEach((function(e){
+                            e.call(r, t);
+                        })); else {
+                            var i = Array.prototype.slice.call(arguments, 1); n.forEach((function(e){
+                                e.apply(r, i);
+                            }));
+                        } return !!n.length;
+                    },
+                }; function o(e){
+                    for (var t in n)e[t] = n[t]; return e;
+                } function i(e, t){
+                    var n; var o = this; if (arguments.length){
+                        if (t){
+                            if (n = a(o, e, !0)){
+                                if (!(n = n.filter((function(e){
+                                    return e !== t && e.originalListener !== t;
+                                }))).length) return i.call(o, e); o[r][e] = n;
+                            }
+                        } else if ((n = o[r]) && (delete n[e], !Object.keys(n).length)) return i.call(o);
+                    } else delete o[r]; return o;
+                } function a(e, t, n){
+                    if (!n || e[r]){
+                        var o = e[r] || (e[r] = {}); return o[t] || (o[t] = []);
+                    }
+                }o(t.prototype), t.mixin = o;
+            }((function e(){
+                if (!(this instanceof e)) return new e;
+            }));
+        },
+    }; var t = {}; function r(n){
         var o = t[n]; if (void 0 !== o) return o.exports; var i = t[n] = { exports: {} }; return e[n](i, i.exports, r), i.exports;
     }r.n = (e)=>{
         var t = e && e.__esModule ? ()=>e.default : ()=>e; return r.d(t, { a: t }), t;
@@ -55,99 +55,99 @@
         });
     }, r.o = (e, t)=>Object.prototype.hasOwnProperty.call(e, t), (()=>{
         'use strict'; var e = {
-                VK: 'vk',
-                OK: 'ok',
-                YANDEX: 'yandex',
-                CRAZY_GAMES: 'crazy_games',
-                ABSOLUTE_GAMES: 'absolute_games',
-                GAME_DISTRIBUTION: 'game_distribution',
-                PLAYGAMA: 'playgama',
-                WORTAL: 'wortal',
-                PLAYDECK: 'playdeck',
-                TELEGRAM: 'telegram',
-                Y8: 'y8',
-                LAGGED: 'lagged',
-                FACEBOOK: 'facebook',
-                POKI: 'poki',
-                MOCK: 'mock',
-                QA_TOOL: 'qa_tool',
-                MSN: 'msn',
-            }, t = {
-                PLATFORM: 'platform',
-                PLAYER: 'player',
-                GAME: 'game',
-                STORAGE: 'storage',
-                ADVERTISEMENT: 'advertisement',
-                SOCIAL: 'social',
-                DEVICE: 'device',
-                LEADERBOARD: 'leaderboard',
-                PAYMENTS: 'payments',
-                REMOTE_CONFIG: 'remote_config',
-                CLIPBOARD: 'clipboard',
-                ACHIEVEMENTS: 'achievements',
-            }, n = {
-                INTERSTITIAL_STATE_CHANGED: 'interstitial_state_changed',
-                REWARDED_STATE_CHANGED: 'rewarded_state_changed',
-                BANNER_STATE_CHANGED: 'banner_state_changed',
-                VISIBILITY_STATE_CHANGED: 'visibility_state_changed',
-            }, o = {
-                VISIBLE: 'visible',
-                HIDDEN: 'hidden',
-            }, i = {
-                LOADING: 'loading',
-                OPENED: 'opened',
-                CLOSED: 'closed',
-                FAILED: 'failed',
-            }, a = {
-                LOADING: 'loading',
-                OPENED: 'opened',
-                CLOSED: 'closed',
-                FAILED: 'failed',
-                REWARDED: 'rewarded',
-            }, s = {
-                LOADING: 'loading',
-                SHOWN: 'shown',
-                HIDDEN: 'hidden',
-                FAILED: 'failed',
-            }, u = {
-                LOCAL_STORAGE: 'local_storage',
-                PLATFORM_INTERNAL: 'platform_internal',
-            }, c = {
-                DESKTOP: 'desktop',
-                MOBILE: 'mobile',
-                TABLET: 'tablet',
-                TV: 'tv',
-            }, l = {
-                GAME_READY: 'game_ready',
-                IN_GAME_LOADING_STARTED: 'in_game_loading_started',
-                IN_GAME_LOADING_STOPPED: 'in_game_loading_stopped',
-                GAMEPLAY_STARTED: 'gameplay_started',
-                GAMEPLAY_STOPPED: 'gameplay_stopped',
-                PLAYER_GOT_ACHIEVEMENT: 'player_got_achievement',
-                GAME_OVER: 'game_over',
-            }, f = {
-                INITIALIZE: 'initialize',
-                AUTHORIZE_PLAYER: 'authorize_player',
-                SHARE: 'share',
-                INVITE_FRIENDS: 'invite_friends',
-                JOIN_COMMUNITY: 'join_community',
-                CREATE_POST: 'create_post',
-                ADD_TO_HOME_SCREEN: 'add_to_home_screen',
-                ADD_TO_FAVORITES: 'add_to_favorites',
-                RATE: 'rate',
-                SET_LEADERBOARD_SCORE: 'set_leaderboard_score',
-                GET_LEADERBOARD_SCORE: 'get_leaderboard_score',
-                GET_LEADERBOARD_ENTRIES: 'get_leaderboard_entries',
-                GET_PURCHASES: 'get_purchases',
-                GET_CATALOG: 'get_catalog',
-                PURCHASE: 'purchase',
-                CONSUME_PURCHASE: 'consume_purchase',
-                GET_REMOTE_CONFIG: 'get_remote_config',
-                GET_STORAGE_DATA: 'get_storage_data',
-                SHOW_LEADERBOARD_NATIVE_POPUP: 'show_leaderboard_native_popup',
-                CLIPBOARD_WRITE: 'clipboard_write',
-                ADBLOCK_DETECT: 'adblock_detect',
-            }, p = { message: 'Before using the SDK you must initialize it' }, d = { message: 'Storage not supported' }, y = { message: 'Storage not available' }, h = { message: 'GameDistribution Game ID is undefined' }, m = { message: 'Y8 Game params are not found' }, v = { message: 'OK Game params are not found' }, _ = { message: 'Lagged Game params are not found' }, g = { message: 'Message is too long' }; function S(e){
+            VK: 'vk',
+            OK: 'ok',
+            YANDEX: 'yandex',
+            CRAZY_GAMES: 'crazy_games',
+            ABSOLUTE_GAMES: 'absolute_games',
+            GAME_DISTRIBUTION: 'game_distribution',
+            PLAYGAMA: 'playgama',
+            WORTAL: 'wortal',
+            PLAYDECK: 'playdeck',
+            TELEGRAM: 'telegram',
+            Y8: 'y8',
+            LAGGED: 'lagged',
+            FACEBOOK: 'facebook',
+            POKI: 'poki',
+            MOCK: 'mock',
+            QA_TOOL: 'qa_tool',
+            MSN: 'msn',
+        }; var t = {
+            PLATFORM: 'platform',
+            PLAYER: 'player',
+            GAME: 'game',
+            STORAGE: 'storage',
+            ADVERTISEMENT: 'advertisement',
+            SOCIAL: 'social',
+            DEVICE: 'device',
+            LEADERBOARD: 'leaderboard',
+            PAYMENTS: 'payments',
+            REMOTE_CONFIG: 'remote_config',
+            CLIPBOARD: 'clipboard',
+            ACHIEVEMENTS: 'achievements',
+        }; var n = {
+            INTERSTITIAL_STATE_CHANGED: 'interstitial_state_changed',
+            REWARDED_STATE_CHANGED: 'rewarded_state_changed',
+            BANNER_STATE_CHANGED: 'banner_state_changed',
+            VISIBILITY_STATE_CHANGED: 'visibility_state_changed',
+        }; var o = {
+            VISIBLE: 'visible',
+            HIDDEN: 'hidden',
+        }; var i = {
+            LOADING: 'loading',
+            OPENED: 'opened',
+            CLOSED: 'closed',
+            FAILED: 'failed',
+        }; var a = {
+            LOADING: 'loading',
+            OPENED: 'opened',
+            CLOSED: 'closed',
+            FAILED: 'failed',
+            REWARDED: 'rewarded',
+        }; var s = {
+            LOADING: 'loading',
+            SHOWN: 'shown',
+            HIDDEN: 'hidden',
+            FAILED: 'failed',
+        }; var u = {
+            LOCAL_STORAGE: 'local_storage',
+            PLATFORM_INTERNAL: 'platform_internal',
+        }; var c = {
+            DESKTOP: 'desktop',
+            MOBILE: 'mobile',
+            TABLET: 'tablet',
+            TV: 'tv',
+        }; var l = {
+            GAME_READY: 'game_ready',
+            IN_GAME_LOADING_STARTED: 'in_game_loading_started',
+            IN_GAME_LOADING_STOPPED: 'in_game_loading_stopped',
+            GAMEPLAY_STARTED: 'gameplay_started',
+            GAMEPLAY_STOPPED: 'gameplay_stopped',
+            PLAYER_GOT_ACHIEVEMENT: 'player_got_achievement',
+            GAME_OVER: 'game_over',
+        }; var f = {
+            INITIALIZE: 'initialize',
+            AUTHORIZE_PLAYER: 'authorize_player',
+            SHARE: 'share',
+            INVITE_FRIENDS: 'invite_friends',
+            JOIN_COMMUNITY: 'join_community',
+            CREATE_POST: 'create_post',
+            ADD_TO_HOME_SCREEN: 'add_to_home_screen',
+            ADD_TO_FAVORITES: 'add_to_favorites',
+            RATE: 'rate',
+            SET_LEADERBOARD_SCORE: 'set_leaderboard_score',
+            GET_LEADERBOARD_SCORE: 'get_leaderboard_score',
+            GET_LEADERBOARD_ENTRIES: 'get_leaderboard_entries',
+            GET_PURCHASES: 'get_purchases',
+            GET_CATALOG: 'get_catalog',
+            PURCHASE: 'purchase',
+            CONSUME_PURCHASE: 'consume_purchase',
+            GET_REMOTE_CONFIG: 'get_remote_config',
+            GET_STORAGE_DATA: 'get_storage_data',
+            SHOW_LEADERBOARD_NATIVE_POPUP: 'show_leaderboard_native_popup',
+            CLIPBOARD_WRITE: 'clipboard_write',
+            ADBLOCK_DETECT: 'adblock_detect',
+        }; var p = { message: 'Before using the SDK you must initialize it' }; var d = { message: 'Storage not supported' }; var y = { message: 'Storage not available' }; var h = { message: 'GameDistribution Game ID is undefined' }; var m = { message: 'Y8 Game params are not found' }; var v = { message: 'OK Game params are not found' }; var _ = { message: 'Lagged Game params are not found' }; var g = { message: 'Message is too long' }; function S(e){
             return S = 'function' == typeof Symbol && 'symbol' == typeof Symbol.iterator
                 ? function(e){
                     return typeof e;
@@ -181,7 +181,7 @@
             }(e, O(e, t, 'get'));
         } function O(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var D = new WeakMap, k = new WeakMap, I = new WeakMap; const R = function(){
+        } var D = new WeakMap; var k = new WeakMap; var I = new WeakMap; const R = function(){
             function e(){
                 var t = this; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
@@ -197,7 +197,7 @@
                 }), A(this, D, new Promise((function(e, r){
                     A(t, k, e), A(t, I, r);
                 })));
-            } var t, r; return t = e, (r = [
+            } var t; var r; return t = e, (r = [
                 {
                     key: 'promise',
                     get(){
@@ -237,7 +237,7 @@
             }(e); return 'symbol' == T(t) ? t : String(t);
         } const N = function(){
             function e(t){
-                var r, n, o; !function(e, t){
+                var r; var n; var o; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, e), r = this, o = void 0, (n = j(n = '_platformBridge')) in r
                     ? Object.defineProperty(r, n, {
@@ -247,7 +247,7 @@
                         writable: !0,
                     })
                     : r[n] = o, this._platformBridge = t;
-            } var t, r; return t = e, (r = [
+            } var t; var r; return t = e, (r = [
                 {
                     key: 'initialize',
                     value(){
@@ -298,20 +298,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && M(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = H(n); if (o){
+                var e; var t = H(n); if (o){
                     var r = H(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === C(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return F(e);
                 }(this, e);
             }); function a(){
-                var e, t, r, n; !function(e, t){
+                var e; var t; var r; var n; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, a); for (var o = arguments.length, s = new Array(o), u = 0; u < o; u++)s[u] = arguments[u]; return t = F(e = i.call.apply(i, [this].concat(s))), n = {
                     writable: !0,
@@ -438,14 +438,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Z(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = K(n); if (o){
+                var e; var t = K(n); if (o){
                     var r = K(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === W(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -496,7 +496,7 @@
                     },
                 },
             ]) && V(t.prototype, r), Object.defineProperty(t, 'prototype', { writable: !1 }), a;
-        }(N); var q = r(258), X = r.n(q); function Q(e){
+        }(N); var q = r(258); var X = r.n(q); function Q(e){
             return Q = 'function' == typeof Symbol && 'symbol' == typeof Symbol.iterator
                 ? function(e){
                     return typeof e;
@@ -535,14 +535,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && te(e, t);
-            }(s, e); var t, r, o, i, a = (o = s, i = function(){
+            }(s, e); var t; var r; var o; var i; var a = (o = s, i = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = re(o); if (i){
+                var e; var t = re(o); if (i){
                     var r = re(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Q(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -602,14 +602,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ue(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = ce(n); if (o){
+                var e; var t = ce(n); if (o){
                     var r = ce(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === ie(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -706,7 +706,7 @@
             }(e, Se(e, t, 'get'));
         } function Se(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var be = 'created', Pe = 'completed', Ee = new WeakMap, Ae = new WeakMap, we = new WeakMap, Oe = new WeakMap, De = new WeakSet, ke = new WeakSet, Ie = function(){
+        } var be = 'created'; var Pe = 'completed'; var Ee = new WeakMap; var Ae = new WeakMap; var we = new WeakMap; var Oe = new WeakMap; var De = new WeakSet; var ke = new WeakSet; var Ie = function(){
             function e(t){
                 !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
@@ -723,7 +723,7 @@
                     writable: !0,
                     value: 0,
                 }), _e(this, Ee, t);
-            } var t, r; return t = e, (r = [
+            } var t; var r; return t = e, (r = [
                 {
                     key: 'state',
                     get(){
@@ -801,7 +801,7 @@
             }(e, Ve(e, t, 'get'));
         } function Ve(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var Ye = new WeakMap, Ze = new WeakMap, Ke = new WeakSet, Je = new WeakSet, qe = function(e){
+        } var Ye = new WeakMap; var Ze = new WeakMap; var Ke = new WeakSet; var Je = new WeakSet; var qe = function(e){
             !function(e, t){
                 if ('function' != typeof t && null !== t) throw new TypeError('Super expression must either be null or a function'); e.prototype = Object.create(t && t.prototype, {
                     constructor: {
@@ -810,14 +810,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Be(e, t);
-            }(l, e); var t, r, o, u, c = (o = l, u = function(){
+            }(l, e); var t; var r; var o; var u; var c = (o = l, u = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Me(o); if (u){
+                var e; var t = Me(o); if (u){
                     var r = Me(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === je(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Ge(e);
@@ -874,7 +874,7 @@
                     value(e){
                         if (e){
                             var t = e[this._platformBridge.platformId]; if (void 0 !== t) return void this.setMinimumDelayBetweenInterstitial(t);
-                        } var r = je(e), n = We(this, Ze); switch (r){
+                        } var r = je(e); var n = We(this, Ze); switch (r){
                         case 'number':n = e; break; case 'string':if (n = parseInt(e, 10), Number.isNaN(n)) return; break; default:return;
                         }ze(this, Ze, n), We(this, Ye) && (We(this, Ye).stop(), xe(this, Ke, Xe).call(this));
                     },
@@ -967,14 +967,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && nt(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = ot(n); if (o){
+                var e; var t = ot(n); if (o){
                     var r = ot(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === et(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1124,14 +1124,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ct(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = lt(n); if (o){
+                var e; var t = lt(n); if (o){
                     var r = lt(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === at(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1189,14 +1189,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ht(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = mt(n); if (o){
+                var e; var t = mt(n); if (o){
                     var r = mt(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === pt(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1316,14 +1316,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && bt(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Pt(n); if (o){
+                var e; var t = Pt(n); if (o){
                     var r = Pt(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === _t(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1405,14 +1405,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Dt(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = kt(n); if (o){
+                var e; var t = kt(n); if (o){
                     var r = kt(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === At(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1478,14 +1478,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && jt(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Nt(n); if (o){
+                var e; var t = Nt(n); if (o){
                     var r = Nt(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Rt(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1555,14 +1555,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Ft(e, t);
-            }(a, e); var t, r, n, o, i = (n = a, o = function(){
+            }(a, e); var t; var r; var n; var o; var i = (n = a, o = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Ht(n); if (o){
+                var e; var t = Ht(n); if (o){
                     var r = Ht(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Bt(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -1668,9 +1668,9 @@
             }(e, t); return function(e, t){
                 return t.get ? t.get.call(e) : t.value;
             }(e, r);
-        } var Jt = new WeakMap, qt = function(){
+        } var Jt = new WeakMap; var qt = function(){
             function t(e){
-                var r, n, i, a = this; !function(e, t){
+                var r; var n; var i; var a = this; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, t), Yt(this, '_isInitialized', !1), Yt(this, '_platformSdk', null), Yt(this, '_isPlayerAuthorized', !1), Yt(this, '_playerId', null), Yt(this, '_playerName', null), Yt(this, '_playerPhotos', []), Yt(this, '_visibilityState', null), Yt(this, '_localStorage', null), Yt(this, '_defaultStorageType', u.LOCAL_STORAGE), Yt(this, '_platformStorageCachedData', null), Yt(this, '_isBannerSupported', !1), Yt(this, '_interstitialState', null), Yt(this, '_rewardedState', null), Yt(this, '_bannerState', null), Yt(this, '_paymentsPurchases', []), i = {
                     writable: !0,
@@ -1686,7 +1686,7 @@
                 })), window.addEventListener('focus', (function(){
                     a._setVisibilityState(o.VISIBLE);
                 })), e && (this._options = Wt({}, e));
-            } var r, l; return r = t, (l = [
+            } var r; var l; return r = t, (l = [
                 {
                     key: 'platformId',
                     get(){
@@ -2054,7 +2054,7 @@
                                 t.redirected
                                     ? r(t.redirected)
                                     : window.setTimeout((function(){
-                                        var t, n = 0 === e.offsetHeight || 'none' === (null === (t = window.getComputedStyle(e)) || void 0 === t ? void 0 : t.display); r(n), e.remove();
+                                        var t; var n = 0 === e.offsetHeight || 'none' === (null === (t = window.getComputedStyle(e)) || void 0 === t ? void 0 : t.display); r(n), e.remove();
                                     }), 100);
                             })).catch((function(){
                                 r(!0);
@@ -2288,24 +2288,24 @@
                 },
             ]) && Vt(r.prototype, l), Object.defineProperty(r, 'prototype', { writable: !1 }), t;
         }(); X().mixin(qt.prototype); const Xt = qt; var Qt = function(e){
-                return new Promise((function(t){
-                    var r = document.createElement('script'); r.src = e, r.addEventListener('load', t), document.head.appendChild(r);
+            return new Promise((function(t){
+                var r = document.createElement('script'); r.src = e, r.addEventListener('load', t), document.head.appendChild(r);
+            }));
+        }; var $t = function(){
+            for (var e = arguments.length, t = new Array(e), r = 0; r < e; r++)t[r] = arguments[r]; return t.length <= 0
+                ? Promise.resolve()
+                : new Promise((function(e){
+                    var r = setInterval((function(){
+                        for (var n = window, o = 0; o < t.length; o++){
+                            var i = n[t[o]]; if (!i) return; n = i;
+                        }e(), clearInterval(r);
+                    }), 100);
                 }));
-            }, $t = function(){
-                for (var e = arguments.length, t = new Array(e), r = 0; r < e; r++)t[r] = arguments[r]; return t.length <= 0
-                    ? Promise.resolve()
-                    : new Promise((function(e){
-                        var r = setInterval((function(){
-                            for (var n = window, o = 0; o < t.length; o++){
-                                var i = n[t[o]]; if (!i) return; n = i;
-                            }e(), clearInterval(r);
-                        }), 100);
-                    }));
-            }, er = function(e){
-                return /^data:image\/(png|jpeg|jpg|gif|bmp|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/.test(e);
-            }, tr = function(e, t){
-                return void 0 === e[t] ? null : e[t];
-            }; function rr(e, t){
+        }; var er = function(e){
+            return /^data:image\/(png|jpeg|jpg|gif|bmp|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/.test(e);
+        }; var tr = function(e, t){
+            return void 0 === e[t] ? null : e[t];
+        }; function rr(e, t){
             var r = arguments.length > 2 && void 0 !== arguments[2] && arguments[2]; return Array.isArray(e)
                 ? e.reduce((function(e, n, o){
                     if (e[o] = tr(t, n), r) try {
@@ -2367,8 +2367,8 @@
             }(e, dr(e, t, 'get'));
         } function dr(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var yr = new WeakMap, hr = new WeakSet; function mr(e, t){
-            var r = this, n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, o = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 'result', i = this._getPromiseDecorator(e); return i || (i = this._createPromiseDecorator(e), this._platformSdk.send(t, n).then((function(t){
+        } var yr = new WeakMap; var hr = new WeakSet; function mr(e, t){
+            var r = this; var n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}; var o = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 'result'; var i = this._getPromiseDecorator(e); return i || (i = this._createPromiseDecorator(e), this._platformSdk.send(t, n).then((function(t){
                 t[o] ? r._resolvePromiseDecorator(e) : r._rejectPromiseDecorator(e);
             })).catch((function(t){
                 r._rejectPromiseDecorator(e, t);
@@ -2382,20 +2382,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && sr(e, t);
-            }(d, t); var r, n, o, l, p = (o = d, l = function(){
+            }(d, t); var r; var n; var o; var l; var p = (o = d, l = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = cr(o); if (l){
+                var e; var t = cr(o); if (l){
                     var r = cr(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === nr(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return ur(e);
                 }(this, e);
             }); function d(){
-                var e, t, r; !function(e, t){
+                var e; var t; var r; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, d); for (var n = arguments.length, o = new Array(n), i = 0; i < n; i++)o[i] = arguments[i]; return lr(t = ur(e = p.call.apply(p, [this].concat(o))), r = hr), r.add(t), function(e, t, r){
                     lr(e, t), t.set(e, {
@@ -2414,7 +2414,7 @@
                     key: 'platformLanguage',
                     get(){
                         var e = new URL(window.location.href); if (e.searchParams.has('language')){
-                            var t = e.searchParams.get('language'), r = 0; try {
+                            var t = e.searchParams.get('language'); var r = 0; try {
                                 r = parseInt(t, 10);
                             } catch (e){
                                 r = 0;
@@ -2495,7 +2495,7 @@
                 {
                     key: 'initialize',
                     value(){
-                        var e = this; if (this._isInitialized) return Promise.resolve(); var t, r, n, o = this._getPromiseDecorator(f.INITIALIZE); if (!o){
+                        var e = this; if (this._isInitialized) return Promise.resolve(); var t; var r; var n; var o = this._getPromiseDecorator(f.INITIALIZE); if (!o){
                             o = this._createPromiseDecorator(f.INITIALIZE); var i = new URL(window.location.href); i.searchParams.has('platform') && (t = this, r = yr, n = i.searchParams.get('platform'), function(e, t, r){
                                 if (t.set)t.set.call(e, r); else {
                                     if (!t.writable) throw new TypeError('attempted to set read only private field'); t.value = r;
@@ -2597,7 +2597,7 @@
                 {
                     key: 'showBanner',
                     value(e){
-                        var t = this, r = 'bottom', n = 'resize', o = !1; e && ('string' == typeof e.position && (r = e.position), 'string' == typeof e.layoutType && (n = e.layoutType), 'boolean' == typeof e.canClose && (o = e.canClose)), this._platformSdk.send('VKWebAppShowBannerAd', {
+                        var t = this; var r = 'bottom'; var n = 'resize'; var o = !1; e && ('string' == typeof e.position && (r = e.position), 'string' == typeof e.layoutType && (n = e.layoutType), 'boolean' == typeof e.canClose && (o = e.canClose)), this._platformSdk.send('VKWebAppShowBannerAd', {
                             banner_location: r,
                             layout_type: n,
                             can_close: o,
@@ -2715,7 +2715,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? gr(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = Pr(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = Pr(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -2782,10 +2782,10 @@
             }(e, Lr(e, t, 'get'));
         } function Lr(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var jr = new WeakMap, Nr = new WeakMap, Cr = new WeakMap, Br = new WeakMap, Gr = new WeakSet; function Mr(e){
+        } var jr = new WeakMap; var Nr = new WeakMap; var Cr = new WeakMap; var Br = new WeakMap; var Gr = new WeakSet; function Mr(e){
             var t = this; return new Promise((function(r){
                 var n = { scopes: !1 }; e && 'boolean' == typeof e.scopes && (n.scopes = e.scopes), t._platformSdk.getPlayer(n).then((function(e){
-                    t._playerId = e.getUniqueID(), t._isPlayerAuthorized = 'lite' !== e.getMode(), t._defaultStorageType = t._isPlayerAuthorized ? u.PLATFORM_INTERNAL : u.LOCAL_STORAGE; var r = e.getName(); '' !== r && (t._playerName = r), t._playerPhotos = []; var n = e.getPhoto('small'), o = e.getPhoto('medium'), i = e.getPhoto('large'); return n && t._playerPhotos.push(n), o && t._playerPhotos.push(o), i && t._playerPhotos.push(i), Ir(t, Nr, e), e.getData();
+                    t._playerId = e.getUniqueID(), t._isPlayerAuthorized = 'lite' !== e.getMode(), t._defaultStorageType = t._isPlayerAuthorized ? u.PLATFORM_INTERNAL : u.LOCAL_STORAGE; var r = e.getName(); '' !== r && (t._playerName = r), t._playerPhotos = []; var n = e.getPhoto('small'); var o = e.getPhoto('medium'); var i = e.getPhoto('large'); return n && t._playerPhotos.push(n), o && t._playerPhotos.push(o), i && t._playerPhotos.push(i), Ir(t, Nr, e), e.getData();
                 })).then((function(e){
                     t._platformStorageCachedData = e;
                 })).finally((function(){
@@ -2801,20 +2801,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Ar(e, t);
-            }(y, t); var r, n, o, p, d = (o = y, p = function(){
+            }(y, t); var r; var n; var o; var p; var d = (o = y, p = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Or(o); if (p){
+                var e; var t = Or(o); if (p){
                     var r = Or(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === _r(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return wr(e);
                 }(this, e);
             }); function y(){
-                var e, t, r; !function(e, t){
+                var e; var t; var r; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, y); for (var n = arguments.length, o = new Array(n), i = 0; i < n; i++)o[i] = arguments[i]; return kr(t = wr(e = d.call.apply(d, [this].concat(o))), r = Gr), r.add(t), Dr(wr(e), jr, {
                     writable: !0,
@@ -2940,25 +2940,25 @@
                         var e = this; if (this._isInitialized) return Promise.resolve(); var t = this._getPromiseDecorator(f.INITIALIZE); return t || (t = this._createPromiseDecorator(f.INITIALIZE), Qt('/sdk.js').then((function(){
                             $t('YaGames', 'init').then((function(){
                                 window.YaGames.init().then((function(t){
-                                    var r; e._platformSdk = t; var n = Rr(e, Gr, Mr).call(e), o = null === (r = e._platformSdk.features.PluginEngineDataReporterAPI) || void 0 === r
-                                            ? void 0
-                                            : r.report({
-                                                engineName: '',
-                                                engineVersion: '',
-                                                pluginName: 'playgama-bridge',
-                                                pluginVersion: '1.21.0',
-                                            }), i = e._platformSdk.shortcut.canShowPrompt().then((function(t){
-                                            Ir(e, jr, t.canShow);
-                                        })), a = new Promise((function(e){
-                                            setTimeout(e, 1e3);
-                                        })), u = Promise.race([
-                                            i,
-                                            a,
-                                        ]), c = e._platformSdk.getLeaderboards().then((function(t){
-                                            Ir(e, Cr, t);
-                                        })), l = e._platformSdk.getPayments().then((function(t){
-                                            Ir(e, Br, t);
-                                        })); e._isBannerSupported = !0; var p = e._platformSdk.adv.getBannerAdvStatus().then((function(t){
+                                    var r; e._platformSdk = t; var n = Rr(e, Gr, Mr).call(e); var o = null === (r = e._platformSdk.features.PluginEngineDataReporterAPI) || void 0 === r
+                                        ? void 0
+                                        : r.report({
+                                            engineName: '',
+                                            engineVersion: '',
+                                            pluginName: 'playgama-bridge',
+                                            pluginVersion: '1.21.0',
+                                        }); var i = e._platformSdk.shortcut.canShowPrompt().then((function(t){
+                                        Ir(e, jr, t.canShow);
+                                    })); var a = new Promise((function(e){
+                                        setTimeout(e, 1e3);
+                                    })); var u = Promise.race([
+                                        i,
+                                        a,
+                                    ]); var c = e._platformSdk.getLeaderboards().then((function(t){
+                                        Ir(e, Cr, t);
+                                    })); var l = e._platformSdk.getPayments().then((function(t){
+                                        Ir(e, Br, t);
+                                    })); e._isBannerSupported = !0; var p = e._platformSdk.adv.getBannerAdvStatus().then((function(t){
                                         t.stickyAdvIsShowing && e._setBannerState(s.SHOWN);
                                     })); Promise.all([
                                         n,
@@ -3007,7 +3007,7 @@
                         var t = this; return null != e && e.gameId
                             ? new Promise((function(r, n){
                                 t._platformSdk.features.GamesAPI.getGameByID(null == e ? void 0 : e.gameId).then((function(e){
-                                    var t = e.game, n = e.isAvailable; r(Sr(Sr({}, t), {}, { isAvailable: n }));
+                                    var t = e.game; var n = e.isAvailable; r(Sr(Sr({}, t), {}, { isAvailable: n }));
                                 })).catch(n);
                             }))
                             : Promise.reject(new Error('Provide gameId'));
@@ -3016,7 +3016,7 @@
                 {
                     key: 'authorizePlayer',
                     value(e){
-                        var t = this, r = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); return r || (r = this._createPromiseDecorator(f.AUTHORIZE_PLAYER), this._isPlayerAuthorized
+                        var t = this; var r = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); return r || (r = this._createPromiseDecorator(f.AUTHORIZE_PLAYER), this._isPlayerAuthorized
                             ? Rr(this, Gr, Mr).call(this, e).then((function(){
                                 t._resolvePromiseDecorator(f.AUTHORIZE_PLAYER);
                             }))
@@ -3167,7 +3167,7 @@
                 {
                     key: 'rate',
                     value(){
-                        var e = this, t = this._getPromiseDecorator(f.RATE); return t || (t = this._createPromiseDecorator(f.RATE), this._platformSdk.feedback.canReview().then((function(t){
+                        var e = this; var t = this._getPromiseDecorator(f.RATE); return t || (t = this._createPromiseDecorator(f.RATE), this._platformSdk.feedback.canReview().then((function(t){
                             t.value
                                 ? e._platformSdk.feedback.requestReview().then((function(t){
                                     t.feedbackSent ? e._resolvePromiseDecorator(f.RATE) : e._rejectPromiseDecorator(f.RATE);
@@ -3223,7 +3223,7 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var t = this, r = this._paymentsGetProductPlatformData(e); if (!Tr(this, Br) || !r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), Tr(this, Br).purchase(r).then((function(r){
+                        var t = this; var r = this._paymentsGetProductPlatformData(e); if (!Tr(this, Br) || !r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), Tr(this, Br).purchase(r).then((function(r){
                             var n = Sr({ commonId: e }, r.purchaseData); t._paymentsPurchases.push(n), t._resolvePromiseDecorator(f.PURCHASE, n);
                         })).catch((function(e){
                             t._rejectPromiseDecorator(f.PURCHASE, e);
@@ -3245,9 +3245,9 @@
                 {
                     key: 'paymentsGetCatalog',
                     value(){
-                        var e = this; if (!Tr(this, Br)) return Promise.reject(); var t = this._paymentsGetProductsPlatformData(), r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), Tr(this, Br).getCatalog().then((function(r){
+                        var e = this; if (!Tr(this, Br)) return Promise.reject(); var t = this._paymentsGetProductsPlatformData(); var r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), Tr(this, Br).getCatalog().then((function(r){
                             var n = t.map((function(e){
-                                var t, n = r.find((function(t){
+                                var t; var n = r.find((function(t){
                                     return t.id === e.id;
                                 })); return {
                                     commonId: e.commonId,
@@ -3295,7 +3295,7 @@
                 {
                     key: 'clipboardWrite',
                     value(e){
-                        var t = this, r = this._getPromiseDecorator(f.CLIPBOARD_WRITE); return r || (r = this._createPromiseDecorator(f.CLIPBOARD_WRITE), this._platformSdk.clipboard.writeText(e).then((function(){
+                        var t = this; var r = this._getPromiseDecorator(f.CLIPBOARD_WRITE); return r || (r = this._createPromiseDecorator(f.CLIPBOARD_WRITE), this._platformSdk.clipboard.writeText(e).then((function(){
                             t._resolvePromiseDecorator(f.CLIPBOARD_WRITE, !0);
                         })).catch((function(e){
                             t._rejectPromiseDecorator(f.CLIPBOARD_WRITE, e);
@@ -3363,7 +3363,7 @@
             }(e, Qr(e, t, 'get'));
         } function Qr(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var $r = 'banner-container', en = new WeakMap, tn = new WeakMap, rn = new WeakMap, nn = new WeakSet; function on(){
+        } var $r = 'banner-container'; var en = new WeakMap; var tn = new WeakMap; var rn = new WeakMap; var nn = new WeakSet; function on(){
             var e = this; return Xr(this, tn)
                 ? new Promise((function(t, r){
                     e._platformSdk.user.getUser().then((function(n){
@@ -3382,20 +3382,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Wr(e, t);
-            }(y, t); var r, n, o, p, d = (o = y, p = function(){
+            }(y, t); var r; var n; var o; var p; var d = (o = y, p = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Yr(o); if (p){
+                var e; var t = Yr(o); if (p){
                     var r = Yr(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Hr(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Vr(e);
                 }(this, e);
             }); function y(){
-                var e, t, r; !function(e, t){
+                var e; var t; var r; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, y); for (var n = arguments.length, o = new Array(n), s = 0; s < n; s++)o[s] = arguments[s]; return Kr(t = Vr(e = d.call.apply(d, [this].concat(o))), r = nn), r.add(t), Zr(Vr(e), en, {
                     writable: !0,
@@ -3543,7 +3543,7 @@
                 {
                     key: 'showBanner',
                     value(e){
-                        var t = this, r = document.getElementById($r); r || ((r = document.createElement('div')).id = $r, r.style.position = 'absolute', document.body.appendChild(r)), 'top' === (null == e ? void 0 : e.position) ? (r.style.top = 0, r.style.height = '90px', r.style.width = '100%') : 'left' === (null == e ? void 0 : e.position) ? (r.style.left = 0, r.style.top = 0, r.style.height = '100%', r.style.width = '90px') : 'right' === (null == e ? void 0 : e.position) ? (r.style.right = 0, r.style.top = 0, r.style.height = '100%', r.style.width = '90px') : (r.style.bottom = 0, r.style.height = '90px', r.style.width = '100%'), r.style.display = 'block', this._platformSdk.banner.requestResponsiveBanner([$r]).then((function(){
+                        var t = this; var r = document.getElementById($r); r || ((r = document.createElement('div')).id = $r, r.style.position = 'absolute', document.body.appendChild(r)), 'top' === (null == e ? void 0 : e.position) ? (r.style.top = 0, r.style.height = '90px', r.style.width = '100%') : 'left' === (null == e ? void 0 : e.position) ? (r.style.left = 0, r.style.top = 0, r.style.height = '100%', r.style.width = '90px') : 'right' === (null == e ? void 0 : e.position) ? (r.style.right = 0, r.style.top = 0, r.style.height = '100%', r.style.width = '90px') : (r.style.bottom = 0, r.style.height = '90px', r.style.width = '100%'), r.style.display = 'block', this._platformSdk.banner.requestResponsiveBanner([$r]).then((function(){
                             t._setBannerState(s.SHOWN);
                         })).catch((function(){
                             t._setBannerState(s.FAILED), r.style.display = 'none';
@@ -3597,7 +3597,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? un(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = fn(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = fn(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -3663,20 +3663,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && dn(e, t);
-            }(l, t); var r, n, o, s, c = (o = l, s = function(){
+            }(l, t); var r; var n; var o; var s; var c = (o = l, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = hn(o); if (s){
+                var e; var t = hn(o); if (s){
                     var r = hn(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === sn(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return yn(e);
                 }(this, e);
             }); function l(){
-                var e, t, r; !function(e, t){
+                var e; var t; var r; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, l); for (var n = arguments.length, o = new Array(n), i = 0; i < n; i++)o[i] = arguments[i]; return function(e, t){
                     if (t.has(e)) throw new TypeError('Cannot initialize the same private elements twice on an object');
@@ -3845,7 +3845,7 @@
             }(e, Dn(e, t, 'get'));
         } function Dn(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var kn = 'banner-container', In = new WeakMap; const Rn = function(t){
+        } var kn = 'banner-container'; var In = new WeakMap; const Rn = function(t){
             !function(e, t){
                 if ('function' != typeof t && null !== t) throw new TypeError('Super expression must either be null or a function'); e.prototype = Object.create(t && t.prototype, {
                     constructor: {
@@ -3854,20 +3854,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Pn(e, t);
-            }(p, t); var r, n, o, c, l = (o = p, c = function(){
+            }(p, t); var r; var n; var o; var c; var l = (o = p, c = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = An(o); if (c){
+                var e; var t = An(o); if (c){
                     var r = An(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === gn(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return En(e);
                 }(this, e);
             }); function p(){
-                var e, t, r, n; !function(e, t){
+                var e; var t; var r; var n; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, p); for (var o = arguments.length, i = new Array(o), a = 0; a < o; a++)i[a] = arguments[a]; return t = En(e = l.call.apply(l, [this].concat(i))), n = {
                     writable: !0,
@@ -3906,7 +3906,7 @@
                 {
                     key: 'showBanner',
                     value(e){
-                        var t = this, r = document.getElementById(kn); r || ((r = document.createElement('div')).id = kn, r.style.position = 'absolute', document.body.appendChild(r)), 'top' === (null == e ? void 0 : e.position) ? (r.style.top = 0, r.style.height = '90px', r.style.width = '100%') : 'left' === (null == e ? void 0 : e.position) ? (r.style.left = 0, r.style.top = 0, r.style.height = '100%', r.style.minHeight = '600px', r.style.width = '120px') : 'right' === (null == e ? void 0 : e.position) ? (r.style.right = 0, r.style.top = 0, r.style.height = '100%', r.style.minHeight = '600px', r.style.width = '120px') : (r.style.bottom = 0, r.style.height = '90px', r.style.width = '100%'), r.style.display = 'block', this._platformSdk.showAd('display', { containerId: kn }).then((function(){
+                        var t = this; var r = document.getElementById(kn); r || ((r = document.createElement('div')).id = kn, r.style.position = 'absolute', document.body.appendChild(r)), 'top' === (null == e ? void 0 : e.position) ? (r.style.top = 0, r.style.height = '90px', r.style.width = '100%') : 'left' === (null == e ? void 0 : e.position) ? (r.style.left = 0, r.style.top = 0, r.style.height = '100%', r.style.minHeight = '600px', r.style.width = '120px') : 'right' === (null == e ? void 0 : e.position) ? (r.style.right = 0, r.style.top = 0, r.style.height = '100%', r.style.minHeight = '600px', r.style.width = '120px') : (r.style.bottom = 0, r.style.height = '90px', r.style.width = '100%'), r.style.display = 'block', this._platformSdk.showAd('display', { containerId: kn }).then((function(){
                             t._setBannerState(s.SHOWN);
                         })).catch((function(){
                             t._setBannerState(s.FAILED), r.style.display = 'none';
@@ -4023,10 +4023,10 @@
             }(e, t); return function(e, t){
                 return t.get ? t.get.call(e) : t.value;
             }(e, r);
-        } var Yn = 'AUTHORIZED', Zn = {
-                VALUABLE_ACCESS: 'VALUABLE_ACCESS',
-                PHOTO_CONTENT: 'PHOTO_CONTENT',
-            }, Kn = new WeakMap, Jn = new WeakMap, qn = new WeakMap, Xn = new WeakSet, Qn = new WeakSet, $n = new WeakSet, eo = new WeakSet, to = new WeakSet, ro = new WeakSet, no = new WeakSet, oo = new WeakSet, io = new WeakSet, ao = new WeakSet, so = new WeakSet, uo = new WeakSet, co = new WeakSet, lo = new WeakSet, fo = new WeakSet, po = new WeakSet; function yo(){
+        } var Yn = 'AUTHORIZED'; var Zn = {
+            VALUABLE_ACCESS: 'VALUABLE_ACCESS',
+            PHOTO_CONTENT: 'PHOTO_CONTENT',
+        }; var Kn = new WeakMap; var Jn = new WeakMap; var qn = new WeakMap; var Xn = new WeakSet; var Qn = new WeakSet; var $n = new WeakSet; var eo = new WeakSet; var to = new WeakSet; var ro = new WeakSet; var no = new WeakSet; var oo = new WeakSet; var io = new WeakSet; var ao = new WeakSet; var so = new WeakSet; var uo = new WeakSet; var co = new WeakSet; var lo = new WeakSet; var fo = new WeakSet; var po = new WeakSet; function yo(){
             return {
                 userProfile: {
                     fields: 'uid,name,pic50x50,pic128x128,pic_base',
@@ -4148,14 +4148,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Bn(e, t);
-            }(l, t); var r, n, o, s, c = (o = l, s = function(){
+            }(l, t); var r; var n; var o; var s; var c = (o = l, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Mn(o); if (s){
+                var e; var t = Mn(o); if (s){
                     var r = Mn(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Tn(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Gn(e);
@@ -4237,7 +4237,7 @@
                                     return Vn(e, qn)[t](r, n);
                                 }; var t = e._platformSdk.Util.getRequestParameters() || {}; t.api_server && t.apiconnection
                                     ? e._platformSdk.init(t.api_server, t.apiconnection, (function(){
-                                        var t, r = null === (t = e._platformSdk) || void 0 === t ? void 0 : t.saved_state; e._isPlayerAuthorized = !r || r === Yn, e._isPlayerAuthorized ? e._platformSdk.Client.call(Vn(e, Kn).userProfile, Vn(e, Jn).userProfileCallback) : (e._isInitialized = !0, e._resolvePromiseDecorator(f.INITIALIZE));
+                                        var t; var r = null === (t = e._platformSdk) || void 0 === t ? void 0 : t.saved_state; e._isPlayerAuthorized = !r || r === Yn, e._isPlayerAuthorized ? e._platformSdk.Client.call(Vn(e, Kn).userProfile, Vn(e, Jn).userProfileCallback) : (e._isInitialized = !0, e._resolvePromiseDecorator(f.INITIALIZE));
                                     }), (function(){
                                         e._rejectPromiseDecorator(f.INITIALIZE);
                                     }))
@@ -4270,7 +4270,7 @@
                         var n = this; return t === u.PLATFORM_INTERNAL
                             ? this._hasValuableAccessPermission
                                 ? new Promise((function(t, o){
-                                    var i = Array.isArray(e) ? e : [e], a = {
+                                    var i = Array.isArray(e) ? e : [e]; var a = {
                                         method: 'storage.get',
                                         keys: i,
                                         scope: 'CUSTOM',
@@ -4299,15 +4299,15 @@
                     value(e, t, r){
                         var n = this; if (r === u.PLATFORM_INTERNAL){
                             if (!this._hasValuableAccessPermission) return Promise.reject(y); for (var o = Array.isArray(e) ? e : [e], i = Array.isArray(e) ? t : [t], a = [], s = function(){
-                                    var e = o[c], t = i[c]; 'string' != typeof t && (t = JSON.stringify(t)); var r = {
-                                            method: 'storage.set',
-                                            key: e,
-                                            value: t,
-                                        }, s = new Promise((function(e, t){
-                                            n._platformSdk.Client.call(r, (function(r, n){
-                                                n ? e() : t();
-                                            }));
-                                        })); a.push(s);
+                                    var e = o[c]; var t = i[c]; 'string' != typeof t && (t = JSON.stringify(t)); var r = {
+                                        method: 'storage.set',
+                                        key: e,
+                                        value: t,
+                                    }; var s = new Promise((function(e, t){
+                                        n._platformSdk.Client.call(r, (function(r, n){
+                                            n ? e() : t();
+                                        }));
+                                    })); a.push(s);
                                 }, c = 0; c < o.length; c++)s(); return Promise.all(a);
                         } return Cn(Mn(l.prototype), 'setDataToStorage', this).call(this, e, t, r);
                     },
@@ -4318,13 +4318,13 @@
                         var r = this; if (t === u.PLATFORM_INTERNAL){
                             if (!this._hasValuableAccessPermission) return Promise.reject(y); for (var n = Array.isArray(e) ? e : [e], o = [], i = function(){
                                     var e = {
-                                            method: 'storage.set',
-                                            key: n[a],
-                                        }, t = new Promise((function(t, n){
-                                            r._platformSdk.Client.call(e, (function(e, r){
-                                                r ? t() : n();
-                                            }));
-                                        })); o.push(t);
+                                        method: 'storage.set',
+                                        key: n[a],
+                                    }; var t = new Promise((function(t, n){
+                                        r._platformSdk.Client.call(e, (function(e, r){
+                                            r ? t() : n();
+                                        }));
+                                    })); o.push(t);
                                 }, a = 0; a < n.length; a++)i(); return Promise.all(o);
                         } return Cn(Mn(l.prototype), 'deleteDataFromStorage', this).call(this, e, t);
                     },
@@ -4384,13 +4384,13 @@
                 {
                     key: 'createPost',
                     value(e){
-                        if (!e || null == e || !e.media) return Promise.reject(); var t, r = this._getPromiseDecorator(f.CREATE_POST); return r || (r = this._createPromiseDecorator(f.CREATE_POST), this._platformSdk.UI.postMediatopic(e, null !== (t = e.status) && void 0 !== t && t)), r.promise;
+                        if (!e || null == e || !e.media) return Promise.reject(); var t; var r = this._getPromiseDecorator(f.CREATE_POST); return r || (r = this._createPromiseDecorator(f.CREATE_POST), this._platformSdk.UI.postMediatopic(e, null !== (t = e.status) && void 0 !== t && t)), r.promise;
                     },
                 },
                 {
                     key: 'joinCommunity',
                     value(e){
-                        if (!e || null == e || !e.groupId) return Promise.reject(); var t, r = this._getPromiseDecorator(f.JOIN_COMMUNITY); return r || (r = this._createPromiseDecorator(f.JOIN_COMMUNITY), this._platformSdk.UI.joinGroup(e.groupId, null !== (t = e.enableMessages) && void 0 !== t && t)), r.promise;
+                        if (!e || null == e || !e.groupId) return Promise.reject(); var t; var r = this._getPromiseDecorator(f.JOIN_COMMUNITY); return r || (r = this._createPromiseDecorator(f.JOIN_COMMUNITY), this._platformSdk.UI.joinGroup(e.groupId, null !== (t = e.enableMessages) && void 0 !== t && t)), r.promise;
                     },
                 },
             ]) && Nn(r.prototype, n), Object.defineProperty(r, 'prototype', { writable: !1 }), l;
@@ -4405,9 +4405,9 @@
         } function Co(){
             Co = function(){
                 return t;
-            }; var e, t = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function(e, t, r){
-                    e[t] = r.value;
-                }, i = 'function' == typeof Symbol ? Symbol : {}, a = i.iterator || '@@iterator', s = i.asyncIterator || '@@asyncIterator', u = i.toStringTag || '@@toStringTag'; function c(e, t, r){
+            }; var e; var t = {}; var r = Object.prototype; var n = r.hasOwnProperty; var o = Object.defineProperty || function(e, t, r){
+                e[t] = r.value;
+            }; var i = 'function' == typeof Symbol ? Symbol : {}; var a = i.iterator || '@@iterator'; var s = i.asyncIterator || '@@asyncIterator'; var u = i.toStringTag || '@@toStringTag'; function c(e, t, r){
                 return Object.defineProperty(e, t, {
                     value: r,
                     enumerable: !0,
@@ -4421,7 +4421,7 @@
                     return e[t] = r;
                 };
             } function l(e, t, r, n){
-                var i = t && t.prototype instanceof v ? t : v, a = Object.create(i.prototype), s = new R(n || []); return o(a, '_invoke', { value: O(e, r, s) }), a;
+                var i = t && t.prototype instanceof v ? t : v; var a = Object.create(i.prototype); var s = new R(n || []); return o(a, '_invoke', { value: O(e, r, s) }), a;
             } function f(e, t, r){
                 try {
                     return {
@@ -4434,9 +4434,9 @@
                         arg: e,
                     };
                 }
-            }t.wrap = l; var p = 'suspendedStart', d = 'suspendedYield', y = 'executing', h = 'completed', m = {}; function v(){} function _(){} function g(){} var S = {}; c(S, a, (function(){
+            }t.wrap = l; var p = 'suspendedStart'; var d = 'suspendedYield'; var y = 'executing'; var h = 'completed'; var m = {}; function v(){} function _(){} function g(){} var S = {}; c(S, a, (function(){
                 return this;
-            })); var b = Object.getPrototypeOf, P = b && b(b(T([]))); P && P !== r && n.call(P, a) && (S = P); var E = g.prototype = v.prototype = Object.create(S); function A(e){
+            })); var b = Object.getPrototypeOf; var P = b && b(b(T([]))); P && P !== r && n.call(P, a) && (S = P); var E = g.prototype = v.prototype = Object.create(S); function A(e){
                 [
                     'next',
                     'throw',
@@ -4449,7 +4449,7 @@
             } function w(e, t){
                 function r(o, i, a, s){
                     var u = f(e[o], e, i); if ('throw' !== u.type){
-                        var c = u.arg, l = c.value; return l && 'object' == No(l) && n.call(l, '__await')
+                        var c = u.arg; var l = c.value; return l && 'object' == No(l) && n.call(l, '__await')
                             ? t.resolve(l.__await).then((function(e){
                                 r('next', e, a, s);
                             }), (function(e){
@@ -4493,7 +4493,7 @@
                     }
                 };
             } function D(t, r){
-                var n = r.method, o = t.iterator[n]; if (o === e) return r.delegate = null, 'throw' === n && t.iterator.return && (r.method = 'return', r.arg = e, D(t, r), 'throw' === r.method) || 'return' !== n && (r.method = 'throw', r.arg = new TypeError('The iterator does not provide a \'' + n + '\' method')), m; var i = f(o, t.iterator, r.arg); if ('throw' === i.type) return r.method = 'throw', r.arg = i.arg, r.delegate = null, m; var a = i.arg; return a ? a.done ? (r[t.resultName] = a.value, r.next = t.nextLoc, 'return' !== r.method && (r.method = 'next', r.arg = e), r.delegate = null, m) : a : (r.method = 'throw', r.arg = new TypeError('iterator result is not an object'), r.delegate = null, m);
+                var n = r.method; var o = t.iterator[n]; if (o === e) return r.delegate = null, 'throw' === n && t.iterator.return && (r.method = 'return', r.arg = e, D(t, r), 'throw' === r.method) || 'return' !== n && (r.method = 'throw', r.arg = new TypeError('The iterator does not provide a \'' + n + '\' method')), m; var i = f(o, t.iterator, r.arg); if ('throw' === i.type) return r.method = 'throw', r.arg = i.arg, r.delegate = null, m; var a = i.arg; return a ? a.done ? (r[t.resultName] = a.value, r.next = t.nextLoc, 'return' !== r.method && (r.method = 'next', r.arg = e), r.delegate = null, m) : a : (r.method = 'throw', r.arg = new TypeError('iterator result is not an object'), r.delegate = null, m);
             } function k(e){
                 var t = { tryLoc: e[0] }; 1 in e && (t.catchLoc = e[1]), 2 in e && (t.finallyLoc = e[2], t.afterLoc = e[3]), this.tryEntries.push(t);
             } function I(e){
@@ -4503,7 +4503,7 @@
             } function T(t){
                 if (t || '' === t){
                     var r = t[a]; if (r) return r.call(t); if ('function' == typeof t.next) return t; if (!isNaN(t.length)){
-                        var o = -1, i = function r(){
+                        var o = -1; var i = function r(){
                             for (;++o < t.length;) if (n.call(t, o)) return r.value = t[o], r.done = !1, r; return r.value = e, r.done = !0, r;
                         }; return i.next = i;
                     }
@@ -4533,7 +4533,7 @@
             })), c(E, 'toString', (function(){
                 return '[object Generator]';
             })), t.keys = function(e){
-                var t = Object(e), r = []; for (var n in t)r.push(n); return r.reverse(), function e(){
+                var t = Object(e); var r = []; for (var n in t)r.push(n); return r.reverse(), function e(){
                     for (;r.length;){
                         var n = r.pop(); if (n in t) return e.value = n, e.done = !1, e;
                     } return e.done = !0, e;
@@ -4550,8 +4550,8 @@
                     if (this.done) throw t; var r = this; function o(n, o){
                         return s.type = 'throw', s.arg = t, r.next = n, o && (r.method = 'next', r.arg = e), !!o;
                     } for (var i = this.tryEntries.length - 1; i >= 0; --i){
-                        var a = this.tryEntries[i], s = a.completion; if ('root' === a.tryLoc) return o('end'); if (a.tryLoc <= this.prev){
-                            var u = n.call(a, 'catchLoc'), c = n.call(a, 'finallyLoc'); if (u && c){
+                        var a = this.tryEntries[i]; var s = a.completion; if ('root' === a.tryLoc) return o('end'); if (a.tryLoc <= this.prev){
+                            var u = n.call(a, 'catchLoc'); var c = n.call(a, 'finallyLoc'); if (u && c){
                                 if (this.prev < a.catchLoc) return o(a.catchLoc, !0); if (this.prev < a.finallyLoc) return o(a.finallyLoc);
                             } else if (u){
                                 if (this.prev < a.catchLoc) return o(a.catchLoc, !0);
@@ -4595,7 +4595,7 @@
             }, t;
         } function Bo(e, t, r, n, o, i, a){
             try {
-                var s = e[i](a), u = s.value;
+                var s = e[i](a); var u = s.value;
             } catch (e){
                 return void r(e);
             }s.done ? t(u) : Promise.resolve(u).then(n, o);
@@ -4609,7 +4609,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? Go(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = Ho(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = Ho(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -4664,7 +4664,7 @@
             }(e, t), t.add(e);
         } function Yo(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to get private field on non-instance'); return r;
-        } var Zo = new WeakSet, Ko = new WeakSet; function Jo(){
+        } var Zo = new WeakSet; var Ko = new WeakSet; function Jo(){
             var e = this; return new Promise((function(t){
                 e._platformSdk.userService.getUser().then((function(t){
                     return e._playerId = t.id, e._isPlayerAuthorized = t.isAuthorized, e._playerName = t.name, e._playerPhotos = t.photos, e._defaultStorageType = e._isPlayerAuthorized ? u.PLATFORM_INTERNAL : u.LOCAL_STORAGE, e._isPlayerAuthorized ? Yo(e, Ko, qo).call(e, []) : Promise.resolve();
@@ -4676,7 +4676,7 @@
             return Xo.apply(this, arguments);
         } function Xo(){
             var e; return e = Co().mark((function e(t){
-                var r, n = arguments; return Co().wrap((function(e){
+                var r; var n = arguments; return Co().wrap((function(e){
                     for (;;) switch (e.prev = e.next){
                     case 0:if (r = n.length > 1 && void 0 !== n[1] && n[1], this._platformStorageCachedData){
                         e.next = 5; break;
@@ -4684,7 +4684,7 @@
                     }
                 }), e, this);
             })), Xo = function(){
-                var t = this, r = arguments; return new Promise((function(n, o){
+                var t = this; var r = arguments; return new Promise((function(n, o){
                     var i = e.apply(t, r); function a(e){
                         Bo(i, n, o, a, s, 'next', e);
                     } function s(e){
@@ -4701,14 +4701,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && zo(e, t);
-            }(l, t); var r, n, o, s, c = (o = l, s = function(){
+            }(l, t); var r; var n; var o; var s; var c = (o = l, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Wo(o); if (s){
+                var e; var t = Wo(o); if (s){
                     var r = Wo(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === No(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return xo(e);
@@ -4846,7 +4846,7 @@
                 {
                     key: 'authorizePlayer',
                     value(e){
-                        var t = this, r = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); return r || (r = this._createPromiseDecorator(f.AUTHORIZE_PLAYER), this._isPlayerAuthorized
+                        var t = this; var r = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); return r || (r = this._createPromiseDecorator(f.AUTHORIZE_PLAYER), this._isPlayerAuthorized
                             ? Yo(this, Zo, Jo).call(this, e).then((function(){
                                 t._resolvePromiseDecorator(f.AUTHORIZE_PLAYER);
                             }))
@@ -4862,7 +4862,7 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var t = this, r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); r.externalId || (r.externalId = this._paymentsGenerateTransactionId(e)); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.inGamePaymentsApi.purchase(r).then((function(r){
+                        var t = this; var r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); r.externalId || (r.externalId = this._paymentsGenerateTransactionId(e)); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.inGamePaymentsApi.purchase(r).then((function(r){
                             if ('PAID' === r.status){
                                 var n = Mo({ commonId: e }, r); t._paymentsPurchases.push(n), t._resolvePromiseDecorator(f.PURCHASE, n);
                             } else t._rejectPromiseDecorator(f.PURCHASE, r.error);
@@ -4959,7 +4959,7 @@
             }(e, fi(e, t, 'get'));
         } function fi(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var pi = new WeakMap, di = new WeakMap; const yi = function(t){
+        } var pi = new WeakMap; var di = new WeakMap; const yi = function(t){
             !function(e, t){
                 if ('function' != typeof t && null !== t) throw new TypeError('Super expression must either be null or a function'); e.prototype = Object.create(t && t.prototype, {
                     constructor: {
@@ -4968,14 +4968,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ni(e, t);
-            }(p, t); var r, n, o, s, c = (o = p, s = function(){
+            }(p, t); var r; var n; var o; var s; var c = (o = p, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = ii(o); if (s){
+                var e; var t = ii(o); if (s){
                     var r = ii(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === $o(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return oi(e);
@@ -5050,7 +5050,7 @@
                     key: 'showInterstitial',
                     value(){
                         var e = this; window.addEventListener('message', (function t(r){
-                            var n = r.data, o = null == n ? void 0 : n.playdeck; if (o) switch (o.method){
+                            var n = r.data; var o = null == n ? void 0 : n.playdeck; if (o) switch (o.method){
                             case 'startAd':e._setInterstitialState(i.OPENED); break; case 'rewardedAd':case 'skipAd':e._setInterstitialState(i.CLOSED), window.removeEventListener('message', t); break; case 'errAd':case 'notFoundAd':e._setInterstitialState(i.FAILED), window.removeEventListener('message', t);
                             }
                         })), window.parent.postMessage({ playdeck: { method: 'showAd' } }, '*');
@@ -5060,7 +5060,7 @@
                     key: 'showRewarded',
                     value(){
                         var e = this; window.addEventListener('message', (function t(r){
-                            var n = r.data, o = null == n ? void 0 : n.playdeck; if (o) switch (o.method){
+                            var n = r.data; var o = null == n ? void 0 : n.playdeck; if (o) switch (o.method){
                             case 'startAd':e._setRewardedState(a.OPENED); break; case 'rewardedAd':e._setRewardedState(a.REWARDED), e._setRewardedState(a.CLOSED), window.removeEventListener('message', t); break; case 'skipAd':e._setRewardedState(a.CLOSED), window.removeEventListener('message', t); break; case 'errAd':case 'notFoundAd':e._setRewardedState(a.FAILED), window.removeEventListener('message', t);
                             }
                         })), window.parent.postMessage({ playdeck: { method: 'showAd' } }, '*');
@@ -5089,7 +5089,7 @@
                     value(e, t, r){
                         return t === u.PLATFORM_INTERNAL
                             ? new Promise((function(t){
-                                var r = {}, n = Array.isArray(e) ? e : [e]; window.addEventListener('message', (function o(i){
+                                var r = {}; var n = Array.isArray(e) ? e : [e]; window.addEventListener('message', (function o(i){
                                     var a = i.data; if (a && a.playdeck && 'getData' === a.playdeck.method && n.includes(a.playdeck.key)){
                                         var s = a.playdeck; if ('getData' === s.method && (r[s.key] = s.value.data), Object.keys(r).length === n.length){
                                             window.removeEventListener('message', o); var u = Array.isArray(e)
@@ -5116,7 +5116,7 @@
                     value(e, t, r){
                         return r === u.PLATFORM_INTERNAL
                             ? new Promise((function(r){
-                                var n = Array.isArray(e) ? e : [e], o = (Array.isArray(t) ? t : [t]).map((function(e){
+                                var n = Array.isArray(e) ? e : [e]; var o = (Array.isArray(t) ? t : [t]).map((function(e){
                                     return 'string' != typeof e ? JSON.stringify(e) : e;
                                 })); n.forEach((function(e, t){
                                     return window.parent.postMessage({
@@ -5163,15 +5163,15 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var t = this, r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); r.externalId || (r.externalId = this._paymentsGenerateTransactionId(e)); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), window.addEventListener('message', (function e(t){
-                            var r = t.data, n = null == r ? void 0 : r.playdeck; n && 'requestPayment' === n.method && (window.parent.postMessage({
+                        var t = this; var r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); r.externalId || (r.externalId = this._paymentsGenerateTransactionId(e)); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), window.addEventListener('message', (function e(t){
+                            var r = t.data; var n = null == r ? void 0 : r.playdeck; n && 'requestPayment' === n.method && (window.parent.postMessage({
                                 playdeck: {
                                     method: 'openTelegramLink',
                                     value: n.value.url,
                                 },
                             }, '*'), window.removeEventListener('message', e));
                         })), window.addEventListener('message', (function r(n){
-                            var o = n.data, i = null == o ? void 0 : o.playdeck; if (i && 'invoiceClosed' === i.method) if ('paid' === i.value.status){
+                            var o = n.data; var i = null == o ? void 0 : o.playdeck; if (i && 'invoiceClosed' === i.method) if ('paid' === i.value.status){
                                 window.removeEventListener('message', r); var a = function(e){
                                     for (var t = 1; t < arguments.length; t++){
                                         var r = null != arguments[t] ? arguments[t] : {}; t % 2
@@ -5226,7 +5226,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? mi(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = gi(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = gi(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -5283,7 +5283,7 @@
             }(e, Oi(e, t, 'get'));
         } function Oi(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var Di = new WeakMap, ki = new WeakSet; function Ii(){
+        } var Di = new WeakMap; var ki = new WeakSet; function Ii(){
             this._playerId = this._platformSdk.player.getId(), this._playerName = this._platformSdk.player.getName(), this._playerPhotos = [this._platformSdk.player.getPhoto()];
         } const Ri = function(t){
             !function(e, t){
@@ -5294,20 +5294,20 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && bi(e, t);
-            }(d, t); var r, n, o, c, p = (o = d, c = function(){
+            }(d, t); var r; var n; var o; var c; var p = (o = d, c = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Ei(o); if (c){
+                var e; var t = Ei(o); if (c){
                     var r = Ei(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === hi(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Pi(e);
                 }(this, e);
             }); function d(){
-                var e, t, r; !function(e, t){
+                var e; var t; var r; !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, d); for (var n = arguments.length, o = new Array(n), i = 0; i < n; i++)o[i] = arguments[i]; return Ai(t = Pi(e = p.call.apply(p, [this].concat(o))), r = ki), r.add(t), function(e, t, r){
                     Ai(e, t), t.set(e, {
@@ -5348,7 +5348,7 @@
                         var e = this; if (this._isInitialized) return Promise.resolve(); var t = this._getPromiseDecorator(f.INITIALIZE); return t || (t = this._createPromiseDecorator(f.INITIALIZE), Qt('https://storage.googleapis.com/cdn-wortal-ai/v2/wortal-core.js').then((function(){
                             $t('Wortal', 'initializeAsync').then((function(){
                                 window.Wortal.initializeAsync().then((function(){
-                                    var t, r, n; e._platformSdk = window.Wortal, t = e, r = Di, n = e._platformSdk.getSupportedAPIs(), function(e, t, r){
+                                    var t; var r; var n; e._platformSdk = window.Wortal, t = e, r = Di, n = e._platformSdk.getSupportedAPIs(), function(e, t, r){
                                         if (t.set)t.set.call(e, r); else {
                                             if (!t.writable) throw new TypeError('attempted to set read only private field'); t.value = r;
                                         }
@@ -5383,7 +5383,7 @@
                 {
                     key: 'showInterstitial',
                     value(e){
-                        var t = this, r = 'next', n = 'NextLevel'; e && (e.placement && (r = e.placement), e.description && (n = e.description)), this._platformSdk.ads.showInterstitial(r, n, (function(){
+                        var t = this; var r = 'next'; var n = 'NextLevel'; e && (e.placement && (r = e.placement), e.description && (n = e.description)), this._platformSdk.ads.showInterstitial(r, n, (function(){
                             t._setInterstitialState(i.OPENED);
                         }), (function(){
                             t._setInterstitialState(i.CLOSED);
@@ -5395,7 +5395,7 @@
                 {
                     key: 'showRewarded',
                     value(e){
-                        var t = this, r = 'Bonus'; e && e.description && (r = e.description), this._platformSdk.ads.showRewarded(r, (function(){
+                        var t = this; var r = 'Bonus'; e && e.description && (r = e.description), this._platformSdk.ads.showRewarded(r, (function(){
                             t._setRewardedState(a.OPENED);
                         }), (function(){
                             t._setRewardedState(a.CLOSED);
@@ -5544,7 +5544,7 @@
             }(e, zi(e, t, 'get'));
         } function zi(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var xi = new WeakMap, Wi = new WeakMap, Vi = new WeakMap, Yi = new WeakMap; const Zi = function(t){
+        } var xi = new WeakMap; var Wi = new WeakMap; var Vi = new WeakMap; var Yi = new WeakMap; const Zi = function(t){
             !function(e, t){
                 if ('function' != typeof t && null !== t) throw new TypeError('Super expression must either be null or a function'); e.prototype = Object.create(t && t.prototype, {
                     constructor: {
@@ -5553,14 +5553,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Ni(e, t);
-            }(d, t); var r, n, o, s, p = (o = d, s = function(){
+            }(d, t); var r; var n; var o; var s; var p = (o = d, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Bi(o); if (s){
+                var e; var t = Bi(o); if (s){
                     var r = Bi(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Ti(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Ci(e);
@@ -5695,7 +5695,7 @@
                     value(e, t, r){
                         var n = this; return r === u.PLATFORM_INTERNAL
                             ? new Promise((function(r){
-                                var o = Array.isArray(e) ? e : [e], i = (Array.isArray(t) ? t : [t]).map((function(e){
+                                var o = Array.isArray(e) ? e : [e]; var i = (Array.isArray(t) ? t : [t]).map((function(e){
                                     return 'string' != typeof e ? JSON.stringify(e) : e;
                                 })); o.forEach((function(e, t){
                                     return n._platformSdk.CloudStorage.setItem(e, i[t]);
@@ -5739,7 +5739,7 @@
                 {
                     key: 'clipboardRead',
                     value(){
-                        var e = this, t = this._getPromiseDecorator(f.CLIPBOARD_READ); return t || (t = this._createPromiseDecorator(f.CLIPBOARD_READ), this._platformSdk.readTextFromClipboard((function(t){
+                        var e = this; var t = this._getPromiseDecorator(f.CLIPBOARD_READ); return t || (t = this._createPromiseDecorator(f.CLIPBOARD_READ), this._platformSdk.readTextFromClipboard((function(t){
                             t ? e._resolvePromiseDecorator(f.CLIPBOARD_READ, t) : e._rejectPromiseDecorator(f.CLIPBOARD_READ);
                         }))), t.promise;
                     },
@@ -5755,7 +5755,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? Ji(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = $i(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = $i(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -5818,7 +5818,7 @@
             }(e, t), t.add(e);
         } function ia(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to get private field on non-instance'); return r;
-        } var aa = 'userData', sa = '6129580795478709', ua = new WeakSet, ca = new WeakSet; function la(){
+        } var aa = 'userData'; var sa = '6129580795478709'; var ua = new WeakSet; var ca = new WeakSet; function la(){
             var e = this; return new Promise((function(t, r){
                 e._platformStorageCachedData
                     ? t(e._platformStorageCachedData)
@@ -5830,12 +5830,12 @@
             }));
         } function fa(e){
             if ('ok' === e.status){
-                this._isPlayerAuthorized = !0, this._defaultStorageType = u.PLATFORM_INTERNAL; var t = e.authResponse.details, r = t.pid, n = t.locale, o = t.nickname, i = t.first_name, a = t.last_name, s = t.avatars; r && (this._playerId = r), this._platformLanguage = n, this._playerName = [
+                this._isPlayerAuthorized = !0, this._defaultStorageType = u.PLATFORM_INTERNAL; var t = e.authResponse.details; var r = t.pid; var n = t.locale; var o = t.nickname; var i = t.first_name; var a = t.last_name; var s = t.avatars; r && (this._playerId = r), this._platformLanguage = n, this._playerName = [
                     i,
                     a,
                 ].filter((function(e){
                     return !!e;
-                })).join(' ') || o, this._playerPhotos = []; var c = s.thumb_url, l = s.medium_url, f = s.large_url; c && this._playerPhotos.push(c), l && this._playerPhotos.push(l), f && this._playerPhotos.push(f);
+                })).join(' ') || o, this._playerPhotos = []; var c = s.thumb_url; var l = s.medium_url; var f = s.large_url; c && this._playerPhotos.push(c), l && this._playerPhotos.push(l), f && this._playerPhotos.push(f);
             }
         } const pa = function(t){
             !function(e, t){
@@ -5846,14 +5846,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ta(e, t);
-            }(l, t); var r, n, o, s, c = (o = l, s = function(){
+            }(l, t); var r; var n; var o; var s; var c = (o = l, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = na(o); if (s){
+                var e; var t = na(o); if (s){
                     var r = na(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Xi(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return ra(e);
@@ -5932,11 +5932,11 @@
                 {
                     key: 'initialize',
                     value(){
-                        var e = this; if (this._isInitialized) return Promise.resolve(); var t, r = this._getPromiseDecorator(f.INITIALIZE); return r || (r = this._createPromiseDecorator(f.INITIALIZE), null !== (t = this._options) && void 0 !== t && t.gameId
+                        var e = this; if (this._isInitialized) return Promise.resolve(); var t; var r = this._getPromiseDecorator(f.INITIALIZE); return r || (r = this._createPromiseDecorator(f.INITIALIZE), null !== (t = this._options) && void 0 !== t && t.gameId
                             ? Qt('https://cdn.y8.com/api/sdk.js').then((function(){
                                 $t('ID').then((function(){
                                     e._platformSdk = window.ID, e._platformSdk.Event.subscribe('id.init', (function(){
-                                        var t, r, n, o, i, a; (t = {
+                                        var t; var r; var n; var o; var i; var a; (t = {
                                             hostId: 'ca-host-pub-'.concat(sa),
                                             adsenseId: e._options.channelId ? 'ca-pub-'.concat(sa) : e._options.adsenseId,
                                             channelId: e._options.channelId,
@@ -6090,7 +6090,7 @@
                     key: 'setLeaderboardScore',
                     value(e){
                         var t = this; if (!this._isPlayerAuthorized) return Promise.reject(); if (!e || !e.points || !e.table) return Promise.reject(new Error('`table` or `points` property is not provided')); var r = this._getPromiseDecorator(f.SET_LEADERBOARD_SCORE); return r || (r = this._createPromiseDecorator(f.SET_LEADERBOARD_SCORE), this._platformSdk.GameAPI.Leaderboards.save(e, (function(e){
-                            var r = e.success, n = e.errormessage; r ? t._resolvePromiseDecorator(f.SET_LEADERBOARD_SCORE) : t._rejectPromiseDecorator(f.SET_LEADERBOARD_SCORE, n);
+                            var r = e.success; var n = e.errormessage; r ? t._resolvePromiseDecorator(f.SET_LEADERBOARD_SCORE) : t._rejectPromiseDecorator(f.SET_LEADERBOARD_SCORE, n);
                         }))), r.promise;
                     },
                 },
@@ -6098,7 +6098,7 @@
                     key: 'getLeaderboardScore',
                     value(e){
                         var t = this; if (!this._isPlayerAuthorized) return Promise.reject(); if (!e || !e.table) return Promise.reject(new Error('`table` property is not provided')); var r = this._getPromiseDecorator(f.GET_LEADERBOARD_SCORE); return r || (r = this._createPromiseDecorator(f.GET_LEADERBOARD_SCORE), this._platformSdk.GameAPI.Leaderboards.listCustom(qi(qi({}, e), {}, { playerid: this.playerId }), (function(e){
-                            var r = e.scores, n = e.success, o = e.errormessage; n ? t._resolvePromiseDecorator(f.GET_LEADERBOARD_SCORE, r[0]) : t._rejectPromiseDecorator(f.GET_LEADERBOARD_SCORE, o);
+                            var r = e.scores; var n = e.success; var o = e.errormessage; n ? t._resolvePromiseDecorator(f.GET_LEADERBOARD_SCORE, r[0]) : t._rejectPromiseDecorator(f.GET_LEADERBOARD_SCORE, o);
                         }))), r.promise;
                     },
                 },
@@ -6106,7 +6106,7 @@
                     key: 'getLeaderboardEntries',
                     value(e){
                         var t = this; if (!this._isPlayerAuthorized) return Promise.reject(); if (!e || !e.table) return Promise.reject(new Error('`table` property is not provided')); var r = this._getPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); return r || (r = this._createPromiseDecorator(f.GET_LEADERBOARD_ENTRIES), this._platformSdk.GameAPI.Leaderboards.listCustom(e, (function(e){
-                            var r = e.scores, n = e.success, o = e.errormessage; n ? t._resolvePromiseDecorator(f.GET_LEADERBOARD_ENTRIES, r) : t._rejectPromiseDecorator(f.GET_LEADERBOARD_ENTRIES, o);
+                            var r = e.scores; var n = e.success; var o = e.errormessage; n ? t._resolvePromiseDecorator(f.GET_LEADERBOARD_ENTRIES, r) : t._rejectPromiseDecorator(f.GET_LEADERBOARD_ENTRIES, o);
                         }))), r.promise;
                     },
                 },
@@ -6130,8 +6130,8 @@
                                 e.success
                                     ? r(e.achievements.map((function(e){
                                         var t = e.player; return qi(qi({}, function(e, t){
-                                            if (null == e) return {}; var r, n, o = function(e, t){
-                                                if (null == e) return {}; var r, n, o = {}, i = Object.keys(e); for (n = 0; n < i.length; n++)r = i[n], t.indexOf(r) >= 0 || (o[r] = e[r]); return o;
+                                            if (null == e) return {}; var r; var n; var o = function(e, t){
+                                                if (null == e) return {}; var r; var n; var o = {}; var i = Object.keys(e); for (n = 0; n < i.length; n++)r = i[n], t.indexOf(r) >= 0 || (o[r] = e[r]); return o;
                                             }(e, t); if (Object.getOwnPropertySymbols){
                                                 var i = Object.getOwnPropertySymbols(e); for (n = 0; n < i.length; n++)r = i[n], t.indexOf(r) >= 0 || Object.prototype.propertyIsEnumerable.call(e, r) && (o[r] = e[r]);
                                             } return o;
@@ -6204,14 +6204,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && va(e, t);
-            }(l, t); var r, n, o, s, c = (o = l, s = function(){
+            }(l, t); var r; var n; var o; var s; var c = (o = l, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = _a(o); if (s){
+                var e; var t = _a(o); if (s){
                     var r = _a(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === da(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -6254,7 +6254,7 @@
                             ? Qt('https://lagged.com/api/rev-share/lagged.js').then((function(){
                                 $t('LaggedAPI').then((function(){
                                     e._platformSdk = window.LaggedAPI, e._platformSdk.init(e._options.devId, e._options.publisherId), e._platformSdk.User.get((function(t){
-                                        var r, n = null !== (r = null == t ? void 0 : t.user) && void 0 !== r ? r : {}, o = n.id, i = n.name, a = n.avatar; o > 0 && (e._playerId = o, e._playerName = i, e._playerPhotos.push(a), e._isPlayerAuthorized = !0), e._isInitialized = !0, e._resolvePromiseDecorator(f.INITIALIZE);
+                                        var r; var n = null !== (r = null == t ? void 0 : t.user) && void 0 !== r ? r : {}; var o = n.id; var i = n.name; var a = n.avatar; o > 0 && (e._playerId = o, e._playerName = i, e._playerPhotos.push(a), e._isPlayerAuthorized = !0), e._isInitialized = !0, e._resolvePromiseDecorator(f.INITIALIZE);
                                     }));
                                 }));
                             }))
@@ -6392,7 +6392,7 @@
             }(e); return 'symbol' == Pa(t) ? t : String(t);
         } function Ta(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to get private field on non-instance'); return r;
-        } var La = new WeakSet, ja = new WeakSet; function Na(e){
+        } var La = new WeakSet; var ja = new WeakSet; function Na(e){
             var t = this; if (!(arguments.length > 1 && void 0 !== arguments[1] && arguments[1]) && this._preloadedInterstitialPromises[e]) return this._preloadedInterstitialPromises[e]; var r = null; return this._preloadedInterstitialPromises[e] = this._platformSdk.getInterstitialAdAsync(e).then((function(e){
                 return r = e, e.loadAsync();
             })).then((function(){
@@ -6417,14 +6417,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && wa(e, t);
-            }(y, t); var r, n, o, p, d = (o = y, p = function(){
+            }(y, t); var r; var n; var o; var p; var d = (o = y, p = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Da(o); if (p){
+                var e; var t = Da(o); if (p){
                     var r = Da(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Pa(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Oa(e);
@@ -6623,7 +6623,7 @@
                 {
                     key: 'showInterstitial',
                     value(e){
-                        var t, r = this, n = e || (null === (t = this._interstitialPlacements[0]) || void 0 === t ? void 0 : t.id); Ta(this, La, Na).call(this, n).then((function(e){
+                        var t; var r = this; var n = e || (null === (t = this._interstitialPlacements[0]) || void 0 === t ? void 0 : t.id); Ta(this, La, Na).call(this, n).then((function(e){
                             return r._setInterstitialState(i.OPENED), e.showAsync();
                         })).then((function(){
                             r._setInterstitialState(i.CLOSED);
@@ -6637,7 +6637,7 @@
                 {
                     key: 'showRewarded',
                     value(e){
-                        var t, r = this, n = e || (null === (t = this._rewardedPlacements[0]) || void 0 === t ? void 0 : t.id); Ta(this, ja, Ca).call(this, n).then((function(e){
+                        var t; var r = this; var n = e || (null === (t = this._rewardedPlacements[0]) || void 0 === t ? void 0 : t.id); Ta(this, ja, Ca).call(this, n).then((function(e){
                             return r._setRewardedState(a.OPENED), e.showAsync();
                         })).then((function(){
                             r._setRewardedState(a.REWARDED), r._setRewardedState(a.CLOSED);
@@ -6676,7 +6676,7 @@
                     key: 'getLeaderboardEntries',
                     value(e){
                         var t = this; if (!e || !e.leaderboardName) return Promise.reject(); var r = this._getPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); if (!r){
-                            var n, o; r = this._createPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); var i = [
+                            var n; var o; r = this._createPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); var i = [
                                 null !== (n = e.count) && void 0 !== n ? n : 5,
                                 null !== (o = e.offset) && void 0 !== o ? o : 0,
                             ]; this._platformSdk.getLeaderboardAsync(e.leaderboardName).then((function(e){
@@ -6703,7 +6703,7 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var t = this, r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.payments.purchaseAsync(r).then((function(r){
+                        var t = this; var r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.payments.purchaseAsync(r).then((function(r){
                             var n = ba({ commonId: e }, r); t._paymentsPurchases.push(n), t._resolvePromiseDecorator(f.PURCHASE, r);
                         })).catch((function(e){
                             t._rejectPromiseDecorator(f.PURCHASE, e);
@@ -6713,7 +6713,7 @@
                 {
                     key: 'paymentsConsumePurchase',
                     value(e){
-                        var t = this, r = this._paymentsPurchases.findIndex((function(t){
+                        var t = this; var r = this._paymentsPurchases.findIndex((function(t){
                             return t.commonId === e;
                         })); if (r < 0) return Promise.reject(); var n = this._getPromiseDecorator(f.CONSUME_PURCHASE); return n || (n = this._createPromiseDecorator(f.CONSUME_PURCHASE), this._platformSdk.payments.consumePurchaseAsync(this._paymentsPurchases[r].purchaseToken).then((function(e){
                             t._paymentsPurchases.splice(r, 1), t._resolvePromiseDecorator(f.CONSUME_PURCHASE, e);
@@ -6725,7 +6725,7 @@
                 {
                     key: 'paymentsGetCatalog',
                     value(){
-                        var e = this, t = this._paymentsGetProductsPlatformData(); if (!t) return Promise.reject(); var r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), this._platformSdk.payments.getCatalogAsync().then((function(r){
+                        var e = this; var t = this._paymentsGetProductsPlatformData(); if (!t) return Promise.reject(); var r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), this._platformSdk.payments.getCatalogAsync().then((function(r){
                             var n = t.map((function(e){
                                 var t = r.find((function(t){
                                     return t.productID === e.productID;
@@ -6748,7 +6748,7 @@
                 {
                     key: 'paymentsGetPurchases',
                     value(){
-                        var e = this, t = this._getPromiseDecorator(f.GET_PURCHASES); return t || (t = this._createPromiseDecorator(f.GET_PURCHASES), this._platformSdk.payments.getPurchasesAsync().then((function(t){
+                        var e = this; var t = this._getPromiseDecorator(f.GET_PURCHASES); return t || (t = this._createPromiseDecorator(f.GET_PURCHASES), this._platformSdk.payments.getPurchasesAsync().then((function(t){
                             var r = e._paymentsGetProductsPlatformData(); e._paymentsPurchases = t.map((function(e){
                                 return ba({
                                     commonId: r.find((function(t){
@@ -6764,7 +6764,7 @@
                 {
                     key: 'inviteFriends',
                     value(){
-                        var e = this, t = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}; if (!t.image || !t.text) return Promise.reject(); if (!er(t.image)) return Promise.reject(new Error('Image is not base64')); var r = this._getPromiseDecorator(f.INVITE_FRIENDS); return r || (r = this._createPromiseDecorator(f.INVITE_FRIENDS), this._platformSdk.inviteAsync(t).then((function(){
+                        var e = this; var t = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}; if (!t.image || !t.text) return Promise.reject(); if (!er(t.image)) return Promise.reject(new Error('Image is not base64')); var r = this._getPromiseDecorator(f.INVITE_FRIENDS); return r || (r = this._createPromiseDecorator(f.INVITE_FRIENDS), this._platformSdk.inviteAsync(t).then((function(){
                             e._resolvePromiseDecorator(f.INVITE_FRIENDS);
                         })).catch((function(t){
                             e._rejectPromiseDecorator(f.INVITE_FRIENDS, t);
@@ -6800,12 +6800,12 @@
                     var n = r.call(e, 'string'); if ('object' != Ga(n)) return n; throw new TypeError('@@toPrimitive must return a primitive value.');
                 } return String(e);
             }(e); return 'symbol' == Ga(t) ? t : String(t);
-        } var Ha, Ua = function(){
+        } var Ha; var Ua = function(){
             function e(){
                 !function(e, t){
                     if (!(e instanceof t)) throw new TypeError('Cannot call a class as a function');
                 }(this, e);
-            } var t, r; return t = e, r = [
+            } var t; var r; return t = e, r = [
                 {
                     key: 'send',
                     value(e){
@@ -6914,7 +6914,7 @@
             }(e, r);
         } function rs(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to get private field on non-instance'); return r;
-        } var ns = 'banner', os = 'get_data_from_storage', is = 'get_server_time', as = 'clipboard_read', ss = 'unlock_achievement', us = 'get_achievements', cs = 'get_performance_resources', ls = 'isStorageInternalSupported', fs = 'isStorageLocalSupported', ps = new WeakMap, ds = new WeakMap, ys = new WeakSet, hs = new WeakSet, ms = function(r){
+        } var ns = 'banner'; var os = 'get_data_from_storage'; var is = 'get_server_time'; var as = 'clipboard_read'; var ss = 'unlock_achievement'; var us = 'get_achievements'; var cs = 'get_performance_resources'; var ls = 'isStorageInternalSupported'; var fs = 'isStorageLocalSupported'; var ps = new WeakMap; var ds = new WeakMap; var ys = new WeakSet; var hs = new WeakSet; var ms = function(r){
             !function(e, t){
                 if ('function' != typeof t && null !== t) throw new TypeError('Super expression must either be null or a function'); e.prototype = Object.create(t && t.prototype, {
                     constructor: {
@@ -6923,14 +6923,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Ya(e, t);
-            }(y, r); var n, o, c, p, d = (c = y, p = function(){
+            }(y, r); var n; var o; var c; var p; var d = (c = y, p = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = qa(c); if (p){
+                var e; var t = qa(c); if (p){
                     var r = qa(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === Wa(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return Za(e);
@@ -7101,7 +7101,7 @@
                     value(){
                         var e = this; if (this._isInitialized) return Promise.resolve(); var r = this._getPromiseDecorator(f.INITIALIZE); return r || (r = this._createPromiseDecorator(f.INITIALIZE), this._defaultStorageType = u.PLATFORM_INTERNAL, ts(this, ds).addListener((function(r){
                             var n = r.data; if (null != n && n.type && n.type === t.PLATFORM && (n.action === f.INITIALIZE && rs(e, ys, _s).call(e, n), n.action === cs)){
-                                var o, i = ts(e, ds).generateMessageId(), a = (null == n || null === (o = n.options) || void 0 === o ? void 0 : o.resources) || []; rs(e, hs, gs).call(e, i, a);
+                                var o; var i = ts(e, ds).generateMessageId(); var a = (null == n || null === (o = n.options) || void 0 === o ? void 0 : o.resources) || []; rs(e, hs, gs).call(e, i, a);
                             }
                         })), ts(this, ds).send({
                             type: t.PLATFORM,
@@ -7112,10 +7112,10 @@
                 {
                     key: 'authorizePlayer',
                     value(e){
-                        var r = this, n = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); if (!n){
+                        var r = this; var n = this._getPromiseDecorator(f.AUTHORIZE_PLAYER); if (!n){
                             n = this._createPromiseDecorator(f.AUTHORIZE_PLAYER); var o = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function e(n){
                                 var i = n.data; if ((null == i ? void 0 : i.type) === t.PLAYER && i.action === f.AUTHORIZE_PLAYER && i.id === o){
-                                    var a = i.player, s = i.auth; 'success' === s.status ? (r._isPlayerAuthorized = !0, r._playerId = a.userId, r._playerName = a.name, a.profilePictureUrl && (r._playerPhotos = [a.profilePictureUrl]), r._resolvePromiseDecorator(f.AUTHORIZE_PLAYER)) : r._rejectPromiseDecorator(f.AUTHORIZE_PLAYER, s.error), ts(r, ds).removeListener(e);
+                                    var a = i.player; var s = i.auth; 'success' === s.status ? (r._isPlayerAuthorized = !0, r._playerId = a.userId, r._playerName = a.name, a.profilePictureUrl && (r._playerPhotos = [a.profilePictureUrl]), r._resolvePromiseDecorator(f.AUTHORIZE_PLAYER)) : r._rejectPromiseDecorator(f.AUTHORIZE_PLAYER, s.error), ts(r, ds).removeListener(e);
                                 }
                             })), ts(this, ds).send({
                                 type: t.PLAYER,
@@ -7149,7 +7149,7 @@
                     key: 'getServerTime',
                     value(){
                         var e = this; return new Promise((function(r, n){
-                            var o, i = ts(e, ds).generateMessageId(), a = function a(s){
+                            var o; var i = ts(e, ds).generateMessageId(); var a = function a(s){
                                 var u = s.data; if ((null == u ? void 0 : u.type) === t.PLATFORM && u.action === is && u.id === i){
                                     if (!u.time) return void n(new Error('Invalid server time')); clearTimeout(o), r(u.time), ts(e, ds).removeListener(a);
                                 }
@@ -7362,7 +7362,7 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var r = this, n = this._paymentsGetProductPlatformData(e); if (!n) return Promise.reject(); var o = this._getPromiseDecorator(f.PURCHASE); if (!o){
+                        var r = this; var n = this._paymentsGetProductPlatformData(e); if (!n) return Promise.reject(); var o = this._getPromiseDecorator(f.PURCHASE); if (!o){
                             o = this._createPromiseDecorator(f.PURCHASE); var i = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function n(o){
                                 var a = o.data; if ((null == a ? void 0 : a.type) === t.PAYMENTS && a.action === f.PURCHASE && a.id === i){
                                     var s; if (!a.purchase || 'object' !== Wa(a.purchase)) return r._rejectPromiseDecorator(f.PURCHASE, new Error('Invalid purchase')), void ts(r, ds).removeListener(n); if (null !== (s = a.purchase) && void 0 !== s && s.status){
@@ -7383,12 +7383,12 @@
                 {
                     key: 'paymentsConsumePurchase',
                     value(e){
-                        var r = this, n = this._paymentsPurchases.findIndex((function(t){
+                        var r = this; var n = this._paymentsPurchases.findIndex((function(t){
                             return t.commonId === e;
                         })); if (n < 0) return Promise.reject(); var o = this._getPromiseDecorator(f.CONSUME_PURCHASE); if (!o){
                             o = this._createPromiseDecorator(f.CONSUME_PURCHASE); var i = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function e(o){
                                 var a = o.data; if ((null == a ? void 0 : a.type) === t.PAYMENTS && a.action === f.CONSUME_PURCHASE && a.id === i){
-                                    var s, u; if (!a.purchase || 'object' !== Wa(a.purchase)) return r._rejectPromiseDecorator(f.CONSUME_PURCHASE, new Error('Invalid purchase')), void ts(r, ds).removeListener(e); null !== (s = a.purchase) && void 0 !== s && s.status ? (r._paymentsPurchases.splice(n, 1), r._resolvePromiseDecorator(f.CONSUME_PURCHASE, a.result)) : r._rejectPromiseDecorator(f.CONSUME_PURCHASE, (null === (u = a.purchase) || void 0 === u ? void 0 : u.error) || new Error('Unknown consume purchase error')), ts(r, ds).removeListener(e);
+                                    var s; var u; if (!a.purchase || 'object' !== Wa(a.purchase)) return r._rejectPromiseDecorator(f.CONSUME_PURCHASE, new Error('Invalid purchase')), void ts(r, ds).removeListener(e); null !== (s = a.purchase) && void 0 !== s && s.status ? (r._paymentsPurchases.splice(n, 1), r._resolvePromiseDecorator(f.CONSUME_PURCHASE, a.result)) : r._rejectPromiseDecorator(f.CONSUME_PURCHASE, (null === (u = a.purchase) || void 0 === u ? void 0 : u.error) || new Error('Unknown consume purchase error')), ts(r, ds).removeListener(e);
                                 }
                             })), ts(this, ds).send({
                                 type: t.PAYMENTS,
@@ -7402,8 +7402,8 @@
                 {
                     key: 'paymentsGetCatalog',
                     value(){
-                        var e = this, r = this._getPromiseDecorator(f.GET_CATALOG); if (!r){
-                            r = this._createPromiseDecorator(f.GET_CATALOG); var n = this._paymentsGetProductsPlatformData(), o = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function r(i){
+                        var e = this; var r = this._getPromiseDecorator(f.GET_CATALOG); if (!r){
+                            r = this._createPromiseDecorator(f.GET_CATALOG); var n = this._paymentsGetProductsPlatformData(); var o = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function r(i){
                                 var a = i.data; if ((null == a ? void 0 : a.type) === t.PAYMENTS && a.action === f.GET_CATALOG && a.id === o){
                                     var s = n.map((function(e){
                                         return {
@@ -7427,7 +7427,7 @@
                 {
                     key: 'paymentsGetPurchases',
                     value(){
-                        var e = this, r = this._getPromiseDecorator(f.GET_PURCHASES); if (!r){
+                        var e = this; var r = this._getPromiseDecorator(f.GET_PURCHASES); if (!r){
                             r = this._createPromiseDecorator(f.GET_PURCHASES); var n = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function r(o){
                                 var i = o.data; if ((null == i ? void 0 : i.type) === t.PAYMENTS && i.action === f.GET_PURCHASES && i.id === n){
                                     var a = e._paymentsGetProductsPlatformData(); e._paymentsPurchases = i.purchases.map((function(e){
@@ -7449,7 +7449,7 @@
                 {
                     key: 'getRemoteConfig',
                     value(){
-                        var e = this, r = this._getPromiseDecorator(f.GET_REMOTE_CONFIG); if (!r){
+                        var e = this; var r = this._getPromiseDecorator(f.GET_REMOTE_CONFIG); if (!r){
                             r = this._createPromiseDecorator(f.GET_REMOTE_CONFIG); var n = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function r(o){
                                 var i = o.data; (null == i ? void 0 : i.type) === t.REMOTE_CONFIG && i.action === f.GET_REMOTE_CONFIG && i.id === n && (e._resolvePromiseDecorator(f.GET_REMOTE_CONFIG, i.result), ts(e, ds).removeListener(r));
                             })), ts(this, ds).send({
@@ -7463,7 +7463,7 @@
                 {
                     key: 'clipboardWrite',
                     value(e){
-                        var r = this, n = this._getPromiseDecorator(f.CLIPBOARD_WRITE); if (!n){
+                        var r = this; var n = this._getPromiseDecorator(f.CLIPBOARD_WRITE); if (!n){
                             n = this._createPromiseDecorator(f.CLIPBOARD_WRITE); var o = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function e(n){
                                 var i = n.data; (null == i ? void 0 : i.type) === t.CLIPBOARD && i.action === f.CLIPBOARD_WRITE && i.id === o && (r._resolvePromiseDecorator(f.CLIPBOARD_WRITE, !0), ts(r, ds).removeListener(e));
                             })), ts(this, ds).send({
@@ -7478,7 +7478,7 @@
                 {
                     key: 'clipboardRead',
                     value(){
-                        var e = this, r = this._getPromiseDecorator(as); if (!r){
+                        var e = this; var r = this._getPromiseDecorator(as); if (!r){
                             r = this._createPromiseDecorator(as); var n = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function r(o){
                                 var i = o.data; if ((null == i ? void 0 : i.type) === t.CLIPBOARD && i.action === as && i.id === n){
                                     var a = i.text; e._resolvePromiseDecorator(as, a), ts(e, ds).removeListener(r);
@@ -7507,9 +7507,9 @@
                 {
                     key: 'getLeaderboardScore',
                     value(e){
-                        var r = this, n = Object.values(e || {}).find((function(e){
-                                return null == e ? void 0 : e.leaderboardName;
-                            })), o = null == n ? void 0 : n.leaderboardName, i = ''.concat(f.GET_LEADERBOARD_SCORE, '_').concat(o), a = this._getPromiseDecorator(i); if (!a){
+                        var r = this; var n = Object.values(e || {}).find((function(e){
+                            return null == e ? void 0 : e.leaderboardName;
+                        })); var o = null == n ? void 0 : n.leaderboardName; var i = ''.concat(f.GET_LEADERBOARD_SCORE, '_').concat(o); var a = this._getPromiseDecorator(i); if (!a){
                             a = this._createPromiseDecorator(i); var s = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function e(n){
                                 var a = n.data; (null == a ? void 0 : a.type) === t.LEADERBOARD && a.action === f.GET_LEADERBOARD_SCORE && a.id === s && a.leaderboardName === o && (r._resolvePromiseDecorator(i, a.score), ts(r, ds).removeListener(e));
                             })), ts(this, ds).send({
@@ -7525,7 +7525,7 @@
                 {
                     key: 'getLeaderboardEntries',
                     value(e){
-                        var r = this, n = this._getPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); if (!n){
+                        var r = this; var n = this._getPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); if (!n){
                             n = this._createPromiseDecorator(f.GET_LEADERBOARD_ENTRIES); var o = ts(this, ds).generateMessageId(); ts(this, ds).addListener((function e(n){
                                 var i; (null === (i = n.data) || void 0 === i ? void 0 : i.type) === t.LEADERBOARD && n.data.action === f.GET_LEADERBOARD_ENTRIES && n.data.id === o && (r._resolvePromiseDecorator(f.GET_LEADERBOARD_ENTRIES, n.data.entries), ts(r, ds).removeListener(e));
                             })), ts(this, ds).send({
@@ -7590,22 +7590,22 @@
         }(Xt); function vs(){
             return this._supportedFeatures.includes('isStorageRemoteLocalSupported');
         } function _s(e){
-            var t, r, n, o; this._supportedFeatures = e.supportedFeatures || [], this._isBannerSupported = this._supportedFeatures.includes('isBannerSupported'); var i = e.config, a = void 0 === i ? {} : i; this._deviceType = null !== (t = a.deviceType) && void 0 !== t ? t : Ja(qa(Ha.prototype), 'deviceType', this), this._platformLanguage = null !== (r = a.platformLanguage) && void 0 !== r ? r : Ja(qa(Ha.prototype), 'platformLanguage', this), this._platformTld = null !== (n = a.platformTld) && void 0 !== n ? n : Ja(qa(Ha.prototype), 'platformTld', this), this._platformPayload = null !== (o = a.platformPayload) && void 0 !== o ? o : Ja(qa(Ha.prototype), 'platformPayload', this), this._paymentsPurchases = e.purchases || [], this._isInitialized = !0, this._resolvePromiseDecorator(f.INITIALIZE), ts(this, ds).send({
+            var t; var r; var n; var o; this._supportedFeatures = e.supportedFeatures || [], this._isBannerSupported = this._supportedFeatures.includes('isBannerSupported'); var i = e.config; var a = void 0 === i ? {} : i; this._deviceType = null !== (t = a.deviceType) && void 0 !== t ? t : Ja(qa(Ha.prototype), 'deviceType', this), this._platformLanguage = null !== (r = a.platformLanguage) && void 0 !== r ? r : Ja(qa(Ha.prototype), 'platformLanguage', this), this._platformTld = null !== (n = a.platformTld) && void 0 !== n ? n : Ja(qa(Ha.prototype), 'platformTld', this), this._platformPayload = null !== (o = a.platformPayload) && void 0 !== o ? o : Ja(qa(Ha.prototype), 'platformPayload', this), this._paymentsPurchases = e.purchases || [], this._isInitialized = !0, this._resolvePromiseDecorator(f.INITIALIZE), ts(this, ds).send({
                 type: 'liveness',
                 action: 'ping',
                 options: { version: '1.21.0' },
             });
         } function gs(e){
-            var r = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : [], n = Array.isArray(r) ? r : [], o = performance.getEntriesByType('resource') || [], i = n.length > 0
-                    ? n
-                    : [
-                        'name',
-                        'initiatorType',
-                    ], a = o.map((function(e){
-                    var t = {}; return i.forEach((function(r){
-                        r in e && (t[r] = e[r]);
-                    })), t;
-                })); return ts(this, ds).send({
+            var r = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : []; var n = Array.isArray(r) ? r : []; var o = performance.getEntriesByType('resource') || []; var i = n.length > 0
+                ? n
+                : [
+                    'name',
+                    'initiatorType',
+                ]; var a = o.map((function(e){
+                var t = {}; return i.forEach((function(r){
+                    r in e && (t[r] = e[r]);
+                })), t;
+            })); return ts(this, ds).send({
                 type: t.PLATFORM,
                 action: cs,
                 id: e,
@@ -7660,14 +7660,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && ws(e, t);
-            }(c, t); var r, n, o, s, u = (o = c, s = function(){
+            }(c, t); var r; var n; var o; var s; var u = (o = c, s = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Os(o); if (s){
+                var e; var t = Os(o); if (s){
                     var r = Os(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === bs(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return function(e){
@@ -7720,7 +7720,7 @@
                 {
                     key: 'showInterstitial',
                     value(){
-                        var e = this, t = !1; this._platformSdk.commercialBreak((function(){
+                        var e = this; var t = !1; this._platformSdk.commercialBreak((function(){
                             t = !0, e._setInterstitialState(i.OPENED);
                         })).then((function(){
                             t ? e._setInterstitialState(i.CLOSED) : e._setInterstitialState(i.FAILED);
@@ -7732,7 +7732,7 @@
                 {
                     key: 'showRewarded',
                     value(){
-                        var e = this, t = !1; this._platformSdk.rewardedBreak((function(){
+                        var e = this; var t = !1; this._platformSdk.rewardedBreak((function(){
                             t = !0, e._setRewardedState(a.OPENED);
                         })).then((function(r){
                             t ? (r && e._setRewardedState(a.REWARDED), e._setRewardedState(a.CLOSED)) : e._setRewardedState(a.FAILED);
@@ -7807,7 +7807,7 @@
             }(e); return 'symbol' == ks(t) ? t : String(t);
         } function Ms(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to get private field on non-instance'); return r;
-        } var Fs = new WeakSet, Hs = new WeakSet, Us = new WeakSet, zs = new WeakSet; function xs(){
+        } var Fs = new WeakSet; var Hs = new WeakSet; var Us = new WeakSet; var zs = new WeakSet; function xs(){
             var e = this; return arguments.length > 0 && void 0 !== arguments[0] && arguments[0] || !this._preloadedRewardedPromise
                 ? (this._preloadedRewardedPromise = Ms(this, Us, Vs).call(this, !0).catch((function(){
                     e._preloadedRewardedPromise = null;
@@ -7820,7 +7820,7 @@
                 })), this._preloadedInterstitialPromise)
                 : this._preloadedInterstitialPromise;
         } function Vs(){
-            var e = this, t = arguments.length > 0 && void 0 !== arguments[0] && arguments[0]; return new Promise((function(r, n){
+            var e = this; var t = arguments.length > 0 && void 0 !== arguments[0] && arguments[0]; return new Promise((function(r, n){
                 var o = 3; !function i(){
                     o -= 1, e._platformSdk.loadAdsAsync(t).then(r).catch((function(e){
                         'LOAD_ADS_FAILURE' !== e.code || o < 1 ? n(e) : i();
@@ -7838,14 +7838,14 @@
                         configurable: !0,
                     },
                 }), Object.defineProperty(e, 'prototype', { writable: !1 }), t && Ls(e, t);
-            }(l, t); var r, n, o, u, c = (o = l, u = function(){
+            }(l, t); var r; var n; var o; var u; var c = (o = l, u = function(){
                 if ('undefined' == typeof Reflect || !Reflect.construct) return !1; if (Reflect.construct.sham) return !1; if ('function' == typeof Proxy) return !0; try {
                     return Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], (function(){}))), !0;
                 } catch (e){
                     return !1;
                 }
             }(), function(){
-                var e, t = Ns(o); if (u){
+                var e; var t = Ns(o); if (u){
                     var r = Ns(this).constructor; e = Reflect.construct(t, arguments, r);
                 } else e = t.apply(this, arguments); return function(e, t){
                     if (t && ('object' === ks(t) || 'function' == typeof t)) return t; if (void 0 !== t) throw new TypeError('Derived constructors may only return object or undefined'); return js(e);
@@ -7946,7 +7946,7 @@
                 {
                     key: 'showBanner',
                     value(){
-                        var e = this, t = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).position || 'top:728x90'; this._platformSdk.showDisplayAdsAsync(Array.isArray(t) ? t : [t]).then((function(){
+                        var e = this; var t = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).position || 'top:728x90'; this._platformSdk.showDisplayAdsAsync(Array.isArray(t) ? t : [t]).then((function(){
                             e._setBannerState(s.SHOWN);
                         })).catch((function(){
                             e._setBannerState(s.FAILED);
@@ -7996,7 +7996,7 @@
                 {
                     key: 'paymentsPurchase',
                     value(e){
-                        var t = this, r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.iap.purchaseAsync(r).then((function(r){
+                        var t = this; var r = this._paymentsGetProductPlatformData(e); if (!r) return Promise.reject(); var n = this._getPromiseDecorator(f.PURCHASE); return n || (n = this._createPromiseDecorator(f.PURCHASE), this._platformSdk.iap.purchaseAsync(r).then((function(r){
                             if ('IAP_PURCHASE_FAILURE' !== r.code){
                                 var n = Rs(Rs({ commonId: e }, r.receipt), {}, { receiptSignature: r.receiptSignature }); t._paymentsPurchases.push(n), t._resolvePromiseDecorator(f.PURCHASE, n);
                             } else t._rejectPromiseDecorator(f.PURCHASE, r.description);
@@ -8008,7 +8008,7 @@
                 {
                     key: 'paymentsConsumePurchase',
                     value(e){
-                        var t = this, r = this._paymentsPurchases.findIndex((function(t){
+                        var t = this; var r = this._paymentsPurchases.findIndex((function(t){
                             return t.commonId === e;
                         })); if (r < 0) return Promise.reject(); var n = this._getPromiseDecorator(f.CONSUME_PURCHASE); return n || (n = this._createPromiseDecorator(f.CONSUME_PURCHASE), this._platformSdk.iap.consumeAsync(this._paymentsPurchases[r].productId).then((function(e){
                             'IAP_CONSUME_FAILURE' !== e.code ? (t._paymentsPurchases.splice(r, 1), t._resolvePromiseDecorator(f.CONSUME_PURCHASE, Rs(Rs({}, e.consumptionReceipt), {}, { consumptionSignature: e.consumptionSignature }))) : t._rejectPromiseDecorator(f.CONSUME_PURCHASE, e.description);
@@ -8020,7 +8020,7 @@
                 {
                     key: 'paymentsGetCatalog',
                     value(){
-                        var e = this, t = this._paymentsGetProductsPlatformData(); if (!t) return Promise.reject(); var r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), this._platformSdk.iap.getAllAddOnsAsync().then((function(r){
+                        var e = this; var t = this._paymentsGetProductsPlatformData(); if (!t) return Promise.reject(); var r = this._getPromiseDecorator(f.GET_CATALOG); return r || (r = this._createPromiseDecorator(f.GET_CATALOG), this._platformSdk.iap.getAllAddOnsAsync().then((function(r){
                             if ('IAP_GET_ALL_ADD_ONS_FAILURE' !== r.code){
                                 var n = t.map((function(e){
                                     var t = r.find((function(t){
@@ -8047,7 +8047,7 @@
                 {
                     key: 'paymentsGetPurchases',
                     value(){
-                        var e = this, t = this._getPromiseDecorator(f.GET_PURCHASES); return t || (t = this._createPromiseDecorator(f.GET_PURCHASES), this._platformSdk.iap.getPurchasesAsync().then((function(t){
+                        var e = this; var t = this._getPromiseDecorator(f.GET_PURCHASES); return t || (t = this._createPromiseDecorator(f.GET_PURCHASES), this._platformSdk.iap.getPurchasesAsync().then((function(t){
                             if ('IAP_GET_PURCHASES_FAILURE' !== t.code){
                                 var r = e._paymentsGetProductsPlatformData(); e._paymentsPurchases = t.map((function(e){
                                     return Rs(Rs({
@@ -8081,7 +8081,7 @@
             for (var t = 1; t < arguments.length; t++){
                 var r = null != arguments[t] ? arguments[t] : {}; t % 2
                     ? Js(Object(r), !0).forEach((function(t){
-                        var n, o, i; n = e, o = t, i = r[t], (o = Qs(o)) in n
+                        var n; var o; var i; n = e, o = t, i = r[t], (o = Qs(o)) in n
                             ? Object.defineProperty(n, o, {
                                 value: i,
                                 enumerable: !0,
@@ -8126,8 +8126,8 @@
             }(e, iu(e, t, 'get'));
         } function iu(e, t, r){
             if (!t.has(e)) throw new TypeError('attempted to ' + r + ' private field on non-instance'); return t.get(e);
-        } var au = new WeakMap, su = new WeakMap, uu = new WeakMap, cu = new WeakMap, lu = new WeakSet, fu = new WeakSet, pu = new WeakSet; function du(){
-            var t, r = e.MOCK; this._options || (this._options = {}); var n = new URL(window.location.href); if (this._options.forciblySetPlatformId)r = nu(this, fu, yu).call(this, this._options.forciblySetPlatformId.toLowerCase()); else {
+        } var au = new WeakMap; var su = new WeakMap; var uu = new WeakMap; var cu = new WeakMap; var lu = new WeakSet; var fu = new WeakSet; var pu = new WeakSet; function du(){
+            var t; var r = e.MOCK; this._options || (this._options = {}); var n = new URL(window.location.href); if (this._options.forciblySetPlatformId)r = nu(this, fu, yu).call(this, this._options.forciblySetPlatformId.toLowerCase()); else {
                 var o = [
                     'y',
                     'a',
@@ -8164,7 +8164,7 @@
                     writable: !0,
                     value: {},
                 });
-            } var f, p; return f = r, (p = [
+            } var f; var p; return f = r, (p = [
                 {
                     key: 'version',
                     get(){

@@ -61,7 +61,7 @@ export class Cube {
         direction?: Direction;
         color?: string;
     }) {
-        let color, visibleModeClasses;
+        let color; let visibleModeClasses;
 
         this.x = o.x;
         this.y = o.y;

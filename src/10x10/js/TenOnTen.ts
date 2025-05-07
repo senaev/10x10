@@ -50,10 +50,6 @@ export class TenOnTen {
         //язык
         this.lang = 'ru';
 
-        //console.log(d.f.level.colorsCount(this.level));
-        console.log('cubesCount:', data.f.level.cubesCount(this.level));
-        console.log('colorsCount:', data.f.level.colorsCount(this.level));
-
         //датчик конца хода
         this.end = null;
 
@@ -100,10 +96,10 @@ export class TenOnTen {
     //комбинаций начальную
     public refresh = () => {
         this.blockApp = true;
-        const cubes = this.cubes;
+        const cubesLocal = this.cubes;
         //удаляем нафиг кубики с главного поля
-        cubes._mainEach(function (cube, field, x, y) {
-            cubes._set({
+        cubesLocal._mainEach(function (cube, field, x, y) {
+            cubesLocal._set({
                 field,
                 x,
                 y,
@@ -117,8 +113,8 @@ export class TenOnTen {
             function (app) {
                 app.generateMainCubes();
                 setTimeout(
-                    function (app) {
-                        app.blockApp = false;
+                    function (appLocal) {
+                        appLocal.blockApp = false;
                     },
                     data.animTime * 8,
                     app
@@ -132,7 +128,7 @@ export class TenOnTen {
     //генерируем маску для предидущего хода
     private generateMask(): Mask {
         const mask: Partial<Mask> = {};
-        const cubes = this.cubes;
+        const cubesLocal = this.cubes;
 
         for (const fieldNumber in data.fields) {
             const field = data.fields[fieldNumber];
@@ -141,7 +137,7 @@ export class TenOnTen {
             for (let x = 0; x < data.cubesWidth; x++) {
                 fieldValue[x] = [];
                 for (let y = 0; y < data.cubesWidth; y++) {
-                    const c = cubes._get({
+                    const c = cubesLocal._get({
                         field,
                         x,
                         y,
@@ -198,8 +194,8 @@ export class TenOnTen {
     //Initialize map function
     private initialize() {
     //генерируем кубики в боковых панелях
-        cubes._sideEach((cube, field, x, y) => {
-            cube = new Cube({
+        cubes._sideEach((_cube, field, x, y) => {
+            new Cube({
                 x,
                 y,
                 field,
@@ -214,8 +210,6 @@ export class TenOnTen {
     private generateMainCubes() {
         const firstCubesPosition = data.f.level.getPositions(this.level);
         let nullCells: { x: number; y: number }[] = [];
-
-        let fPos;
 
         for (
             let number = 0, len = data.f.level.cubesCount(this.level);
@@ -248,7 +242,7 @@ export class TenOnTen {
 
                 //шанс попадания кубика в крайнее поле - чем больше, тем ниже
                 const chance = 2;
-                for (var key = 0; key < chance; key++) {
+                for (let key = 0; key < chance; key++) {
                     cell = nullCells.shift()!;
                     if (
                         cell.x === 0 ||
@@ -270,11 +264,10 @@ export class TenOnTen {
 
             //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
             const colorsCount = data.f.level.colorsCount(this.level);
-            const colorNumber = data.f.rand(0, colorsCount - 1);
 
             //цвета, которые есть в смежных кубиках
             const apperanceColors = [];
-            for (var key = 0; key < 4; key++) {
+            for (let key = 0; key < 4; key++) {
                 const address: CubeAddress = {
                     x: cell!.x,
                     y: cell!.y,
@@ -299,7 +292,7 @@ export class TenOnTen {
 
             //цвета, которых нету в смежных
             const noApperanceColors = [];
-            for (var key = 0; key < colorsCount; key++) {
+            for (let key = 0; key < colorsCount; key++) {
                 if (apperanceColors.indexOf(data.colors[key]) === -1) {
                     noApperanceColors.push(data.colors[key]);
                 }
@@ -331,13 +324,13 @@ export class TenOnTen {
      * game_over - конец игры,
      * next_level - конец уровня, переход на следующий
      */
-        const cubes = this.cubes;
+        const cubesLocal = this.cubes;
         let game_over = true;
         let next_level = true;
 
         for (let x = 0; x < data.cubesWidth; x++) {
             for (let y = 0; y < data.cubesWidth; y++) {
-                const cube = cubes['main'][x][y];
+                const cube = cubesLocal['main'][x][y];
 
                 //если на поле еще остались кубики, уровень не завершен
                 if (cube !== null) {
@@ -428,9 +421,8 @@ export class TenOnTen {
                                     action: 'remove',
                                 });
                             }
-                        }
-                        //если же раньше тут тоже был кубик
-                        else {
+                        } else {
+                            //если же раньше тут тоже был кубик
                             //а сейчас кубика нету
                             //заполняем клетку кубиком
                             if (cube === null) {
@@ -442,9 +434,8 @@ export class TenOnTen {
                                     cube: null,
                                     action: 'add',
                                 });
-                            }
+                            } else {
                             //если и раньше и сейчас - нужно сравнить эти значения
-                            else {
                                 //пробегаемся по каждому параметру
                                 for (const prop in pCube) {
                                     //если какие-то параметры различаются,
@@ -510,7 +501,6 @@ export class TenOnTen {
                 break;
             default:
                 throw new Error('Неизвествое значение в changed[key].action: ' + changed[key].action);
-                break;
             }
         }
 

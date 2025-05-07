@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "webpack:watch": "webpack --watch"
+    "serve:static": "ts-node ./src/serve-static/enableStaticFilesServing.ts",
+    "webpack:watch": "webpack --watch",
+    "dev": "concurrently -k 'npm run webpack:watch' 'npm run serve:static'"
   },
   "repository": {
     "type": "git",
@@ -20,11 +22,11 @@
   "devDependencies": {
     "@types/jquery": "^3.5.32",
     "@types/jquery.transit": "^0.9.33",
+    "concurrently": "^9.1.2",
     "css-loader": "^7.1.2",
     "jquery": "^3.7.1",
     "jquery.transit": "^0.9.12",
     "postcss-loader": "^8.1.1",
-    "serve": "^14.2.4",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",

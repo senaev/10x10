@@ -9,13 +9,13 @@ import { MainMask } from "./mainMask";
  * для основного приложения
  */
 export class MoveMap {
+  public mainMask: any;
   public beyondTheSide: any[];
+  public startCubes: any[];
+  public toSideActions: any[];
 
   private animationMap: any[];
-  private toSideActions: any[];
   private app: any;
-  private mainMask: any;
-  private startCubes: any[];
   private cubes: any;
   private animationLength: number;
   private colorSheme: Record<string, number>;

@@ -21,7 +21,7 @@ export class MCube {
   public extra?: Record<string, any>;
   public mainMask: MainMask;
   public cube: Cube;
-  public inGroup: number | null;
+  public inGroup: MCube[] | null;
   public steps: Step[];
   public rand: number;
 

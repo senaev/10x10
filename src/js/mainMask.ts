@@ -14,7 +14,7 @@ import { MoveMap } from "./moveMap";
 export class MainMask {
   //основной массив со значениями
   //сюда будут попадать м-кубики, учавствующие в анимации
-  private arr: MCube[] = [];
+  public readonly arr: MCube[] = [];
   private moveMap: MoveMap;
 
   constructor(o: { cubes: Cubes; startCubes: Cube[]; moveMap: MoveMap }) {
@@ -88,14 +88,14 @@ export class MainMask {
           this.arr[key].steps.push({ do: null });
         } else {
           this.arr[key].steps.push({
-            do: "s" + this.arr[key].direction.charAt(0),
+            do: "s" + this.arr[key].direction!.charAt(0),
           });
         }
       }
     }
 
     this.arr.sort(function (a, b) {
-      return a.cube.toMine - b.cube.toMine;
+      return a.cube.toMine! - b.cube.toMine!;
     });
 
     this.step();
@@ -154,9 +154,9 @@ export class MainMask {
   }
 
   searchAdjacentCubes() {
-    var arr = this.arr,
-      byColorPrev = {},
-      byColor = {};
+    const arr = this.arr;
+    const byColorPrev: Record<string, MCube[]> = {};
+    const byColor: Record<string, MCube[]> = {};
 
     //создаем объект с массивами м-кубиков по цветам
     for (var key in arr) {
@@ -191,7 +191,7 @@ export class MainMask {
     }
 
     //ищем группы смежных кубиков и помещаем их в массив groups
-    var groups = [];
+    let groups: MCube[][] = [];
     for (var key in byColor) {
       groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
     }
@@ -199,14 +199,14 @@ export class MainMask {
   }
 
   //функция поиска смежных в массиве по цветам
-  searchAdjacentCubesByColor(arr) {
+  searchAdjacentCubesByColor(arr: MCube[]): MCube[][] {
     var group;
     for (var key = 0; key < arr.length - 1; key++) {
       //текущий кубик
       var current = arr[key];
       for (var key1 = key + 1; key1 < arr.length; key1++) {
         //кубик, который проверяем на смежность текущену кубику
-        var compare = arr[key1];
+        const compare: MCube = arr[key1];
         //если кубики смежные
         if (
           Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) ===
@@ -257,9 +257,9 @@ export class MainMask {
 
     //теперь, когда группы созданы, выбираем из кубиков все
     //существующие неповторяющиеся группы
-    var groups = [];
-    for (var key in arr) {
-      group = arr[key].inGroup;
+    const groups: MCube[][] = [];
+    for (const key in arr) {
+      const group = arr[key].inGroup;
       //добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
       if (group !== null && group.length > 2 && groups.indexOf(group) === -1) {
         groups.push(group);
@@ -270,9 +270,8 @@ export class MainMask {
   }
 
   //поскольку маска - несортированный масив, получаем куб методом перебора
-  _get(o) {
-    var arr;
-    arr = this.arr;
+  _get(o: { x: number; y: number }): MCube | null {
+    const arr = this.arr;
     for (var key in arr) {
       if (arr[key].x === o.x && arr[key].y === o.y) {
         return arr[key];

@@ -1,5 +1,7 @@
+import { Cube } from "./cube";
 import { data } from "./data";
 import { MainMask } from "./mainMask";
+import { MCube } from "./mCube";
 
 /**
  * класс для удобной работы с абстрактным классом MainMask
@@ -9,10 +11,10 @@ import { MainMask } from "./mainMask";
  * для основного приложения
  */
 export class MoveMap {
-  public mainMask: any;
-  public beyondTheSide: any[];
-  public startCubes: any[];
-  public toSideActions: any[];
+  public mainMask: MainMask;
+  public beyondTheSide: MCube[];
+  public startCubes: Cube[];
+  public toSideActions: MCube[];
 
   private animationMap: any[];
   private app: any;

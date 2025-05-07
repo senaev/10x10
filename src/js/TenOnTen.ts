@@ -13,17 +13,14 @@ export type MaskFieldValue = {
 export type Mask = Record<Field, (MaskFieldValue | null)[][]>;
 
 export class TenOnTen {
-  public container: JQuery<HTMLElement>;
+  public readonly container: JQuery<HTMLElement>;
   public blockApp: boolean;
   public level: number;
   public readonly cubes: typeof cubes;
 
   public moveMap: MoveMap | undefined;
   public end: string | null;
-
-  private lang: keyof (typeof data.lang)[keyof typeof data.lang];
-
-  private previousStepMap: Mask | undefined;
+  public readonly undoButton: UndoButton;
 
   //счетчик для значений toMine кубиков, попадающих в главное поле
   public readonly mainCounter: () => number = (function () {
@@ -33,7 +30,9 @@ export class TenOnTen {
     };
   })();
 
-  private undoButton: UndoButton;
+  private readonly lang: keyof (typeof data.lang)[keyof typeof data.lang];
+
+  private previousStepMap: Mask | undefined;
 
   constructor({ container }: { container: HTMLElement }) {
     //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
@@ -104,7 +103,7 @@ export class TenOnTen {
     //удаляем нафиг кубики с главного поля
     cubes._mainEach(function (cube, field, x, y) {
       cubes._set({ field: field, x: x, y: y }, null);
-      cube.animate({ action: "remove", duration: 4, delay: 0 });
+      cube.animate({ action: "remove", duration: 4 });
     });
     setTimeout(
       function (app) {
@@ -157,7 +156,7 @@ export class TenOnTen {
   }
 
   //переводим игру на следующий уровень
-  private nextLevel() {
+  public nextLevel() {
     var colorsCount = data.f.level.colorsCount(this.level);
     this.level++;
     if (data.f.level.colorsCount(this.level) > colorsCount) {
@@ -451,7 +450,7 @@ export class TenOnTen {
     }
 
     for (const key in changed) {
-      var cube = changed[key].cube;
+      let cube = changed[key].cube;
       switch (changed[key].action) {
         case "add":
           //создаем новый кубик с теми же параметрами и подменяем им предидущий
@@ -476,29 +475,32 @@ export class TenOnTen {
             },
             null
           );
-          cube.animate({ action: "remove", duration: 4, delay: 0 });
+          cube!.animate({ action: "remove", duration: 4 });
           break;
         case "change":
-          cube.change({
-            color: changed[key].pCube.color,
-            direction: changed[key].pCube.direction,
+          cube!.change({
+            color: changed[key].pCube!.color,
+            direction: changed[key].pCube!.direction!,
           });
           break;
         default:
           throw new Error(
-            "Неизвествое значение в changed[key].action: ",
-            changed[key].action
+            "Неизвествое значение в changed[key].action: " + changed[key].action
           );
           break;
       }
     }
 
     //меняем значения ту майн всех кубиков на поле
-    for (var x in this.previousStepMap["main"]) {
-      for (var y in this.previousStepMap["main"][x]) {
-        if (this.previousStepMap["main"][x][y] !== null) {
-          this.cubes._get({ field: "main", x: x, y: y }).toMine =
-            this.previousStepMap["main"][x][y].toMine;
+    const mainField = this.previousStepMap!["main"];
+    for (var x in mainField) {
+      for (var y in mainField[x]) {
+        if (mainField[x][y] !== null) {
+          this.cubes._get({
+            field: "main",
+            x: Number(x),
+            y: Number(y),
+          })!.toMine = mainField[x][y]!.toMine!;
         }
       }
     }
@@ -520,7 +522,5 @@ export class TenOnTen {
     this.cubes._mergeMoveMap(this.moveMap);
 
     this.checkStepEnd();
-
-    //console.log("//////////ITOG CUBES:", this.cubes);
   }
 }

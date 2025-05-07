@@ -4,7 +4,10 @@ import { data, Field } from "./data";
 import { TenOnTen } from "./TenOnTen";
 export type Direction = "top" | "bottom" | "left" | "right";
 
-export type CubeAnimateAction = { action: string; duration: number };
+export type CubeAnimateAction = {
+  action: string;
+  duration: number;
+};
 
 export type Transition = Partial<{
   duration: number;
@@ -43,9 +46,9 @@ export class Cube {
   public extra?: Record<string, any>;
   public toMine?: number | null;
   public readonly app: TenOnTen;
+  public readonly $el: JQuery<HTMLElement>;
 
   private disapperance?: string;
-  private $el: JQuery<HTMLElement>;
 
   constructor(o: {
     x: number;

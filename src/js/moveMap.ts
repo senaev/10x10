@@ -14,7 +14,7 @@ import { TenOnTen } from "./TenOnTen";
  */
 export class MoveMap {
   public readonly mainMask: MainMask;
-  public readonly beyondTheSide: MCube[] = [];
+  public readonly beyondTheSide: Cube[] = [];
   public readonly startCubes: Cube[];
   public readonly toSideActions: MCube[] = [];
 
@@ -124,12 +124,12 @@ export class MoveMap {
     }
     //сортируем попавшие в боковое поле м-кубики по времени попадания
     this.toSideActions.sort(function (a, b) {
-      return a.toSideTime - b.toSideTime;
+      return a.toSideTime! - b.toSideTime!;
     });
   }
 
   //когда ход прощитан, запускаем саму анимацию
-  private animate() {
+  public animate() {
     var map;
     var startCubes = this.startCubes;
 
@@ -167,10 +167,10 @@ export class MoveMap {
               app.nextLevel();
               break;
             case "game_over":
-              app.endOfGame();
+              alert("game over");
               break;
             default:
-              throw new Error("Неверное значение в app.end: ", app.end);
+              throw new Error("Неверное значение в app.end: " + app.end);
               break;
           }
         }

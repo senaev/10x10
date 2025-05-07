@@ -2,6 +2,7 @@ import { Cube } from "./cube";
 import { data, Field, FIELDS } from "./data";
 import { MoveMap } from "./moveMap";
 import { TenOnTen } from "./TenOnTen";
+
 export type CubesField = Record<number, Record<number, Cube | null>>;
 export type CubesFields = Record<Field, CubesField>;
 
@@ -170,7 +171,7 @@ export const cubes = {
     cube.x = line[line.length - 1].x;
     cube.y = line[line.length - 1].y;
     //получаем удаляемый (дальний от mainField в линии) кубик
-    var removedCube = this._get(line[0]);
+    const removedCube = this._get(line[0])!;
     //сдвигаем линию на одну клетку от mainField
     for (var key = 0; key < line.length - 1; key++) {
       this._set(line[key], this._get(line[key + 1]));
@@ -359,26 +360,28 @@ export const cubes = {
         //вычисляем, какие кубики будем двигать при вставке в линию
         var pos =
           data.cubesWidth - allCubesToSideInThisLine.length + posInSide! - 1;
-        var c1, c2, cr;
+        let c1: Cube;
+        let c2: Cube;
+        let cr: Cube;
 
         //смысл этих условий в том, что если кубик, который надо анимировать,
         //еще присутствует в линии, мы берем этот кубик оттуда, если же
         //он уже удален из линии, но его нужно анимировать, мы берем его
         //из массива удаленных кубиков этой линии
         if (pos - 2 > -1) {
-          cr = this._get(line[pos - 2]);
+          cr = this._get(line[pos - 2])!;
         } else {
           cr = removeBS[removeBS.length + (pos - 2)];
         }
 
         if (pos > -1) {
-          c1 = this._get(line[pos]);
+          c1 = this._get(line[pos])!;
         } else {
           c1 = removeBS[removeBS.length + pos];
         }
 
         if (pos - 1 > -1) {
-          c2 = this._get(line[pos - 1]);
+          c2 = this._get(line[pos - 1])!;
         } else {
           c2 = removeBS[removeBS.length + (pos - 1)];
         }

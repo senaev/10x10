@@ -20,10 +20,12 @@
   },
   "homepage": "https://github.com/senaev/10x10#readme",
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "@types/jquery": "^3.5.32",
     "@types/jquery.transit": "^0.9.33",
     "concurrently": "^9.1.2",
     "css-loader": "^7.1.2",
+    "express": "^5.1.0",
     "jquery": "^3.7.1",
     "jquery.transit": "^0.9.12",
     "postcss-loader": "^8.1.1",

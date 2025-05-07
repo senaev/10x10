@@ -4,7 +4,7 @@ import * as webpack from "webpack";
 export default () => {
   return {
     mode: "development",
-    entry: "./src/index.ts",
+    entry: "./src/10x10/index.ts",
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "main.js",

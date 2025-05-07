@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
-        "cubes"
+        "cubes",
+        "POSITIONS"
     ],
     "search.exclude": {
         "**/node_modules": true,

@@ -1,10 +1,11 @@
+import { Field, FIELDS } from '../const/FIELDS';
+
 import { Cube } from './cube';
 import {
-    data, Field, FIELDS,
+    data,
 } from './data';
 import { MoveMap } from './moveMap';
 import { TenOnTen } from './TenOnTen';
-
 export type CubesField = Record<number, Record<number, Cube | null>>;
 export type CubesFields = Record<Field, CubesField>;
 
@@ -72,15 +73,17 @@ export class Cubes {
     //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     //с каждым кубиком
     public _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
-        for (const key in data.fields) {
-            if (data.fields[key] !== 'main') {
-                for (let x = 0; x < data.cubesWidth; x++) {
-                    for (let y = 0; y < data.cubesWidth; y++) {
-                        func(this[data.fields[key]][x][y]!, data.fields[key], x, y);
-                    }
+        FIELDS.forEach((field) => {
+            if (field === 'main') {
+                return;
+            }
+
+            for (let x = 0; x < data.cubesWidth; x++) {
+                for (let y = 0; y < data.cubesWidth; y++) {
+                    func(this[field][x][y]!, field, x, y);
                 }
             }
-        }
+        });
     }
 
     //пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым

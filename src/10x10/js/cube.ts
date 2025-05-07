@@ -1,9 +1,14 @@
 import $ from 'jquery';
 
+import { CUBE_COLORS } from '../const/CUBE_COLORS';
+import { Field } from '../const/FIELDS';
+import { getLevelColorsCount } from '../utils/getLevelColorsCount';
+
 import { CubeAddress } from './cubes';
-import { data, Field } from './data';
+import { data } from './data';
 import { Action } from './moveMap';
 import { TenOnTen } from './TenOnTen';
+
 export type Direction = 'top' | 'bottom' | 'left' | 'right';
 
 export type CubeAnimateAction = {
@@ -102,8 +107,8 @@ export class Cube {
         //задаем цвет кубика
         if (o.color === undefined) {
             color =
-        data.colors[
-            data.f.rand(0, data.f.level.colorsCount(this.app.level) - 1)
+        CUBE_COLORS[
+            data.f.rand(0, getLevelColorsCount(this.app.level) - 1)
         ];
         } else {
             color = o.color;

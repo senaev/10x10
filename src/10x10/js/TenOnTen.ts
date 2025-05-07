@@ -1,10 +1,17 @@
 import $ from 'jquery';
 
+import { CUBE_COLORS } from '../const/CUBE_COLORS';
+import { Field, FIELDS } from '../const/FIELDS';
+import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
+import { getLevelColorsCount } from '../utils/getLevelColorsCount';
+
 import { Cube, Direction } from './cube';
 import {
     CubeAddress, Cubes,
 } from './cubes';
-import { data, Field } from './data';
+import {
+    data,
+} from './data';
 import { MoveMap } from './moveMap';
 import { UndoButton } from './undoButton';
 
@@ -33,7 +40,7 @@ export class TenOnTen {
         };
     })();
 
-    private readonly lang: keyof (typeof data.lang)[keyof typeof data.lang];
+    private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
 
     private previousStepMap: Mask | undefined;
 
@@ -131,8 +138,7 @@ export class TenOnTen {
         const mask: Partial<Mask> = {};
         const cubesLocal = this.cubes;
 
-        for (const fieldNumber in data.fields) {
-            const field = data.fields[fieldNumber];
+        for (const field of FIELDS) {
             const fieldValue: (MaskFieldValue | null)[][] = [];
             mask[field] = fieldValue;
             for (let x = 0; x < data.cubesWidth; x++) {
@@ -166,9 +172,9 @@ export class TenOnTen {
 
     //переводим игру на следующий уровень
     public nextLevel() {
-        const colorsCount = data.f.level.colorsCount(this.level);
+        const colorsCount = getLevelColorsCount(this.level);
         this.level++;
-        if (data.f.level.colorsCount(this.level) > colorsCount) {
+        if (getLevelColorsCount(this.level) > colorsCount) {
             this.plusColor();
         }
         this.generateMainCubes();
@@ -176,8 +182,8 @@ export class TenOnTen {
 
     //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
     private plusColor() {
-        const colorsCount = data.f.level.colorsCount(this.level);
-        const newColor = data.colors[colorsCount - 1];
+        const colorsCount = getLevelColorsCount(this.level);
+        const newColor = CUBE_COLORS[colorsCount - 1];
         this.cubes._sideEach(function (cube) {
             if (data.f.rand(0, colorsCount - 1) === 0) {
                 cube.change({
@@ -188,8 +194,8 @@ export class TenOnTen {
     }
 
     // Возвращаем слово в необходимом переводе
-    public word(w: keyof typeof data.lang) {
-        return data.lang[w][this.lang];
+    public word(w: keyof typeof I18N_DICTIONARY) {
+        return I18N_DICTIONARY[w][this.lang];
     }
 
     //Initialize map function
@@ -264,7 +270,7 @@ export class TenOnTen {
             }
 
             //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
-            const colorsCount = data.f.level.colorsCount(this.level);
+            const colorsCount = getLevelColorsCount(this.level);
 
             //цвета, которые есть в смежных кубиках
             const apperanceColors = [];
@@ -294,8 +300,8 @@ export class TenOnTen {
             //цвета, которых нету в смежных
             const noApperanceColors = [];
             for (let key = 0; key < colorsCount; key++) {
-                if (apperanceColors.indexOf(data.colors[key]) === -1) {
-                    noApperanceColors.push(data.colors[key]);
+                if (apperanceColors.indexOf(CUBE_COLORS[key]) === -1) {
+                    noApperanceColors.push(CUBE_COLORS[key]);
                 }
             }
 

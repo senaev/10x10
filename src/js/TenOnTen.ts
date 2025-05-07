@@ -1,14 +1,16 @@
 import $ from "jquery";
-import { Cube } from "./cube";
-import { cubes } from "./cubes";
+import { Cube, Direction } from "./cube";
+import { CubeAddress, cubes } from "./cubes";
 import { data, Field } from "./data";
 import { MoveMap } from "./moveMap";
 import { UndoButton } from "./undoButton";
 
-export type Mask = Record<
-  Field,
-  (null | { color: string; direction: string; toMine?: number })[][]
->;
+export type MaskFieldValue = {
+  color: string;
+  direction: Direction | null;
+  toMine?: number | null;
+};
+export type Mask = Record<Field, (MaskFieldValue | null)[][]>;
 
 export class TenOnTen {
   public container: JQuery<HTMLElement>;
@@ -17,6 +19,7 @@ export class TenOnTen {
   public readonly cubes: typeof cubes;
 
   public moveMap: MoveMap | undefined;
+  public end: string | null;
 
   private lang: keyof (typeof data.lang)[keyof typeof data.lang];
 
@@ -29,8 +32,6 @@ export class TenOnTen {
       return ++numberOfCalls;
     };
   })();
-
-  private end: string | null;
 
   private undoButton: UndoButton;
 
@@ -123,34 +124,36 @@ export class TenOnTen {
 
   //генерируем маску для предидущего хода
   private generateMask(): Mask {
-    const mask: Mask = {};
+    const mask: Partial<Mask> = {};
     const cubes = this.cubes;
 
-    for (var fieldNumber in data.fields) {
-      var field = data.fields[fieldNumber];
-      mask[field] = [];
-      for (var x = 0; x < data.cubesWidth; x++) {
-        mask[field][x] = [];
-        for (var y = 0; y < data.cubesWidth; y++) {
+    for (let fieldNumber in data.fields) {
+      const field = data.fields[fieldNumber];
+      const fieldValue: (MaskFieldValue | null)[][] = [];
+      mask[field] = fieldValue;
+      for (let x = 0; x < data.cubesWidth; x++) {
+        fieldValue[x] = [];
+        for (let y = 0; y < data.cubesWidth; y++) {
           var c = cubes._get({ field: field, x: x, y: y });
 
           if (c === null) {
-            mask[field][x][y] = null;
+            fieldValue[x][y] = null;
           } else {
-            mask[field][x][y] = {
+            const resultValue: MaskFieldValue = {
               color: c.color,
               direction: c.direction,
             };
+            fieldValue[x][y] = resultValue;
             //для корректной обработки порядка попадания в главное поле
             if (field === "main") {
-              mask[field][x][y]!.toMine = c.toMine;
+              resultValue.toMine = c.toMine;
             }
           }
         }
       }
     }
 
-    return mask;
+    return mask as Mask;
   }
 
   //переводим игру на следующий уровень
@@ -199,17 +202,17 @@ export class TenOnTen {
   //генерируем кубики на главном поле
   private generateMainCubes() {
     var firstCubesPosition = data.f.level.getPositions(this.level);
-    var nullCells;
-    var rand;
+    let nullCells: { x: number; y: number }[] = [];
+
     var fPos;
+
     for (
       var number = 0, len = data.f.level.cubesCount(this.level);
       number < len;
       number++
     ) {
-      var cube;
-      var cell;
-      fPos = null;
+      let cell: { x: number; y: number } | undefined;
+      let fPos = null;
 
       if (firstCubesPosition[number] !== undefined) {
         fPos = firstCubesPosition[number];
@@ -232,7 +235,7 @@ export class TenOnTen {
         //шанс попадания кубика в крайнее поле - чем больше, тем ниже
         var chance = 2;
         for (var key = 0; key < chance; key++) {
-          cell = nullCells.shift();
+          cell = nullCells.shift()!;
           if (
             cell.x === 0 ||
             cell.y === 0 ||
@@ -255,11 +258,18 @@ export class TenOnTen {
       //цвета, которые есть в смежных кубиках
       var apperanceColors = [];
       for (var key = 0; key < 4; key++) {
-        var pos = { x: cell.x, y: cell.y, field: "main" };
-        var prop = key % 2 == 0 ? "x" : "y";
-        pos[prop] = key < 2 ? pos[prop] + 1 : pos[prop] - 1;
-        if (pos.x > -1 && pos.y > -1 && pos.x < 10 && pos.y < 10) {
-          var c = this.cubes._get(pos);
+        var address: CubeAddress = { x: cell!.x, y: cell!.y, field: "main" };
+
+        var prop: "x" | "y" = key % 2 == 0 ? "x" : "y";
+        address[prop] = key < 2 ? address[prop] + 1 : address[prop] - 1;
+
+        if (
+          address.x > -1 &&
+          address.y > -1 &&
+          address.x < 10 &&
+          address.y < 10
+        ) {
+          var c = this.cubes._get(address);
           if (c !== null) {
             apperanceColors.push(c.color);
           }
@@ -277,9 +287,10 @@ export class TenOnTen {
       //получаем итоговый цвет
       var color =
         noApperanceColors[data.f.rand(0, noApperanceColors.length - 1)];
-      cube = new Cube({
-        x: cell.x,
-        y: cell.y,
+
+      new Cube({
+        x: cell!.x,
+        y: cell!.y,
         field: "main",
         app: this,
         color: color,
@@ -357,27 +368,40 @@ export class TenOnTen {
     this.undoButton._set({ active: false });
 
     //массив, в котором описаны все различия между текущим и предидущим состоянием
-    var changed = [];
-    //пробегаем в массиве по каждому кубику предидущего массива
+    const changed: {
+      field: Field;
+      x: number;
+      y: number;
+      pCube: MaskFieldValue | null;
+      cube: Cube | null;
+      action: string;
+    }[] = [];
+
+    //пробегаем в массиве по каждому кубику предыдущего массива
     const previousStepMap = this.previousStepMap;
     if (previousStepMap) {
       for (const fieldName in previousStepMap) {
-        for (var x in previousStepMap[fieldName as Field]) {
-          for (var y in previousStepMap[fieldName as Field][x]) {
-            x = parseInt(x);
-            y = parseInt(y);
-            var pCube = previousStepMap[fieldName as Field][x][y];
+        for (let x in previousStepMap[fieldName as Field]) {
+          for (let y in previousStepMap[fieldName as Field][x]) {
+            const xNumber = parseInt(x);
+            const yNumber = parseInt(y);
+            const pCube: MaskFieldValue | null =
+              previousStepMap[fieldName as Field][xNumber][yNumber];
             //берем соответствующее значение текущей маски для сравнения
-            var cube = this.cubes._get({ field: fieldName, x: x, y: y });
+            var cube = this.cubes._get({
+              field: fieldName as Field,
+              x: xNumber,
+              y: yNumber,
+            });
             //если предидущее - null
             if (pCube === null) {
               //а новое - что-то другое
               //удаляем кубик из нового значения
               if (cube !== null) {
                 changed.push({
-                  field: fieldName,
-                  x: x,
-                  y: y,
+                  field: fieldName as Field,
+                  x: xNumber,
+                  y: yNumber,
                   pCube: null,
                   cube: cube,
                   action: "remove",
@@ -390,9 +414,9 @@ export class TenOnTen {
               //заполняем клетку кубиком
               if (cube === null) {
                 changed.push({
-                  field: fieldName,
-                  x: x,
-                  y: y,
+                  field: fieldName as Field,
+                  x: xNumber,
+                  y: yNumber,
                   pCube: pCube,
                   cube: null,
                   action: "add",
@@ -404,11 +428,14 @@ export class TenOnTen {
                 for (var prop in pCube) {
                   //если какие-то параметры различаются,
                   //меняем параметры кубика
-                  if (cube[prop] !== pCube[prop]) {
+                  if (
+                    cube[prop as keyof Cube] !==
+                    pCube[prop as keyof MaskFieldValue]
+                  ) {
                     changed.push({
-                      field: fieldName,
-                      x: x,
-                      y: y,
+                      field: fieldName as Field,
+                      x: xNumber,
+                      y: yNumber,
                       pCube: pCube,
                       cube: cube,
                       action: "change",
@@ -423,7 +450,7 @@ export class TenOnTen {
       }
     }
 
-    for (var key in changed) {
+    for (const key in changed) {
       var cube = changed[key].cube;
       switch (changed[key].action) {
         case "add":
@@ -432,8 +459,8 @@ export class TenOnTen {
             x: changed[key].x,
             y: changed[key].y,
             field: changed[key].field,
-            color: changed[key].pCube.color,
-            direction: changed[key].pCube.direction,
+            color: changed[key]!.pCube!.color,
+            direction: changed[key]!.pCube!.direction!,
             app: this,
             disapperance: "cool",
           });

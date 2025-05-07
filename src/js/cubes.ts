@@ -57,14 +57,12 @@ export const cubes = {
   },
   //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
   //с каждым кубиком
-  _sideEach(
-    func: (cube: Cube | null, field: Field, x: number, y: number) => void
-  ) {
+  _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
     for (var key in data.fields) {
       if (data.fields[key] !== "main") {
         for (var x = 0; x < data.cubesWidth; x++) {
           for (var y = 0; y < data.cubesWidth; y++) {
-            func(cubes[data.fields[key]][x][y], data.fields[key], x, y);
+            func(cubes[data.fields[key]][x][y]!, data.fields[key], x, y);
           }
         }
       }

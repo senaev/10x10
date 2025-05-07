@@ -32,7 +32,11 @@ export class UndoButton {
       );
   }
 
-  public _set = (o: { active: boolean }) => {
+  public _set = (o: {
+    active: boolean;
+    func?: () => void;
+    caption?: string;
+  }) => {
     if (o.func !== undefined && this.func !== o.func) {
       this.func = o.func;
     }
@@ -48,9 +52,5 @@ export class UndoButton {
         this.$el.addClass("blocked");
       }
     }
-  };
-
-  public _get = (prop) => {
-    return undoButton[prop];
   };
 }

@@ -24,7 +24,7 @@ export class MCube {
   public inGroup: MCube[] | null;
   public steps: Step[];
   public rand: number;
-  public toSideTime: number;
+  public toSideTime: number | undefined;
 
   constructor(o: {
     x: number;

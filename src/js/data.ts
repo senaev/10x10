@@ -113,7 +113,7 @@ export const data = {
 
       return null;
     },
-    shuffle: function (o: number[][]) {
+    shuffle: function <T>(o: T[]) {
       for (
         var j, x, i = o.length;
         i;

@@ -1,19 +1,21 @@
-import "jquery.transit";
-import { initPlayGamaBridge } from "../PlayGama/initPlayGamaBridge";
-import { TenOnTen } from "./js/TenOnTen";
+import 'jquery.transit';
+import { initPlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
 
-import "./main.css";
+import { TenOnTen } from './js/TenOnTen';
 
-const container = document.getElementById("app");
+import './main.css';
+
+const container = document.getElementById('app');
 
 if (!container) {
-  throw new Error("Container not found");
+    throw new Error('Container not found');
 }
 
-var tenOnTen = new TenOnTen({
-  container,
+const tenOnTen = new TenOnTen({
+    container,
 });
 
-console.log("App is ready", tenOnTen);
+// eslint-disable-next-line no-console
+console.log('App is ready', tenOnTen);
 
 initPlayGamaBridge();

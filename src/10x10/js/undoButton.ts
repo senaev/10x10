@@ -1,56 +1,52 @@
-import $ from "jquery";
-import { TenOnTen } from "./TenOnTen";
+import $ from 'jquery';
+
+import { TenOnTen } from './TenOnTen';
 
 export class UndoButton {
-  private app: TenOnTen;
-  private active: boolean;
-  private caption: string;
-  private func: () => void;
-  private $el: JQuery<HTMLElement>;
+    private app: TenOnTen;
+    private active: boolean;
+    private caption: string;
+    private func: () => void;
+    private $el: JQuery<HTMLElement>;
 
-  constructor(params: { app: TenOnTen }) {
-    var undoButton = this;
+    constructor(params: { app: TenOnTen }) {
 
-    this.app = params.app;
-    this.active = true;
-    this.caption = this.app.word("refresh");
-    this.func = undoButton.app.refresh;
+        this.app = params.app;
+        this.active = true;
+        this.caption = this.app.word('refresh');
+        this.func = this.app.refresh;
 
-    this.$el = $(
-      '<div class="undoButton">' + undoButton.app.word("refresh") + "</div>"
-    )
-      .click(function (e) {
-        //не даем продолжить выполнение событий
-        e.preventDefault();
+        this.$el = $('<div class="undoButton">' + this.app.word('refresh') + '</div>')
+            .click((e) => {
+                //не даем продолжить выполнение событий
+                e.preventDefault();
 
-        if (undoButton.active && !undoButton.app.blockApp) {
-          undoButton.func.apply(undoButton.app);
+                if (this.active && !this.app.blockApp) {
+                    this.func.apply(this.app);
+                }
+            })
+            .appendTo(this.app.container.children('.panel.topRightPanel').first());
+    }
+
+    public _set = (o: {
+        active: boolean;
+        func?: () => void;
+        caption?: string;
+    }) => {
+        if (o.func !== undefined && this.func !== o.func) {
+            this.func = o.func;
         }
-      })
-      .appendTo(
-        undoButton.app.container.children(".panel.topRightPanel").first()
-      );
-  }
-
-  public _set = (o: {
-    active: boolean;
-    func?: () => void;
-    caption?: string;
-  }) => {
-    if (o.func !== undefined && this.func !== o.func) {
-      this.func = o.func;
-    }
-    if (o.caption !== undefined && this.caption !== o.caption) {
-      this.caption = o.caption;
-      this.$el.html(o.caption);
-    }
-    if (o.active !== undefined && this.active !== o.active) {
-      this.active = o.active;
-      if (this.active) {
-        this.$el.removeClass("blocked");
-      } else {
-        this.$el.addClass("blocked");
-      }
-    }
-  };
+        if (o.caption !== undefined && this.caption !== o.caption) {
+            this.caption = o.caption;
+            this.$el.html(o.caption);
+        }
+        if (o.active !== undefined && this.active !== o.active) {
+            this.active = o.active;
+            if (this.active) {
+                this.$el.removeClass('blocked');
+            } else {
+                this.$el.addClass('blocked');
+            }
+        }
+    };
 }

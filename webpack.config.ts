@@ -1,33 +1,41 @@
-import path from "path";
-import * as webpack from "webpack";
+import path from 'path';
 
-export default () => {
-  return {
-    mode: "development",
-    entry: "./src/10x10/index.ts",
+import * as webpack from 'webpack';
+
+export default () => ({
+    mode: 'development',
+    entry: './src/10x10/index.ts',
     output: {
-      path: path.resolve(__dirname, "dist"),
-      filename: "main.js",
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
     },
     module: {
-      rules: [
-        {
-          test: /\.(ts|tsx)$/,
-          exclude: /node_modules/,
-          use: "ts-loader",
-        },
-        {
-          test: /\.css$/i,
-          use: ["style-loader", "css-loader", "postcss-loader"],
-        },
-        {
-          test: /\.(png|jpg|jpeg|gif|svg)$/i,
-          type: "asset/inline",
-        },
-      ],
+        rules: [
+            {
+                test: /\.(ts|tsx)$/,
+                exclude: /node_modules/,
+                use: 'ts-loader',
+            },
+            {
+                test: /\.css$/i,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'postcss-loader',
+                ],
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg)$/i,
+                type: 'asset/inline',
+            },
+        ],
     },
     resolve: {
-      extensions: [".tsx", ".ts", ".js", ".css"],
+        extensions: [
+            '.tsx',
+            '.ts',
+            '.js',
+            '.css',
+        ],
     },
-  } satisfies webpack.Configuration;
-};
+} satisfies webpack.Configuration);

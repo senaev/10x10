@@ -1,7 +1,9 @@
 import $ from 'jquery';
 
 import { Cube, Direction } from './cube';
-import { CubeAddress, cubes } from './cubes';
+import {
+    CubeAddress, Cubes,
+} from './cubes';
 import { data, Field } from './data';
 import { MoveMap } from './moveMap';
 import { UndoButton } from './undoButton';
@@ -17,7 +19,7 @@ export class TenOnTen {
     public readonly container: JQuery<HTMLElement>;
     public blockApp: boolean;
     public level: number;
-    public readonly cubes: typeof cubes;
+    public readonly cubes: Cubes;
 
     public moveMap: MoveMap | undefined;
     public end: string | null;
@@ -36,10 +38,9 @@ export class TenOnTen {
     private previousStepMap: Mask | undefined;
 
     constructor({ container }: { container: HTMLElement }) {
-    //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
-    //которому эти кубики принадлежат
-        this.cubes = cubes;
-        this.cubes._app = this;
+        //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
+        //которому эти кубики принадлежат
+        this.cubes = new Cubes({ app: this });
 
         //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
@@ -194,7 +195,7 @@ export class TenOnTen {
     //Initialize map function
     private initialize() {
     //генерируем кубики в боковых панелях
-        cubes._sideEach((_cube, field, x, y) => {
+        this.cubes._sideEach((_cube, field, x, y) => {
             new Cube({
                 x,
                 y,
@@ -229,7 +230,7 @@ export class TenOnTen {
                     nullCells = [];
                     for (let x = 0; x < data.cubesWidth; x++) {
                         for (let y = 0; y < data.cubesWidth; y++) {
-                            if (cubes['main'][x][y] === null) {
+                            if (this.cubes.main[x][y] === null) {
                                 nullCells.push({
                                     x,
                                     y,

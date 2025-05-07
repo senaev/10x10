@@ -14,11 +14,17 @@ export type CubeAddress = {
     y: number;
 };
 
-export type Cubes = typeof cubes;
+export class Cubes {
+    public readonly _app: TenOnTen;
+    public readonly main: CubesField;
+    public readonly top: CubesField;
+    public readonly right: CubesField;
+    public readonly bottom: CubesField;
+    public readonly left: CubesField;
 
-export const cubes = {
-    _app: undefined as TenOnTen | undefined,
-    ...(() => {
+    constructor({ app }: { app: TenOnTen }) {
+        this._app = app;
+
         const cubesLocal: Partial<CubesFields> = {};
 
         for (const key in FIELDS) {
@@ -32,63 +38,70 @@ export const cubes = {
             }
         }
 
-        return cubesLocal as CubesFields;
-    })(),
+        this.main = cubesLocal.main!;
+        this.top = cubesLocal.top!;
+        this.right = cubesLocal.right!;
+        this.bottom = cubesLocal.bottom!;
+        this.left = cubesLocal.left!;
+    }
+
     //добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    _add(cube: Cube) {
+    public _add(cube: Cube) {
         this[cube.field][cube.x][cube.y] = cube;
-    },
+    }
+
     //берем значение клетки из коллекции по полю, иксу, игреку
-    _get(o: CubeAddress) {
-    //console.log(o);
+    public _get(o: CubeAddress) {
+        //console.log(o);
         return this[o.field][o.x][o.y];
-    },
+    }
+
     //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
-    _set(o: CubeAddress, value: Cube | null) {
+    public _set(o: CubeAddress, value: Cube | null) {
         if (o === undefined || value === undefined) {
             throw new Error('cubes._set не получил параметры: o: ' + o + ' value: ' + value);
         }
         //console.log(o, value);
-        cubes[o.field][o.x][o.y] = value;
+        this[o.field][o.x][o.y] = value;
         /*if (value !== null && value instanceof Cube) {
-           value.x = o.x;
-           value.y = o.y;
-           }*/
+               value.x = o.x;
+               value.y = o.y;
+               }*/
         return this[o.field][o.x][o.y];
-    },
+    }
     //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     //с каждым кубиком
-    _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
+    public _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
         for (const key in data.fields) {
             if (data.fields[key] !== 'main') {
                 for (let x = 0; x < data.cubesWidth; x++) {
                     for (let y = 0; y < data.cubesWidth; y++) {
-                        func(cubes[data.fields[key]][x][y]!, data.fields[key], x, y);
+                        func(this[data.fields[key]][x][y]!, data.fields[key], x, y);
                     }
                 }
             }
         }
-    },
+    }
 
     //пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
     //не нулевым найденным кубиком
-    _mainEach(func: (cube: Cube, field: Field, x: number, y: number, i: number) => void) {
+    public _mainEach(func: (cube: Cube, field: Field, x: number, y: number, i: number) => void) {
         let i;
         i = 0;
         for (let x = 0; x < data.cubesWidth; x++) {
             for (let y = 0; y < data.cubesWidth; y++) {
-                const cube = cubes['main'][x][y];
+                const cube = this.main[x][y];
                 if (cube !== null) {
                     func(cube, 'main', x, y, i);
                     i++;
                 }
             }
         }
-    },
+    }
 
     //получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
     //до ближайшего
-    _getLine(o: CubeAddress) {
+    public _getLine(o: CubeAddress) {
         let staticProp: 'x' | 'y';
         let dynamicProp: 'x' | 'y';
         let line: CubeAddress[] = [];
@@ -126,17 +139,17 @@ export const cubes = {
             }
         }
         return line;
-    },
+    }
 
     //вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-    _cutFromLine(startCubes: Cube[]) {
-    //получаем линию
+    public _cutFromLine(startCubes: Cube[]) {
+        //получаем линию
         const line = this._getLine({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field: startCubes[0].field,
         });
-        //пробегаемся, меняем значения в коллекции
+            //пробегаемся, меняем значения в коллекции
         for (let key = line.length - 1; key >= startCubes.length; key--) {
             const prevCube = this._get(line[key - startCubes.length])!;
             this._set(line[key], prevCube);
@@ -145,30 +158,30 @@ export const cubes = {
         }
         //генерируем кубики для крайних значений в линии
         for (let key = 0; key < startCubes.length; key++) {
-            cubes._set(
+            this._set(
                 line[key],
                 new Cube({
                     x: line[key].x,
                     y: line[key].y,
                     field: line[key].field,
-                    app: this._app!,
-                    toMine: cubes._app!.mainCounter(),
+                    app: this._app,
+                    toMine: this._app.mainCounter(),
                 })
             );
         }
 
-    /**
-     * при отладке может возникать забавная ошибка, когда почему-то
-     * случайно добавляются не последние значения линии, а предидущие из них
-     * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
-     * а старые вьюхи ни куда не деваются и одни других перекрывают :)
-     */
-    },
+        /**
+         * при отладке может возникать забавная ошибка, когда почему-то
+         * случайно добавляются не последние значения линии, а предидущие из них
+         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
+         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
+         */
+    }
 
     //добавляем в линию кубик, по кубику мы должны определить, в какую линию
-    _pushInLine(cube: Cube) {
-    //console.log(cube.color);
-    //меняем значения кубика
+    public _pushInLine(cube: Cube) {
+        //console.log(cube.color);
+        //меняем значения кубика
         cube.field = cube.direction!;
         cube.direction = data.f.reverseField(cube.field);
         //получаем линию, в которую вставим кубик
@@ -177,7 +190,7 @@ export const cubes = {
             y: cube.y,
             field: cube.field,
         });
-        //присваиваем значения координат в поле кубику
+            //присваиваем значения координат в поле кубику
         cube.x = line[line.length - 1].x;
         cube.y = line[line.length - 1].y;
         //получаем удаляемый (дальний от mainField в линии) кубик
@@ -190,17 +203,17 @@ export const cubes = {
         this._set(line[line.length - 1], cube);
 
         /**
-     * заносим удаляемый кубик в массив удаляемых, а не
-     * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
-     * большого количества кубиков, при практически полной замене боковой линии,
-     * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
-     * html-элементы таких кубиков будут удалены еще до того, как начнется
-     * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
-     * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
-     */
-        this._app!.moveMap!.beyondTheSide!.push(removedCube);
-    },
-    _mergeMoveMap(moveMap: MoveMap) {
+         * заносим удаляемый кубик в массив удаляемых, а не
+         * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
+         * большого количества кубиков, при практически полной замене боковой линии,
+         * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
+         * html-элементы таких кубиков будут удалены еще до того, как начнется
+         * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
+         * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
+         */
+        this._app.moveMap!.beyondTheSide!.push(removedCube);
+    }
+    public _mergeMoveMap(moveMap: MoveMap) {
         const arr = moveMap.mainMask.arr;
         const startCubes = moveMap.startCubes;
         //извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
@@ -232,9 +245,9 @@ export const cubes = {
 
                 if (
                     mCube.cube.x < 0 ||
-          mCube.cube.x > 9 ||
-          mCube.cube.y < 0 ||
-          mCube.cube.y > 9
+              mCube.cube.x > 9 ||
+              mCube.cube.y < 0 ||
+              mCube.cube.y > 9
                 ) {
                     // eslint-disable-next-line no-console
                     console.log(mCube, mCube.cube.x, mCube.cube.y, mCube.x, mCube.y);
@@ -246,7 +259,7 @@ export const cubes = {
                         y: mCube.cube.y,
                     }) === null
                 ) {
-                    cubes._set({
+                    this._set({
                         field: 'main',
                         x: mCube.cube.x,
                         y: mCube.cube.y,
@@ -259,14 +272,14 @@ export const cubes = {
                 //если кубик взорвался во время хода, убираем его с доски
 
                 if (
-                    cubes._get({
+                    this._get({
                         field: 'main',
                         x: mCube.cube.x,
                         y: mCube.cube.y,
                     }) ===
-          mCube.cube
+              mCube.cube
                 ) {
-                    cubes._set({
+                    this._set({
                         field: 'main',
                         x: mCube.cube.x,
                         y: mCube.cube.y,
@@ -284,22 +297,22 @@ export const cubes = {
                 x: mCube.cube.x,
                 y: mCube.cube.y,
             }) === null) {
-                cubes._set({
+                this._set({
                     field: 'main',
                     x: mCube.cube.x,
                     y: mCube.cube.y,
                 }, null);
             }
             /*mCube.cube.x = mCube.x;
-               mCube.cube.y = mCube.y;*/
+                   mCube.cube.y = mCube.y;*/
             //пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
-    },
+    }
 
     //массовая анимация для кубиков, вспомогательная
     //функция для удобства анимации сразу нескольких кубиков
-    animate(o: { action: 'fromLine'; cube: Cube[] } | { action: 'inLine'; cube: Cube }) {
+    public animate(o: { action: 'fromLine'; cube: Cube[] } | { action: 'inLine'; cube: Cube }) {
         let line;
 
         const { cube, action } = o;
@@ -394,7 +407,7 @@ export const cubes = {
                 //0 - который входит первым
                 const allCubesToSideInThisLine = [];
                 //все кубики, которые попадают во время хода в боковую панель
-                const toSideActions = cubes._app!.moveMap!.toSideActions;
+                const toSideActions = this._app.moveMap!.toSideActions;
                 //для идентификации линии
                 let prop: 'x' | 'y' = 'y';
                 if (cube.field === 'top' || cube.field === 'bottom') {
@@ -416,8 +429,8 @@ export const cubes = {
                 //массив кубиков, которые удалились за пределами этой линии во время хода
                 //0 - первый удалённый(самый дальний)
                 const removeBS = [];
-                for (const key in cubes._app!.moveMap!.beyondTheSide!) {
-                    const c = cubes._app!.moveMap!.beyondTheSide![key];
+                for (const key in this._app.moveMap!.beyondTheSide!) {
+                    const c = this._app.moveMap!.beyondTheSide![key];
                     if (c.field === cube.field && c[prop] === cube[prop]) {
                         removeBS.push(c);
                     }
@@ -425,7 +438,7 @@ export const cubes = {
 
                 //вычисляем, какие кубики будем двигать при вставке в линию
                 const pos =
-          data.cubesWidth - allCubesToSideInThisLine.length + posInSide! - 1;
+              data.cubesWidth - allCubesToSideInThisLine.length + posInSide! - 1;
                 let c1: Cube;
                 let c2: Cube;
                 let cr: Cube;
@@ -472,5 +485,5 @@ export const cubes = {
         default:
             throw new Error('Неизвестная анимация в массиве кубиков: ', action);
         }
-    },
+    }
 };

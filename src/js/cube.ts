@@ -1,16 +1,17 @@
 import $ from "jquery";
 import { cubeAnimation } from "./cubeAnimation";
-import { data } from "./data";
+import { data, Field } from "./data";
 import { TenOnTen } from "./TenOnTen";
 
 export type Direction = "top" | "bottom" | "left" | "right";
 
 export class Cube {
-  private x: number;
-  private y: number;
+  public field: Field;
+  public x: number;
+  public y: number;
+
   private disapperance?: string;
   private toMine?: number | null;
-  private field: string;
   private readonly app: TenOnTen;
   private extra?: Record<string, any>;
   private direction?: Direction | null;

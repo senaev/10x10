@@ -1,147 +1,163 @@
 import { Cube } from "./cube";
 import { data, Field, FIELDS } from "./data";
+import { TenOnTen } from "./TenOnTen";
+export type CubesField = Record<number, Record<number, Cube | null>>;
+export type CubesFields = Record<Field, CubesField>;
+
+export type CubeAddress = {
+  field: Field;
+  x: number;
+  y: number;
+};
 
 export const cubes = {
+  _app: undefined as TenOnTen | undefined,
   ...(() => {
-    const cubes: Record<
-      Field,
-      Record<number, Record<number, Cube | null>>
-    > = {};
+    const cubes: Partial<CubesFields> = {};
 
     for (var key in FIELDS) {
-      cubes[FIELDS[key]] = {};
+      const field: CubesField = {};
+      cubes[FIELDS[key]] = field;
       for (var x = 0; x < data.cubesWidth; x++) {
-        cubes[FIELDS[key]][x] = {};
+        field[x] = {};
         for (var y = 0; y < data.cubesWidth; y++) {
-          cubes[FIELDS[key]][x][y] = null;
+          field[x][y] = null;
         }
       }
     }
 
-    return cubes;
+    return cubes as CubesFields;
   })(),
-};
-
-//добавляем в коллекцию кубик(необходимо для инициализации приложения)
-cubes._add = function (cube) {
-  this[cube.field][cube.x][cube.y] = cube;
-};
-//берем значение клетки из коллекции по полю, иксу, игреку
-cubes._get = function (o) {
-  //console.log(o);
-  return this[o.field][o.x][o.y];
-};
-//устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
-cubes._set = function (o, value) {
-  if (o === undefined || value === undefined) {
-    throw new Error(
-      "cubes._set не получил параметры: o: ",
-      o,
-      " value: ",
-      value
-    );
-  }
-  //console.log(o, value);
-  cubes[o.field][o.x][o.y] = value;
-  /*if (value !== null && value instanceof Cube) {
-         value.x = o.x;
-         value.y = o.y;
-         }*/
-  return this[o.field][o.x][o.y];
-};
-//пробегаемся по всем элементам боковых полей, выполняем переданную функцию
-//с каждым кубиком
-cubes._sideEach = function (func) {
-  for (var key in data.fields) {
-    if (data.fields[key] !== "main") {
-      for (var x = 0; x < data.cubesWidth; x++) {
-        for (var y = 0; y < data.cubesWidth; y++) {
-          func(cubes[data.fields[key]][x][y], data.fields[key], x, y);
+  //добавляем в коллекцию кубик(необходимо для инициализации приложения)
+  _add(cube: Cube) {
+    this[cube.field][cube.x][cube.y] = cube;
+  },
+  //берем значение клетки из коллекции по полю, иксу, игреку
+  _get(o: CubeAddress) {
+    //console.log(o);
+    return this[o.field][o.x][o.y];
+  },
+  //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
+  _set(o: CubeAddress, value: Cube | null) {
+    if (o === undefined || value === undefined) {
+      throw new Error(
+        "cubes._set не получил параметры: o: " + o + " value: " + value
+      );
+    }
+    //console.log(o, value);
+    cubes[o.field][o.x][o.y] = value;
+    /*if (value !== null && value instanceof Cube) {
+           value.x = o.x;
+           value.y = o.y;
+           }*/
+    return this[o.field][o.x][o.y];
+  },
+  //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
+  //с каждым кубиком
+  _sideEach(
+    func: (cube: Cube | null, field: Field, x: number, y: number) => void
+  ) {
+    for (var key in data.fields) {
+      if (data.fields[key] !== "main") {
+        for (var x = 0; x < data.cubesWidth; x++) {
+          for (var y = 0; y < data.cubesWidth; y++) {
+            func(cubes[data.fields[key]][x][y], data.fields[key], x, y);
+          }
         }
       }
     }
-  }
-};
-//пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
-//не нулевым найденным кубиком
-cubes._mainEach = function (func) {
-  var i;
-  i = 0;
-  for (var x = 0; x < data.cubesWidth; x++) {
-    for (var y = 0; y < data.cubesWidth; y++) {
-      if (cubes["main"][x][y] !== null) {
-        func(cubes["main"][x][y], "main", x, y, i);
-        i++;
+  },
+
+  //пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
+  //не нулевым найденным кубиком
+  _mainEach(
+    func: (cube: Cube, field: Field, x: number, y: number, i: number) => void
+  ) {
+    var i;
+    i = 0;
+    for (var x = 0; x < data.cubesWidth; x++) {
+      for (var y = 0; y < data.cubesWidth; y++) {
+        const cube = cubes["main"][x][y];
+        if (cube !== null) {
+          func(cube, "main", x, y, i);
+          i++;
+        }
       }
     }
-  }
-};
-//получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
-//до ближайшего
-cubes._getLine = function (o) {
-  var staticProp, dynamicProp, line, coords;
+  },
 
-  line = [];
-  if (o.field === "top" || o.field === "bottom") {
-    staticProp = "x";
-    dynamicProp = "y";
-  } else {
-    staticProp = "y";
-    dynamicProp = "x";
-  }
-  if (o.field === "top" || o.field === "left") {
-    for (var key = 0; key < data.cubesWidth; key++) {
-      coords = { field: o.field };
-      coords[staticProp] = o[staticProp];
-      coords[dynamicProp] = key;
-      line.push(coords);
-    }
-  } else {
-    for (var key = data.cubesWidth - 1; key >= 0; key--) {
-      coords = { field: o.field };
-      coords[staticProp] = o[staticProp];
-      coords[dynamicProp] = key;
-      line.push(coords);
-    }
-  }
-  return line;
-};
-//вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-cubes._cutFromLine = function (startCubes) {
-  //получаем линию
-  var line = this._getLine({
-    x: startCubes[0].x,
-    y: startCubes[0].y,
-    field: startCubes[0].field,
-  });
-  //пробегаемся, меняем значения в коллекции
-  for (var key = line.length - 1; key >= startCubes.length; key--) {
-    var prevCube = this._get(line[key - startCubes.length]);
-    this._set(line[key], prevCube);
-    prevCube.x = line[key].x;
-    prevCube.y = line[key].y;
-  }
-  //генерируем кубики для крайних значений в линии
-  for (var key = 0; key < startCubes.length; key++) {
-    cubes._set(
-      line[key],
-      new Cube({
-        x: line[key].x,
-        y: line[key].y,
-        field: line[key].field,
-        app: this._app,
-        toMine: cubes._app.mainCounter(),
-      })
-    );
-  }
+  //получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
+  //до ближайшего
+  _getLine(o: CubeAddress) {
+    let staticProp: "x" | "y";
+    let dynamicProp: "x" | "y";
+    let line: CubeAddress[] = [];
+    let coords: CubeAddress;
 
-  /**
-   * при отладке может возникать забавная ошибка, когда почему-то
-   * случайно добавляются не последние значения линии, а предидущие из них
-   * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
-   * а старые вьюхи ни куда не деваются и одни других перекрывают :)
-   */
+    line = [];
+    if (o.field === "top" || o.field === "bottom") {
+      staticProp = "x";
+      dynamicProp = "y";
+    } else {
+      staticProp = "y";
+      dynamicProp = "x";
+    }
+    if (o.field === "top" || o.field === "left") {
+      for (var key = 0; key < data.cubesWidth; key++) {
+        coords = { field: o.field, x: 0, y: 0 };
+        coords[staticProp] = o[staticProp];
+        coords[dynamicProp] = key;
+        line.push(coords);
+      }
+    } else {
+      for (var key = data.cubesWidth - 1; key >= 0; key--) {
+        coords = { field: o.field, x: 0, y: 0 };
+        coords[staticProp] = o[staticProp];
+        coords[dynamicProp] = key;
+        line.push(coords);
+      }
+    }
+    return line;
+  },
+
+  //вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+  _cutFromLine(startCubes: Cube[]) {
+    //получаем линию
+    var line = this._getLine({
+      x: startCubes[0].x,
+      y: startCubes[0].y,
+      field: startCubes[0].field,
+    });
+    //пробегаемся, меняем значения в коллекции
+    for (var key = line.length - 1; key >= startCubes.length; key--) {
+      var prevCube = this._get(line[key - startCubes.length])!;
+      this._set(line[key], prevCube);
+      prevCube.x = line[key].x;
+      prevCube.y = line[key].y;
+    }
+    //генерируем кубики для крайних значений в линии
+    for (var key = 0; key < startCubes.length; key++) {
+      cubes._set(
+        line[key],
+        new Cube({
+          x: line[key].x,
+          y: line[key].y,
+          field: line[key].field,
+          app: this._app!,
+          toMine: cubes._app!.mainCounter(),
+        })
+      );
+    }
+
+    /**
+     * при отладке может возникать забавная ошибка, когда почему-то
+     * случайно добавляются не последние значения линии, а предидущие из них
+     * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
+     * а старые вьюхи ни куда не деваются и одни других перекрывают :)
+     */
+  },
 };
+
 //добавляем в линию кубик, по кубику мы должны определить, в какую линию
 cubes._pushInLine = function (cube) {
   //console.log(cube.color);

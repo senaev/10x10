@@ -478,12 +478,10 @@ export class TenOnTen {
   }
 
   public run(o: { startCubes: Cube[] }) {
-    this.moveMap = new MoveMap();
-
     //создаем маску для возможности возврата хода
     this.previousStepMap = this.generateMask();
 
-    this.moveMap.generate({
+    this.moveMap = new MoveMap({
       startCubes: o.startCubes,
       cubes: this.cubes,
       app: this,

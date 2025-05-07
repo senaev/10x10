@@ -1,7 +1,9 @@
 import { Cube } from "./cube";
+import { Cubes } from "./cubes";
 import { data } from "./data";
 import { MainMask } from "./mainMask";
 import { MCube } from "./mCube";
+import { TenOnTen } from "./TenOnTen";
 
 /**
  * класс для удобной работы с абстрактным классом MainMask
@@ -11,21 +13,28 @@ import { MCube } from "./mCube";
  * для основного приложения
  */
 export class MoveMap {
-  public mainMask: MainMask;
-  public beyondTheSide: MCube[];
-  public startCubes: Cube[];
-  public toSideActions: MCube[];
+  public readonly mainMask: MainMask;
+  public readonly beyondTheSide: MCube[] = [];
+  public readonly startCubes: Cube[];
+  public readonly toSideActions: MCube[] = [];
 
-  private animationMap: any[];
-  private app: any;
-  private cubes: any;
-  private animationLength: number;
-  private colorSheme: Record<string, number>;
+  private readonly animationMap: any[] = [];
+  private readonly app: TenOnTen;
+  private readonly cubes: Cubes;
+  private readonly animationLength: number;
 
-  //строим анимацию для каждого кубика одтельно на основе steps каждого м-кубика
-  private createAnimationMap() {
-    this.animationMap = [];
-    var noEmptyActions = [];
+  constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
+    this.cubes = params.cubes;
+    this.startCubes = params.startCubes;
+
+    this.app = params.app;
+
+    //создаем класс маски
+    this.mainMask = new MainMask({
+      startCubes: this.startCubes,
+      cubes: this.cubes,
+      moveMap: this,
+    });
 
     //массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
     //в последовательности,  в которой они туда попали
@@ -189,38 +198,5 @@ export class MoveMap {
         cube.addAnimate(action);
       }
     }
-  }
-
-  /**
-   * Функции, которым могут понадобиться в дальнейшем
-   */
-  //создание цветовой схемы, в которой каждому цвету присваивается число
-  private generateColorSheme() {
-    var colors: Record<string, number> = {};
-    for (var key = 0; key < data.colors.length; key++) {
-      colors[data.colors[key]] = key;
-    }
-    this.colorSheme = colors;
-  }
-
-  private generate(o) {
-    var cubes, mainMask;
-
-    this.cubes = o.cubes;
-    this.startCubes = o.startCubes;
-
-    this.beyondTheSide = [];
-
-    this.app = o.app;
-
-    //создаем класс маски
-    this.mainMask = new MainMask({
-      startCubes: this.startCubes,
-      cubes: this.cubes,
-      moveMap: this,
-    });
-
-    //генерируем из м-кубиков маски карту анимации
-    this.createAnimationMap();
   }
 }

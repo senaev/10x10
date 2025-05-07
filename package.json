@@ -4,6 +4,7 @@
   "description": "10x10 =====",
   "main": "index.js",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "webpack:watch": "webpack --watch"
   },
   "repository": {

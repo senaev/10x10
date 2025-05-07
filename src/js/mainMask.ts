@@ -1,5 +1,8 @@
+import { Cube } from "./cube";
+import { Cubes } from "./cubes";
 import { data } from "./data";
 import { MCube } from "./mCube";
+import { MoveMap } from "./moveMap";
 
 /**
  * класс для маски(слепок текущего состояния с возможностью создать пошагово один ход игры)
@@ -8,32 +11,35 @@ import { MCube } from "./mCube";
  * затем пожагово - обращение к каждому м-кубику, методом oneStep, в котором автоматически меняются
  * параметры состояния и создаётся объект из последовательности шагов для построения анимации
  */
-export function MainMask(o) {
-  var cubes, startCubes, mainMask, undefined;
-
-  mainMask = this;
-  cubes = o.cubes;
-  startCubes = o.startCubes;
-
-  this.moveMap = o.moveMap;
-
+export class MainMask {
   //основной массив со значениями
   //сюда будут попадать м-кубики, учавствующие в анимации
-  this.arr = [];
-  //создаем маску, берем значения из коллекции кубес
-  this.initialize = function () {
+  private arr: MCube[] = [];
+  private moveMap: MoveMap;
+
+  constructor(o: { cubes: Cubes; startCubes: Cube[]; moveMap: MoveMap }) {
+    var cubes, startCubes;
+
+    const mainMask = this;
+    cubes = o.cubes;
+    startCubes = o.startCubes;
+
+    this.moveMap = o.moveMap;
+
+    //вызываем инициализацию
+
     var startMCubeX, startMCubeY;
 
     //создаем массив из всех кубиков, которые есть на доске
-    cubes._mainEach(function (cube) {
-      mainMask.arr.push(
+    cubes._mainEach((cube) => {
+      this.arr.push(
         new MCube({
           x: cube.x,
           y: cube.y,
           color: cube.color,
           direction: cube.direction,
           extra: cube.extra,
-          mainMask: mainMask,
+          mainMask: this,
           cube: cube,
         })
       );
@@ -49,13 +55,13 @@ export function MainMask(o) {
       if (startCube.field === "top" || startCube.field === "bottom") {
         startMCubeX = startCube.x;
         if (startCube.field === "top") {
-          startMCubeY = startCubes.length - key - 1;
+          startMCubeY = startCubes.length - Number(key) - 1;
         } else {
           startMCubeY = data.cubesWidth - startCubes.length + parseInt(key);
         }
       } else {
         if (startCube.field === "left") {
-          startMCubeX = startCubes.length - key - 1;
+          startMCubeX = startCubes.length - Number(key) - 1;
         } else {
           startMCubeX = data.cubesWidth - startCubes.length + parseInt(key);
         }
@@ -68,7 +74,7 @@ export function MainMask(o) {
         color: startCube.color,
         direction: startCube.direction,
         extra: startCube.extra,
-        mainMask: mainMask,
+        mainMask: this,
         cube: startCube,
       });
       this.arr.push(startMCube);
@@ -88,14 +94,15 @@ export function MainMask(o) {
       }
     }
 
-    mainMask.arr.sort(function (a, b) {
+    this.arr.sort(function (a, b) {
       return a.cube.toMine - b.cube.toMine;
     });
-  };
-  //вызываем инициализацию
-  this.initialize();
+
+    this.step();
+  }
+
   //один ход для всех кубиков на доске
-  this.step = function () {
+  step() {
     //индикатор конца движений, если что-то происходит во время шага анимации -
     //вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
     //либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
@@ -144,8 +151,9 @@ export function MainMask(o) {
         //заканчиваем ход
       }
     }
-  };
-  this.searchAdjacentCubes = function () {
+  }
+
+  searchAdjacentCubes() {
     var arr = this.arr,
       byColorPrev = {},
       byColor = {};
@@ -188,10 +196,10 @@ export function MainMask(o) {
       groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
     }
     return groups;
-  };
+  }
 
   //функция поиска смежных в массиве по цветам
-  this.searchAdjacentCubesByColor = function (arr) {
+  searchAdjacentCubesByColor(arr) {
     var group;
     for (var key = 0; key < arr.length - 1; key++) {
       //текущий кубик
@@ -259,19 +267,17 @@ export function MainMask(o) {
     }
 
     return groups;
-  };
-
-  this.step();
-}
-
-//поскольку маска - несортированный масив, получаем куб методом перебора
-MainMask.prototype._get = function (o) {
-  var arr;
-  arr = this.arr;
-  for (var key in arr) {
-    if (arr[key].x === o.x && arr[key].y === o.y) {
-      return arr[key];
-    }
   }
-  return null;
-};
+
+  //поскольку маска - несортированный масив, получаем куб методом перебора
+  _get(o) {
+    var arr;
+    arr = this.arr;
+    for (var key in arr) {
+      if (arr[key].x === o.x && arr[key].y === o.y) {
+        return arr[key];
+      }
+    }
+    return null;
+  }
+}

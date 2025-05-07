@@ -11,6 +11,8 @@ export type CubeAddress = {
   y: number;
 };
 
+export type Cubes = typeof cubes;
+
 export const cubes = {
   _app: undefined as TenOnTen | undefined,
   ...(() => {
@@ -316,20 +318,11 @@ export const cubes = {
             });
           }
         }
-
-        //первый кубик появляется
-        /*this._get(line[6]).animate({action: "apperanceInSide", duration: 1});
-                   //остальные два сдвигаются ближе к линии
-                   this._get(line[7]).animate({action: "nearer", duration: 1});
-                   this._get(line[8]).animate({action: "nearer", duration: 1});*/
         break;
       //при входе кубика в линию, анимируем линию
       case "inLine":
         //получаем линию кубика
         line = this._getLine({ x: cube.x, y: cube.y, field: cube.field });
-        /*for(var key in line){
-                   console.log(cubes._get(line[key]).color);
-                   }*/
 
         //массив, в который по порядку попадут все кубики,
         //которые войдут в эту же линию того же поля во время хода

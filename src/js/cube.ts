@@ -10,12 +10,12 @@ export class Cube {
   public x: number;
   public y: number;
   public direction: Direction | null;
+  public color: string;
+  public extra?: Record<string, any>;
+  public toMine?: number | null;
+  public readonly app: TenOnTen;
 
   private disapperance?: string;
-  private toMine?: number | null;
-  private readonly app: TenOnTen;
-  private extra?: Record<string, any>;
-  private color: string;
   private $el: JQuery<HTMLElement>;
 
   constructor(o: {

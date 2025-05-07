@@ -1,12 +1,35 @@
 import $ from "jquery";
 import { cubeAnimation } from "./cubeAnimation";
 import { data } from "./data";
+import { TenOnTen } from "./TenOnTen";
+
+export type Direction = "top" | "bottom" | "left" | "right";
 
 export class Cube {
-  constructor(o) {
-    var undefined, cube, color, visibleModeClasses;
+  private x: number;
+  private y: number;
+  private disapperance?: string;
+  private toMine?: number | null;
+  private field: string;
+  private readonly app: TenOnTen;
+  private extra?: Record<string, any>;
+  private direction?: Direction | null;
+  private color: string;
+  private $el: JQuery<HTMLElement>;
 
-    cube = this;
+  constructor(o: {
+    x: number;
+    y: number;
+    disapperance?: string;
+    toMine?: number;
+    field: string;
+    app: TenOnTen;
+    extra?: Record<string, any>;
+    direction?: Direction;
+    color?: string;
+  }) {
+    var color, visibleModeClasses;
+
     this.x = o.x;
     this.y = o.y;
 
@@ -56,7 +79,7 @@ export class Cube {
     this.color = color;
 
     //проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
-    if (cube.field !== "main") {
+    if (this.field !== "main") {
       if (this._inFieldIsVisible()) {
         visibleModeClasses = " ";
       } else {
@@ -77,13 +100,13 @@ export class Cube {
         this.color + " f" + this.field + visibleModeClasses + directionClass
       )
       .hover(
-        function (e) {
+        (e) => {
           e.preventDefault();
 
-          if (cube.field === "main") {
+          if (this.field === "main") {
           } else {
             //cube.findFirstInLine().$el.addClass("firstInHoverLine");
-            var allToFirstInLine = cube.findAllInLineCanGoToMain();
+            var allToFirstInLine = this.findAllInLineCanGoToMain();
             if (typeof allToFirstInLine !== "string") {
               for (var key in allToFirstInLine) {
                 allToFirstInLine[key].$el.addClass("firstInHoverLine");
@@ -91,13 +114,13 @@ export class Cube {
             }
           }
         },
-        function (e) {
+        (e) => {
           e.preventDefault();
 
-          if (cube.field === "main") {
+          if (this.field === "main") {
           } else {
             //cube.findFirstInLine().$el.removeClass("firstInHoverLine");
-            var allToFirstInLine = cube.findAllInLineCanGoToMain();
+            var allToFirstInLine = this.findAllInLineCanGoToMain();
             if (typeof allToFirstInLine !== "string") {
               for (var key in allToFirstInLine) {
                 allToFirstInLine[key].$el.removeClass("firstInHoverLine");
@@ -106,32 +129,32 @@ export class Cube {
           }
         }
       )
-      .click(function (e) {
+      .click((e) => {
         //не даем продолжить выполнение событий
         e.preventDefault();
         //и снимаем курсор с элемента
-        cube.$el.trigger("mouseout");
+        this.$el.trigger("mouseout");
 
         //если стоит блокировка событий приложения - не даём пользователю ничего сделать
-        if (cube.app.blockApp) {
+        if (this.app.blockApp) {
           return;
         }
 
         //если щелчек произошол по главному полю - ничего не делаем
-        if (cube.field === "main") {
+        if (this.field === "main") {
         }
         //если по боковому
         else {
           //ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
           //которые могут выйти из поля
-          var startCubes = cube.findAllInLineCanGoToMain();
+          var startCubes = this.findAllInLineCanGoToMain();
           //если пришел не массив - выполняем анимацию
           if (typeof startCubes === "string") {
             var scale =
-              cube.field === "left" || cube.field === "right"
+              this.field === "left" || this.field === "right"
                 ? [0.8, 1.2]
                 : [1.2, 0.8];
-            cube.$el
+            this.$el
               .transition({
                 scale: scale,
                 duration: data.animTime,
@@ -143,7 +166,7 @@ export class Cube {
           }
           //и отправляем их в путь-дорогу
           else {
-            cube.app.run({ startCubes: startCubes });
+            this.app.run({ startCubes: startCubes });
           }
         }
       });
@@ -152,7 +175,7 @@ export class Cube {
   }
 
   //отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
-  public toField = function () {
+  public toField() {
     this.app.cubes._add(this);
 
     //время попадания в поле майн
@@ -174,36 +197,40 @@ export class Cube {
     } else {
       this.$el.appendTo(this.app.container);
     }
-  };
+  }
 
-  //ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
-  public findFirstInLine = function () {
-    var o = { field: this.field };
+  // Ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
+  public findFirstInLine() {
+    const o: { field: string; x: number; y: number } = {
+      field: this.field,
+      x: this.x,
+      y: this.y,
+    };
     if (o.field === "top" || o.field === "bottom") {
-      o.x = this.x;
       o.y = o.field === "top" ? 9 : 0;
     } else {
       o.x = o.field === "left" ? 9 : 0;
-      o.y = this.y;
     }
     return this.app.cubes._get(o);
-  };
+  }
 
   //находим все кубики от этого до ближнего к майн в линии относительно этого
-  public findAllInLineCanGoToMain = function () {
-    var statProp = "y";
-    var dynamicProp = "x";
+  public findAllInLineCanGoToMain() {
+    let statProp: "y" | "x" = "y";
+    let dynamicProp: "x" | "y" = "x";
     if (this.field === "top" || this.field === "bottom") {
       statProp = "x";
       dynamicProp = "y";
     }
+
     //проверяем, сколько кубиков можно достать из боковой линии
     //по количеству свободных клеток в поле майн
-    var cellsMain =
+    var cellsMain: [number, number, number] =
       this.field === "top" || this.field === "left" ? [0, 1, 2] : [9, 8, 7];
-    var cellsSide =
+    var cellsSide: [number, number, number] =
       this.field === "top" || this.field === "left" ? [9, 8, 7] : [0, 1, 2];
-    var pos = { field: "main" };
+
+    var pos: { field: string; y?: number; x?: number } = { field: "main" };
     pos[statProp] = this[statProp];
     var count = 0;
     for (var key in cellsMain) {
@@ -217,7 +244,7 @@ export class Cube {
 
     //проверяем, если линия пустая, ходить вообще нельзя
     var allNullInLine = true;
-    for (var key = 0; key < data.cubesWidth; key++) {
+    for (let key = 0; key < data.cubesWidth; key++) {
       pos[dynamicProp] = key;
       if (this.app.cubes._get(pos) !== null) {
         allNullInLine = false;
@@ -233,7 +260,7 @@ export class Cube {
       if (count !== 0) {
         pos = { field: this.field };
         pos[statProp] = this[statProp];
-        for (var key = 0; key < 3 && key < count; key++) {
+        for (let key = 0; key < 3 && key < count; key++) {
           pos[dynamicProp] = cellsSide[key];
           arr.push(this.app.cubes._get(pos));
           //если доходим до кубика, над которым курсор - заканчиваем маневр
@@ -248,13 +275,14 @@ export class Cube {
         return "block";
       }
     }
-  };
+  }
 
-  //задаем html-элементу кубика положение на доске
-  //если параметры не переданы, устанавливаем текущую позицию кубика
-  //если переданы - устанавливаем в поле кубику, в позицию х/у, переданные в параметрах
-  public toState = function (o) {
-    var x, y;
+  // Задаем html-элементу кубика положение на доске
+  // Если параметры не переданы, устанавливаем текущую позицию кубика
+  // Если переданы - устанавливаем в поле кубику, в позицию х/у, переданные в параметрах
+  public toState(o?: { x: number; y: number }) {
+    let x: number;
+    let y: number;
     if (o === undefined) {
       x = this.x;
       y = this.y;
@@ -282,34 +310,36 @@ export class Cube {
       left: left,
       top: top,
     });
-  };
+  }
 
   //добавляем объект анимации на обработку через время, полученное в атрибутах
-  public addAnimate = function (o) {
-    var action, delay, duration, cube;
+  public addAnimate(o: { action: string; delay: number; duration: number }) {
+    var action, delay, duration;
 
     action = o.action;
     delay = o.delay;
     duration = o.duration;
-    cube = this;
+
     setTimeout(
-      function (o) {
-        cube.animate(o);
+      (o) => {
+        this.animate(o);
       },
       delay * data.animTime,
       { action: action, duration: duration }
     );
-  };
-  //добавляем объект анимации на обработку через время, полученное в атрибутах
-  public remove = function () {
+  }
+
+  // Добавляем объект анимации на обработку через время, полученное в атрибутах
+  public remove() {
     this.$el.remove();
-  };
-  //сама функция анимации - в зависимости од переданного значения, выполняем те или иные
-  //преобразования html-элемента кубика
+  }
+
+  // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
+  // преобразования html-элемента кубика
   public animate = cubeAnimation;
 
   //проверка, показывать кубик или нет в поле
-  public _inFieldIsVisible = function () {
+  public _inFieldIsVisible() {
     var pos;
     if (this.field === "main") {
       return true;
@@ -321,14 +351,36 @@ export class Cube {
       pos = this["x"];
       return this.field === "left" ? pos > 6 : pos < 3;
     }
-  };
+  }
 
-  //меняем параметры кубика, при этом его анимируем
-  public change = function (o) {
-    var cube = this;
+  // Меняем параметры кубика, при этом его анимируем
+  public change(o: { color?: string; direction?: Direction }) {
+    const changeParams = () => {
+      //если меняем цвет и это не тот же цвет, что сейчас
+      if (o.color !== undefined && o.color !== this.color) {
+        var prevColor = this.color;
+        this.color = o.color;
+        this.$el.removeClass(prevColor).addClass(this.color);
+      }
+      //если меняем направление и это не то же направление, что сейчас
+      if (o.direction !== undefined && o.direction !== this.direction) {
+        var prevDirection = this.direction;
+        this.direction = o.direction;
+
+        //стили следует менять только у кубиков на главном поле, так как
+        //слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
+        if (this.field === "main") {
+          this.$el.removeClass("d" + prevDirection);
+          if (this.direction !== null) {
+            this.$el.addClass("d" + this.direction);
+          }
+        }
+      }
+    };
 
     if (this._inFieldIsVisible()) {
-      var prop;
+      type TransitionProp = "rotate3d" | "rotateX" | "rotateY";
+      let prop: TransitionProp;
       //для красотенюшки задаем разную анимацию для разных полей
       if (this.field === "main") {
         prop = "rotate3d";
@@ -337,48 +389,28 @@ export class Cube {
       } else {
         prop = "rotateY";
       }
+
+      type Transition = { duration: number } & Partial<
+        Record<TransitionProp, string>
+      >;
       //анимация скрытия/открытия
-      var trans1, trans2;
-      trans1 = { duration: data.animTime * 2 };
-      trans2 = { duration: data.animTime * 2 };
+      const transition1: Transition = { duration: data.animTime * 2 };
+      const transition2: Transition = { duration: data.animTime * 2 };
       if (this.field === "main") {
-        trans1[prop] = "1,1,0,90deg";
-        trans2[prop] = "1,1,0,0deg";
+        transition1[prop] = "1,1,0,90deg";
+        transition2[prop] = "1,1,0,0deg";
       } else {
-        trans1[prop] = 90;
-        trans2[prop] = 0;
+        transition1[prop] = String(90);
+        transition2[prop] = String(0);
       }
       //сама анимация с изменением состояния по ходу
       this.$el
-        .transition(trans1, function () {
+        .transition(transition1, function () {
           changeParams();
         })
-        .transition(trans2);
+        .transition(transition2);
     } else {
       changeParams();
     }
-
-    function changeParams() {
-      //если меняем цвет и это не тот же цвет, что сейчас
-      if (o.color !== undefined && o.color !== cube.color) {
-        var prevColor = cube.color;
-        cube.color = o.color;
-        cube.$el.removeClass(prevColor).addClass(cube.color);
-      }
-      //если меняем направление и это не то же направление, что сейчас
-      if (o.direction !== undefined && o.direction !== cube.direction) {
-        var prevDirection = cube.direction;
-        cube.direction = o.direction;
-
-        //стили следует менять только у кубиков на главном поле, так как
-        //слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
-        if (cube.field === "main") {
-          cube.$el.removeClass("d" + prevDirection);
-          if (cube.direction !== null) {
-            cube.$el.addClass("d" + cube.direction);
-          }
-        }
-      }
-    }
-  };
+  }
 }

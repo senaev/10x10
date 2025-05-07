@@ -18,6 +18,7 @@
   "homepage": "https://github.com/senaev/10x10#readme",
   "devDependencies": {
     "@types/jquery": "^3.5.32",
+    "@types/jquery.transit": "^0.9.33",
     "css-loader": "^7.1.2",
     "jquery": "^3.7.1",
     "jquery.transit": "^0.9.12",

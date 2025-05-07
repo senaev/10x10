@@ -13,15 +13,17 @@ export type Mask = Record<
 export class TenOnTen {
   public container: JQuery<HTMLElement>;
   public blockApp: boolean;
+  public level: number;
+  public readonly cubes: typeof cubes;
 
   private moveMap: MoveMap | undefined;
 
-  private cubes: typeof cubes;
-  private level: number;
   private lang: keyof (typeof data.lang)[keyof typeof data.lang];
 
+  private previousStepMap: Mask | undefined;
+
   //счетчик для значений toMine кубиков, попадающих в главное поле
-  private mainCounter: () => number = (function () {
+  public readonly mainCounter: () => number = (function () {
     var numberOfCalls = 0;
     return function () {
       return ++numberOfCalls;
@@ -357,59 +359,62 @@ export class TenOnTen {
     //массив, в котором описаны все различия между текущим и предидущим состоянием
     var changed = [];
     //пробегаем в массиве по каждому кубику предидущего массива
-    for (var fieldName in this.previousStepMap) {
-      for (var x in this.previousStepMap[fieldName]) {
-        for (var y in this.previousStepMap[fieldName][x]) {
-          x = parseInt(x);
-          y = parseInt(y);
-          var pCube = this.previousStepMap[fieldName][x][y];
-          //берем соответствующее значение текущей маски для сравнения
-          var cube = this.cubes._get({ field: fieldName, x: x, y: y });
-          //если предидущее - null
-          if (pCube === null) {
-            //а новое - что-то другое
-            //удаляем кубик из нового значения
-            if (cube !== null) {
-              changed.push({
-                field: fieldName,
-                x: x,
-                y: y,
-                pCube: null,
-                cube: cube,
-                action: "remove",
-              });
+    const previousStepMap = this.previousStepMap;
+    if (previousStepMap) {
+      for (const fieldName in previousStepMap) {
+        for (var x in previousStepMap[fieldName as Field]) {
+          for (var y in previousStepMap[fieldName as Field][x]) {
+            x = parseInt(x);
+            y = parseInt(y);
+            var pCube = previousStepMap[fieldName as Field][x][y];
+            //берем соответствующее значение текущей маски для сравнения
+            var cube = this.cubes._get({ field: fieldName, x: x, y: y });
+            //если предидущее - null
+            if (pCube === null) {
+              //а новое - что-то другое
+              //удаляем кубик из нового значения
+              if (cube !== null) {
+                changed.push({
+                  field: fieldName,
+                  x: x,
+                  y: y,
+                  pCube: null,
+                  cube: cube,
+                  action: "remove",
+                });
+              }
             }
-          }
-          //если же раньше тут тоже был кубик
-          else {
-            //а сейчас кубика нету
-            //заполняем клетку кубиком
-            if (cube === null) {
-              changed.push({
-                field: fieldName,
-                x: x,
-                y: y,
-                pCube: pCube,
-                cube: null,
-                action: "add",
-              });
-            }
-            //если и раньше и сейчас - нужно сравнить эти значения
+            //если же раньше тут тоже был кубик
             else {
-              //пробегаемся по каждому параметру
-              for (var prop in pCube) {
-                //если какие-то параметры различаются,
-                //меняем параметры кубика
-                if (cube[prop] !== pCube[prop]) {
-                  changed.push({
-                    field: fieldName,
-                    x: x,
-                    y: y,
-                    pCube: pCube,
-                    cube: cube,
-                    action: "change",
-                  });
-                  break;
+              //а сейчас кубика нету
+              //заполняем клетку кубиком
+              if (cube === null) {
+                changed.push({
+                  field: fieldName,
+                  x: x,
+                  y: y,
+                  pCube: pCube,
+                  cube: null,
+                  action: "add",
+                });
+              }
+              //если и раньше и сейчас - нужно сравнить эти значения
+              else {
+                //пробегаемся по каждому параметру
+                for (var prop in pCube) {
+                  //если какие-то параметры различаются,
+                  //меняем параметры кубика
+                  if (cube[prop] !== pCube[prop]) {
+                    changed.push({
+                      field: fieldName,
+                      x: x,
+                      y: y,
+                      pCube: pCube,
+                      cube: cube,
+                      action: "change",
+                    });
+                    break;
+                  }
                 }
               }
             }
@@ -472,7 +477,7 @@ export class TenOnTen {
     }
   }
 
-  private run(o) {
+  public run(o: { startCubes: Cube[] }) {
     this.moveMap = new MoveMap();
 
     //создаем маску для возможности возврата хода

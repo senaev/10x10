@@ -1,3 +1,5 @@
+import { Direction } from "./cube";
+
 export const FIELDS = ["main", "top", "right", "bottom", "left"] as const;
 export type Field = (typeof FIELDS)[number];
 
@@ -92,16 +94,24 @@ export const data = {
     rand: function rand(min: number, max: number) {
       return min + (((max - min + 1) * Math.random()) ^ 0);
     },
-    reverseField: function (field: string) {
+    reverseField: function (field: Field): Direction | null {
       if (field === "top") {
         return "bottom";
-      } else if (field === "bottom") {
+      }
+
+      if (field === "bottom") {
         return "top";
-      } else if (field === "left") {
+      }
+
+      if (field === "left") {
         return "right";
-      } else if (field === "right") {
+      }
+
+      if (field === "right") {
         return "left";
       }
+
+      return null;
     },
     shuffle: function (o: number[][]) {
       for (

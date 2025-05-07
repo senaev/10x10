@@ -16,7 +16,7 @@ export class TenOnTen {
   public level: number;
   public readonly cubes: typeof cubes;
 
-  private moveMap: MoveMap | undefined;
+  public moveMap: MoveMap | undefined;
 
   private lang: keyof (typeof data.lang)[keyof typeof data.lang];
 

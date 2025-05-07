@@ -9,9 +9,10 @@ import { MainMask } from "./mainMask";
  * для основного приложения
  */
 export class MoveMap {
+  public beyondTheSide: any[];
+
   private animationMap: any[];
   private toSideActions: any[];
-  private beyondTheSide: any[];
   private app: any;
   private mainMask: any;
   private startCubes: any[];

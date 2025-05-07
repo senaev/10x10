@@ -9,12 +9,12 @@ export class Cube {
   public field: Field;
   public x: number;
   public y: number;
+  public direction: Direction | null;
 
   private disapperance?: string;
   private toMine?: number | null;
   private readonly app: TenOnTen;
   private extra?: Record<string, any>;
-  private direction?: Direction | null;
   private color: string;
   private $el: JQuery<HTMLElement>;
 

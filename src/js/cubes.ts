@@ -156,39 +156,40 @@ export const cubes = {
      * а старые вьюхи ни куда не деваются и одни других перекрывают :)
      */
   },
+
+  //добавляем в линию кубик, по кубику мы должны определить, в какую линию
+  _pushInLine(cube: Cube) {
+    //console.log(cube.color);
+    //меняем значения кубика
+    cube.field = cube.direction!;
+    cube.direction = data.f.reverseField(cube.field);
+    //получаем линию, в которую вставим кубик
+    var line = this._getLine({ x: cube.x, y: cube.y, field: cube.field });
+    //присваиваем значения координат в поле кубику
+    cube.x = line[line.length - 1].x;
+    cube.y = line[line.length - 1].y;
+    //получаем удаляемый (дальний от mainField в линии) кубик
+    var removedCube = this._get(line[0]);
+    //сдвигаем линию на одну клетку от mainField
+    for (var key = 0; key < line.length - 1; key++) {
+      this._set(line[key], this._get(line[key + 1]));
+    }
+    //устанавливаем значение первой клетки
+    this._set(line[line.length - 1], cube);
+
+    /**
+     * заносим удаляемый кубик в массив удаляемых, а не
+     * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
+     * большого количества кубиков, при практически полной замене боковой линии,
+     * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
+     * html-элементы таких кубиков будут удалены еще до того, как начнется
+     * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
+     * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
+     */
+    this._app!.moveMap!.beyondTheSide!.push(removedCube);
+  },
 };
 
-//добавляем в линию кубик, по кубику мы должны определить, в какую линию
-cubes._pushInLine = function (cube) {
-  //console.log(cube.color);
-  //меняем значения кубика
-  cube.field = cube.direction;
-  cube.direction = data.f.reverseField(cube.field);
-  //получаем линию, в которую вставим кубик
-  var line = this._getLine({ x: cube.x, y: cube.y, field: cube.field });
-  //присваиваем значения координат в поле кубику
-  cube.x = line[line.length - 1].x;
-  cube.y = line[line.length - 1].y;
-  //получаем удаляемый (дальний от mainField в линии) кубик
-  var removedCube = this._get(line[0]);
-  //сдвигаем линию на одну клетку от mainField
-  for (var key = 0; key < line.length - 1; key++) {
-    this._set(line[key], this._get(line[key + 1]));
-  }
-  //устанавливаем значение первой клетки
-  this._set(line[line.length - 1], cube);
-
-  /**
-   * заносим удаляемый кубик в массив удаляемых, а не
-   * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
-   * большого количества кубиков, при практически полной замене боковой линии,
-   * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
-   * html-элементы таких кубиков будут удалены еще до того, как начнется
-   * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
-   * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
-   */
-  this._app.moveMap.beyondTheSide.push(removedCube);
-};
 cubes._mergeMoveMap = function (moveMap) {
   var arr = moveMap.mainMask.arr;
   var startCubes = moveMap.startCubes;

@@ -5,6 +5,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { Direction } from '../types/Direction';
+import { bezier } from '../utils/bezier';
 import { getAllCubesInCursorPositionThatCouldGoToMain } from '../utils/getAllCubesInCursorPositionThatCouldGoToMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
@@ -28,23 +29,6 @@ export type Transition = Partial<{
     left: string;
     top: string;
 }>;
-
-function bezier(duration: number): number {
-    const o: Record<number, number> = {
-        1: 99,
-        2: 58,
-        3: 42,
-        4: 34,
-        5: 27,
-        6: 23,
-        7: 19,
-        8: 15,
-        9: 12,
-        10: 11,
-        11: 10,
-    };
-    return o[duration];
-}
 
 export class Cube {
     public field: Field;

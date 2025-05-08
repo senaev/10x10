@@ -9,6 +9,8 @@ import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { Direction } from '../types/Direction';
+import { getCubeAddressInSideFieldInOfderFromMain } from '../utils/getCubeAddressInSideFieldInOfderFromMain';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { getLevelCubesCount } from '../utils/getLevelCubesCount';
 import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
@@ -538,5 +540,46 @@ export class TenOnTen {
         this.cubes._mergeMoveMap(this.moveMap);
 
         this.checkStepEnd();
+    }
+
+    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+    public cutCubesFromLineAndFillByNewOnes(startCubes: Cube[]) {
+        // получаем линию
+        const line = getCubeAddressInSideFieldInOfderFromMain({
+            x: startCubes[0].x,
+            y: startCubes[0].y,
+            field: startCubes[0].field,
+        });
+
+        // пробегаемся, меняем значения в коллекции
+        for (let key = line.length - 1; key >= startCubes.length; key--) {
+            const prevCube = this.cubes._get(line[key - startCubes.length])!;
+            this.cubes._set(line[key], prevCube);
+            prevCube.x = line[key].x;
+            prevCube.y = line[key].y;
+        }
+        // генерируем кубики для крайних значений в линии
+        for (let key = 0; key < startCubes.length; key++) {
+            this.cubes._set(
+                line[key],
+                new Cube({
+                    x: line[key].x,
+                    y: line[key].y,
+                    field: line[key].field,
+                    app: this,
+                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
+                    color: getRandomColorForCubeLevel(this.level),
+                    appearWithAnimation: false,
+                    container: this.container,
+                })
+            );
+        }
+
+        /**
+         * при отладке может возникать забавная ошибка, когда почему-то
+         * случайно добавляются не последние значения линии, а предыдущие из них
+         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
+         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
+         */
     }
 }

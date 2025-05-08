@@ -1,8 +1,7 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
+import { getCubeAddressInSideFieldInOfderFromMain } from '../utils/getCubeAddressInSideFieldInOfderFromMain';
 import { getCubeByAddress } from '../utils/getCubeByAddress';
-import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
-import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './Cube';
@@ -108,88 +107,6 @@ export class Cubes {
         }
     }
 
-    // получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
-    // до ближайшего
-    public _getLine(o: CubeAddress) {
-        let staticProp: 'x' | 'y';
-        let dynamicProp: 'x' | 'y';
-        let line: CubeAddress[] = [];
-        let coords: CubeAddress;
-
-        line = [];
-        if (o.field === 'top' || o.field === 'bottom') {
-            staticProp = 'x';
-            dynamicProp = 'y';
-        } else {
-            staticProp = 'y';
-            dynamicProp = 'x';
-        }
-        if (o.field === 'top' || o.field === 'left') {
-            for (let key = 0; key < BOARD_SIZE; key++) {
-                coords = {
-                    field: o.field,
-                    x: 0,
-                    y: 0,
-                };
-                coords[staticProp] = o[staticProp];
-                coords[dynamicProp] = key;
-                line.push(coords);
-            }
-        } else {
-            for (let key = BOARD_SIZE - 1; key >= 0; key--) {
-                coords = {
-                    field: o.field,
-                    x: 0,
-                    y: 0,
-                };
-                coords[staticProp] = o[staticProp];
-                coords[dynamicProp] = key;
-                line.push(coords);
-            }
-        }
-        return line;
-    }
-
-    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-    public _cutFromLine(startCubes: Cube[]) {
-        // получаем линию
-        const line = this._getLine({
-            x: startCubes[0].x,
-            y: startCubes[0].y,
-            field: startCubes[0].field,
-        });
-            // пробегаемся, меняем значения в коллекции
-        for (let key = line.length - 1; key >= startCubes.length; key--) {
-            const prevCube = this._get(line[key - startCubes.length])!;
-            this._set(line[key], prevCube);
-            prevCube.x = line[key].x;
-            prevCube.y = line[key].y;
-        }
-        // генерируем кубики для крайних значений в линии
-        for (let key = 0; key < startCubes.length; key++) {
-            this._set(
-                line[key],
-                new Cube({
-                    x: line[key].x,
-                    y: line[key].y,
-                    field: line[key].field,
-                    app: this._app,
-                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
-                    color: getRandomColorForCubeLevel(this._app.level),
-                    appearWithAnimation: false,
-                    container: this._app.container,
-                })
-            );
-        }
-
-        /**
-         * при отладке может возникать забавная ошибка, когда почему-то
-         * случайно добавляются не последние значения линии, а предидущие из них
-         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
-         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
-         */
-    }
-
     // добавляем в линию кубик, по кубику мы должны определить, в какую линию
     public _pushInLine(cube: Cube) {
         // console.log(cube.color);
@@ -197,7 +114,7 @@ export class Cubes {
         cube.field = cube.direction!;
         cube.direction = reverseDirection(cube.field);
         // получаем линию, в которую вставим кубик
-        const line = this._getLine({
+        const line = getCubeAddressInSideFieldInOfderFromMain({
             x: cube.x,
             y: cube.y,
             field: cube.field,
@@ -225,13 +142,14 @@ export class Cubes {
          */
         this._app.moveMap!.beyondTheSide!.push(removedCube);
     }
+
     public _mergeMoveMap(moveMap: MoveMap) {
         const arr = moveMap.mainMask.arr;
         const startCubes = moveMap.startCubes;
         // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
         // могут меняться только при вхождении их в боковую панель
         // вытаскиваем кубик из боковой панели коллекции
-        this._cutFromLine(startCubes);
+        this._app.cutCubesFromLineAndFillByNewOnes(startCubes);
         // меняем значение field
         for (const key in startCubes) {
             startCubes[key].field = 'main';
@@ -325,7 +243,6 @@ export class Cubes {
     // массовая анимация для кубиков, вспомогательная
     // функция для удобства анимации сразу нескольких кубиков
     public animate(o: { action: 'fromLine'; cube: Cube[] } | { action: 'inLine'; cube: Cube }) {
-        let line;
 
         const { cube, action } = o;
 
@@ -339,7 +256,7 @@ export class Cubes {
 
                 // получаем линию кубика
                 // коллекция пока в начальном состоянии (до хода)
-                line = this._getLine({
+                const line = getCubeAddressInSideFieldInOfderFromMain({
                     x: startCubes[0].x,
                     y: startCubes[0].y,
                     field: startCubes[0].field,
@@ -406,9 +323,8 @@ export class Cubes {
             // при входе кубика в линию, анимируем линию
         case 'inLine':
             (() => {
-
                 // получаем линию кубика
-                line = this._getLine({
+                const line = getCubeAddressInSideFieldInOfderFromMain({
                     x: cube.x,
                     y: cube.y,
                     field: cube.field,

@@ -146,10 +146,12 @@ export class Cubes {
     public _mergeMoveMap(moveMap: MoveMap) {
         const arr = moveMap.mainMask.arr;
         const startCubes = moveMap.startCubes;
+
         // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
         // могут меняться только при вхождении их в боковую панель
         // вытаскиваем кубик из боковой панели коллекции
         this._app.cutCubesFromLineAndFillByNewOnes(startCubes);
+
         // меняем значение field
         for (const key in startCubes) {
             startCubes[key].field = 'main';
@@ -206,8 +208,7 @@ export class Cubes {
                         field: 'main',
                         x: mCube.cube.x,
                         y: mCube.cube.y,
-                    }) ===
-              mCube.cube
+                    }) === mCube.cube
                 ) {
                     this._set({
                         field: 'main',
@@ -218,7 +219,6 @@ export class Cubes {
             }
         }
         // убираем в боковые поля кубики, которые ушли туда во время хода
-        // console.log(moveMap.toSideActions);
         for (const key in moveMap.toSideActions) {
             const mCube = moveMap.toSideActions[key];
             // если клетку, с которой сошел кубик, ещё не занял другой кубик
@@ -233,8 +233,7 @@ export class Cubes {
                     y: mCube.cube.y,
                 }, null);
             }
-            /* mCube.cube.x = mCube.x;
-                   mCube.cube.y = mCube.y; */
+
             // пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }

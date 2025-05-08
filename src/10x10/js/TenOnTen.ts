@@ -9,7 +9,9 @@ import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { Direction } from '../types/Direction';
+import { getAllCubesInCursorPositionThatCouldGoToMain } from '../utils/getAllCubesInCursorPositionThatCouldGoToMain';
 import { getCubeAddressInSideFieldInOfderFromMain } from '../utils/getCubeAddressInSideFieldInOfderFromMain';
+import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { getLevelCubesCount } from '../utils/getLevelCubesCount';
@@ -103,6 +105,7 @@ export class TenOnTen {
                 color: getRandomColorForCubeLevel(this.level),
                 appearWithAnimation: false,
                 container: this.container,
+                onClick: this.handleCubeClick,
             });
         });
 
@@ -311,6 +314,7 @@ export class TenOnTen {
                 color,
                 appearWithAnimation: true,
                 container: this.container,
+                onClick: this.handleCubeClick,
             });
         }
     }
@@ -478,6 +482,7 @@ export class TenOnTen {
                     app: this,
                     appearWithAnimation: true,
                     container: this.container,
+                    onClick: this.handleCubeClick,
                 });
                 // console.log(cube);
                 break;
@@ -524,12 +529,12 @@ export class TenOnTen {
         }
     }
 
-    public run(o: { startCubes: Cube[] }) {
-    // создаем маску для возможности возврата хода
+    public run(startCubes: Cube[]) {
+        // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
         this.moveMap = new MoveMap({
-            startCubes: o.startCubes,
+            startCubes,
             cubes: this.cubes,
             app: this,
         });
@@ -571,6 +576,7 @@ export class TenOnTen {
                     color: getRandomColorForCubeLevel(this.level),
                     appearWithAnimation: false,
                     container: this.container,
+                    onClick: this.handleCubeClick,
                 })
             );
         }
@@ -582,4 +588,30 @@ export class TenOnTen {
          * а старые вьюхи ни куда не деваются и одни других перекрывают :)
          */
     }
+
+    private readonly handleCubeClick = (address: CubeAddress) => {
+        // если стоит блокировка событий приложения - не даём пользователю ничего сделать
+        if (this.blockApp) {
+            return;
+        }
+
+        // если щелчек произошол по  полю - ничего не делаем
+        if (address.field === 'main') {
+            return;
+        }
+
+        // если по боковому
+        // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
+        // которые могут выйти из поля
+        const startCubes = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.mask, address);
+
+        // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
+        if (typeof startCubes === 'string') {
+            getCubeByAddress(this.cubes.mask, address)!.performIHavePawsAnimation();
+            return;
+        }
+
+        // отправляем в путь-дорогу
+        this.run(startCubes);
+    };
 }

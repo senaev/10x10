@@ -53,6 +53,7 @@ export class Cube {
         direction?: Direction;
         color: string;
         container: JQuery<HTMLElement>;
+        onClick: (address: CubeAddress) => void;
     }) {
         let visibleModeClasses;
 
@@ -156,49 +157,11 @@ export class Cube {
                 // и снимаем курсор с элемента
                 this.$el.trigger('mouseout');
 
-                // если стоит блокировка событий приложения - не даём пользователю ничего сделать
-                if (this.app.blockApp) {
-                    return;
-                }
-
-                // если щелчек произошол по  полю - ничего не делаем
-                if (this.field === 'main') {
-                    //
-                } else {
-                    // если по боковому
-                    // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
-                    // которые могут выйти из поля
-                    const startCubes = getAllCubesInCursorPositionThatCouldGoToMain(this.app.cubes.mask, {
-                        field: this.field,
-                        x: this.x,
-                        y: this.y,
-                    });
-                    // если пришел не массив - выполняем анимацию
-                    if (typeof startCubes === 'string') {
-                        const scale =
-              this.field === 'left' || this.field === 'right'
-                  ? [
-                      0.8,
-                      1.2,
-                  ]
-                  : [
-                      1.2,
-                      0.8,
-                  ];
-                        this.$el
-                            .transition({
-                                scale,
-                                duration: ANIMATION_TIME,
-                            })
-                            .transition({
-                                scale: 1,
-                                duration: ANIMATION_TIME,
-                            });
-                    } else {
-                        // и отправляем их в путь-дорогу
-                        this.app.run({ startCubes });
-                    }
-                }
+                params.onClick({
+                    field: this.field,
+                    x: this.x,
+                    y: this.y,
+                });
             });
 
         this.toField();
@@ -277,6 +240,29 @@ export class Cube {
             left,
             top,
         });
+    }
+
+    public performIHavePawsAnimation() {
+        const scale =
+              this.field === 'left' || this.field === 'right'
+                  ? [
+                      0.8,
+                      1.2,
+                  ]
+                  : [
+                      1.2,
+                      0.8,
+                  ];
+
+        this.$el
+            .transition({
+                scale,
+                duration: ANIMATION_TIME,
+            })
+            .transition({
+                scale: 1,
+                duration: ANIMATION_TIME,
+            });
     }
 
     // добавляем объект анимации на обработку через время, полученное в атрибутах

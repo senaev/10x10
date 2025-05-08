@@ -311,7 +311,7 @@ eval("module.exports = \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAAAgC
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var jquery_transit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery.transit */ \"./node_modules/jquery.transit/jquery.transit.js\");\n/* harmony import */ var jquery_transit__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery_transit__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _PlayGama_initPlayGamaBridge__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../PlayGama/initPlayGamaBridge */ \"./src/PlayGama/initPlayGamaBridge.ts\");\n/* harmony import */ var _js_TenOnTen__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./js/TenOnTen */ \"./src/10x10/js/TenOnTen.ts\");\n/* harmony import */ var _main_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./main.css */ \"./src/10x10/main.css\");\n\n\n\n\nconst container = document.getElementById('app');\nif (!container) {\n    throw new Error('Container not found');\n}\nconst tenOnTen = new _js_TenOnTen__WEBPACK_IMPORTED_MODULE_2__.TenOnTen({\n    container,\n});\nwindow.tenOnTen = tenOnTen;\n// eslint-disable-next-line no-console\nconsole.log('App is ready', tenOnTen);\n(0,_PlayGama_initPlayGamaBridge__WEBPACK_IMPORTED_MODULE_1__.initPlayGamaBridge)();\n\n\n//# sourceURL=webpack://10x10/./src/10x10/index.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var jquery_transit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery.transit */ \"./node_modules/jquery.transit/jquery.transit.js\");\n/* harmony import */ var jquery_transit__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery_transit__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _PlayGama_initPlayGamaBridge__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../PlayGama/initPlayGamaBridge */ \"./src/PlayGama/initPlayGamaBridge.ts\");\n/* harmony import */ var _utils_hintWebpackBuildTime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/hintWebpackBuildTime */ \"./src/utils/hintWebpackBuildTime.ts\");\n/* harmony import */ var _js_TenOnTen__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./js/TenOnTen */ \"./src/10x10/js/TenOnTen.ts\");\n/* harmony import */ var _main_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./main.css */ \"./src/10x10/main.css\");\n\n\n\n\n\n(0,_utils_hintWebpackBuildTime__WEBPACK_IMPORTED_MODULE_2__.hintWebpackBuildTime)();\nconst container = document.getElementById('app');\nif (!container) {\n    throw new Error('Container not found');\n}\nconst tenOnTen = new _js_TenOnTen__WEBPACK_IMPORTED_MODULE_3__.TenOnTen({\n    container,\n});\nwindow.tenOnTen = tenOnTen;\n// eslint-disable-next-line no-console\nconsole.log('App is ready', tenOnTen);\n(0,_PlayGama_initPlayGamaBridge__WEBPACK_IMPORTED_MODULE_1__.initPlayGamaBridge)();\n\n\n//# sourceURL=webpack://10x10/./src/10x10/index.ts?");
 
 /***/ }),
 
@@ -543,6 +543,17 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 "use strict";
 eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   initPlayGamaBridge: () => (/* binding */ initPlayGamaBridge)\n/* harmony export */ });\nfunction initPlayGamaBridge() {\n    bridge\n        .initialize()\n        .then(() => {\n        // eslint-disable-next-line no-console\n        console.log('PlayGamaBridge initialized', bridge.EVENT_NAME);\n    })\n        .catch((error) => {\n        // eslint-disable-next-line no-console\n        console.error('PlayGamaBridge initialization failed', error);\n    });\n}\n\n\n//# sourceURL=webpack://10x10/./src/PlayGama/initPlayGamaBridge.ts?");
+
+/***/ }),
+
+/***/ "./src/utils/hintWebpackBuildTime.ts":
+/*!*******************************************!*\
+  !*** ./src/utils/hintWebpackBuildTime.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   hintWebpackBuildTime: () => (/* binding */ hintWebpackBuildTime)\n/* harmony export */ });\nfunction hintWebpackBuildTime() {\n    const secondsSinceBuild = (Date.now() - 1746718392210) / 1000;\n    // eslint-disable-next-line no-console\n    console.log(`Built ${secondsSinceBuild} sec ago`);\n}\n\n\n//# sourceURL=webpack://10x10/./src/utils/hintWebpackBuildTime.ts?");
 
 /***/ })
 

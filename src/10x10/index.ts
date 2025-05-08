@@ -1,10 +1,13 @@
 import 'jquery.transit';
 import { initPlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
 import { GlobalThis } from '../types/GlobalThis';
+import { hintWebpackBuildTime } from '../utils/hintWebpackBuildTime';
 
 import { TenOnTen } from './js/TenOnTen';
 
 import './main.css';
+
+hintWebpackBuildTime();
 
 const container = document.getElementById('app');
 

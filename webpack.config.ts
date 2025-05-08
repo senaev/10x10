@@ -47,4 +47,9 @@ export default () => ({
             '.css',
         ],
     },
+    plugins: [
+        new webpack.DefinePlugin({
+            WEBPACK_BUILD_TIME: webpack.DefinePlugin.runtimeValue(Date.now, true),
+        }),
+    ],
 } satisfies webpack.Configuration);

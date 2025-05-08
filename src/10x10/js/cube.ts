@@ -341,8 +341,6 @@ export class Cube {
             }
         }
 
-        console.log(arr.map((cube) => cube.color));
-
         return arr;
     }
 

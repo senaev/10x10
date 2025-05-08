@@ -1,6 +1,7 @@
+import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
+
 import { Cube } from './cube';
 import { Cubes } from './cubes';
-import { data } from './data';
 import { MainMask } from './mainMask';
 import { MCube } from './mCube';
 import { TenOnTen } from './TenOnTen';
@@ -195,7 +196,7 @@ export class MoveMap {
                     }
                 }
             },
-            this.animationLength * data.animTime - 1,
+            this.animationLength * ANIMATION_TIME - 1,
             this.app
         );
 

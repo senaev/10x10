@@ -2,7 +2,10 @@ import $ from 'jquery';
 
 import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
 import { shuffleArray } from '../../utils/shuffleArray';
+import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
+import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
@@ -13,9 +16,6 @@ import { Cube, Direction } from './cube';
 import {
     CubeAddress, Cubes,
 } from './cubes';
-import {
-    data,
-} from './data';
 import { MoveMap } from './moveMap';
 import { UndoButton } from './undoButton';
 
@@ -71,24 +71,24 @@ export class TenOnTen {
         (() => {
             const topRightPanel = '<div class="panel topRightPanel"></div>'; //
             let background = '<div class="backgroungField">';
-            for (let key = 0; key < data.cubesWidth * data.cubesWidth; key++) {
+            for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
                 background += '<div class="dCube"></div>';
             }
             background += '</div>';
 
             const backgroundField = $(background).css({
-                height: data.oneWidth * data.cubesWidth,
-                width: data.oneWidth * data.cubesWidth,
-                padding: data.oneWidth * 3 + 3,
-                left: data.oneWidth * -3 - 3,
-                top: data.oneWidth * -3 - 3,
+                height: CUBE_WIDTH * BOARD_SIZE,
+                width: CUBE_WIDTH * BOARD_SIZE,
+                padding: CUBE_WIDTH * 3 + 3,
+                left: CUBE_WIDTH * -3 - 3,
+                top: CUBE_WIDTH * -3 - 3,
             });
 
             this.container
                 .css({
-                    height: data.oneWidth * data.cubesWidth,
-                    width: data.oneWidth * data.cubesWidth,
-                    margin: data.oneWidth * 3,
+                    height: CUBE_WIDTH * BOARD_SIZE,
+                    width: CUBE_WIDTH * BOARD_SIZE,
+                    margin: CUBE_WIDTH * 3,
                     position: 'relative',
                 })
                 .addClass('tenOnTenContainer')
@@ -128,11 +128,11 @@ export class TenOnTen {
                     function (appLocal) {
                         appLocal.blockApp = false;
                     },
-                    data.animTime * 8,
+                    ANIMATION_TIME * 8,
                     app
                 );
             },
-            data.animTime,
+            ANIMATION_TIME,
             this
         );
     };
@@ -145,9 +145,9 @@ export class TenOnTen {
         for (const field of FIELDS) {
             const fieldValue: (MaskFieldValue | null)[][] = [];
             mask[field] = fieldValue;
-            for (let x = 0; x < data.cubesWidth; x++) {
+            for (let x = 0; x < BOARD_SIZE; x++) {
                 fieldValue[x] = [];
-                for (let y = 0; y < data.cubesWidth; y++) {
+                for (let y = 0; y < BOARD_SIZE; y++) {
                     const c = cubesLocal._get({
                         field,
                         x,
@@ -238,8 +238,8 @@ export class TenOnTen {
                 //создаем массив из свободных ячеек, перемешиваем его
                 if (nullCells === undefined) {
                     nullCells = [];
-                    for (let x = 0; x < data.cubesWidth; x++) {
-                        for (let y = 0; y < data.cubesWidth; y++) {
+                    for (let x = 0; x < BOARD_SIZE; x++) {
+                        for (let y = 0; y < BOARD_SIZE; y++) {
                             if (this.cubes.main[x][y] === null) {
                                 nullCells.push({
                                     x,
@@ -259,8 +259,8 @@ export class TenOnTen {
                     if (
                         cell.x === 0 ||
             cell.y === 0 ||
-            cell.x === data.cubesWidth - 1 ||
-            cell.y === data.cubesWidth - 1
+            cell.x === BOARD_SIZE - 1 ||
+            cell.y === BOARD_SIZE - 1
                     ) {
                         nullCells.push(cell);
                     } else {
@@ -340,8 +340,8 @@ export class TenOnTen {
         let game_over = true;
         let next_level = true;
 
-        for (let x = 0; x < data.cubesWidth; x++) {
-            for (let y = 0; y < data.cubesWidth; y++) {
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            for (let y = 0; y < BOARD_SIZE; y++) {
                 const cube = cubesLocal['main'][x][y];
 
                 //если на поле еще остались кубики, уровень не завершен
@@ -354,8 +354,8 @@ export class TenOnTen {
                 if (
                     x === 0 ||
           y === 0 ||
-          x === data.cubesWidth - 1 ||
-          y === data.cubesWidth - 1
+          x === BOARD_SIZE - 1 ||
+          y === BOARD_SIZE - 1
                 ) {
                     if (cube === null) {
                         game_over = false;
@@ -387,7 +387,7 @@ export class TenOnTen {
             function (app) {
                 app.blockApp = false;
             },
-            data.animTime * 4,
+            ANIMATION_TIME * 4,
             this
         );
 

@@ -1,13 +1,15 @@
 import $ from 'jquery';
 
 import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
+import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
+import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { CubeAddress } from './cubes';
-import { data } from './data';
 import { Action } from './moveMap';
 import { TenOnTen } from './TenOnTen';
 
@@ -202,11 +204,11 @@ export class Cube {
                         this.$el
                             .transition({
                                 scale,
-                                duration: data.animTime,
+                                duration: ANIMATION_TIME,
                             })
                             .transition({
                                 scale: 1,
-                                duration: data.animTime,
+                                duration: ANIMATION_TIME,
                             });
                     } else {
                         //и отправляем их в путь-дорогу
@@ -235,7 +237,7 @@ export class Cube {
                 .appendTo(this.app.container)
                 .transition({
                     scale: 1,
-                    duration: data.animTime * 4,
+                    duration: ANIMATION_TIME * 4,
                 });
             delete this.disapperance;
         } else {
@@ -312,7 +314,7 @@ export class Cube {
 
         //проверяем, если линия пустая, ходить вообще нельзя
         let allNullInLine = true;
-        for (let key = 0; key < data.cubesWidth; key++) {
+        for (let key = 0; key < BOARD_SIZE; key++) {
             address[dynamicProp] = key;
             if (this.app.cubes._get(address) !== null) {
                 allNullInLine = false;
@@ -361,20 +363,20 @@ export class Cube {
             x = o.x;
             y = o.y;
         }
-        let left = x * data.oneWidth;
-        let top = y * data.oneWidth;
+        let left = x * CUBE_WIDTH;
+        let top = y * CUBE_WIDTH;
         switch (this.field) {
         case 'top':
-            top -= data.oneWidth * 10;
+            top -= CUBE_WIDTH * 10;
             break;
         case 'right':
-            left += data.oneWidth * 10;
+            left += CUBE_WIDTH * 10;
             break;
         case 'bottom':
-            top += data.oneWidth * 10;
+            top += CUBE_WIDTH * 10;
             break;
         case 'left':
-            left -= data.oneWidth * 10;
+            left -= CUBE_WIDTH * 10;
             break;
         }
         this.$el.css({
@@ -396,7 +398,7 @@ export class Cube {
                     duration,
                 });
             },
-            (delay ?? 0) * data.animTime
+            (delay ?? 0) * ANIMATION_TIME
         );
     }
 
@@ -425,18 +427,18 @@ export class Cube {
                 ];
 
             const trans0: Transition = {
-                duration: data.animTime * dur,
+                duration: ANIMATION_TIME * dur,
                 easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)',
             };
-            trans0[prop] = sign + '=' + dur * data.oneWidth;
+            trans0[prop] = sign + '=' + dur * CUBE_WIDTH;
             const trans1: Transition = {
                 scale,
-                duration: data.animTime / 2,
+                duration: ANIMATION_TIME / 2,
             };
             trans1[prop] = (sign === '+' ? '+' : '-') + '=4';
             const trans2: Transition = {
                 scale: 1,
-                duration: data.animTime / 2,
+                duration: ANIMATION_TIME / 2,
             };
             trans2[prop] = (sign === '+' ? '-' : '+') + '=4';
             this.$el.transition(trans0).transition(trans1).transition(trans2);
@@ -453,10 +455,10 @@ export class Cube {
             const easing =
         'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
             const trans: Transition = {
-                duration: data.animTime * dur,
+                duration: ANIMATION_TIME * dur,
                 easing,
             };
-            trans[prop] = sign + '=' + dur * data.oneWidth;
+            trans[prop] = sign + '=' + dur * CUBE_WIDTH;
 
             //отправляем в коллекцию команду вставки кубика в линию,
             //чтобы остальные кубики в этой линии пододвинулись
@@ -467,7 +469,7 @@ export class Cube {
                         cube,
                     });
                 },
-                data.animTime * (dur - 1),
+                ANIMATION_TIME * (dur - 1),
                 this
             );
 
@@ -483,7 +485,7 @@ export class Cube {
         const nearer = () => {
             let prop: 'top' | 'left' = 'left';
             let sign: '+' | '-' = '-';
-            const trans: Transition = { duration: data.animTime };
+            const trans: Transition = { duration: ANIMATION_TIME };
 
             if (this.field === 'top' || this.field === 'bottom') {
                 prop = 'top';
@@ -496,14 +498,14 @@ export class Cube {
                     sign = '+';
                 }
             }
-            trans[prop] = sign + '=' + duration * data.oneWidth;
+            trans[prop] = sign + '=' + duration * CUBE_WIDTH;
             this.$el.transition(trans);
         };
 
         const forth = () => {
             let prop: 'top' | 'left' = 'left';
             let sign: '+' | '-' = '+';
-            const trans: Transition = { duration: data.animTime };
+            const trans: Transition = { duration: ANIMATION_TIME };
 
             if (this.field === 'top' || this.field === 'bottom') {
                 prop = 'top';
@@ -516,7 +518,7 @@ export class Cube {
                     sign = '-';
                 }
             }
-            trans[prop] = sign + '=' + duration * data.oneWidth;
+            trans[prop] = sign + '=' + duration * CUBE_WIDTH;
             this.$el.transition(trans);
         };
 
@@ -527,7 +529,7 @@ export class Cube {
             };
             switch (this.field) {
             case 'top':
-                pos.y = data.cubesWidth - 3;
+                pos.y = BOARD_SIZE - 3;
                 break;
             case 'right':
                 pos.x = 2;
@@ -536,7 +538,7 @@ export class Cube {
                 pos.y = 2;
                 break;
             case 'left':
-                pos.x = data.cubesWidth - 3;
+                pos.x = BOARD_SIZE - 3;
                 break;
             }
             this.toState(pos);
@@ -549,8 +551,8 @@ export class Cube {
                 .transition({
                     scale: 1,
                     opacity: 1,
-                    duration: duration * data.animTime,
-                    delay: duration * data.animTime,
+                    duration: duration * ANIMATION_TIME,
+                    delay: duration * ANIMATION_TIME,
                     easing: 'out',
                 });
         };
@@ -559,7 +561,7 @@ export class Cube {
             this.$el.transition({
                 scale: 0,
                 opacity: 0,
-                duration: duration * data.animTime,
+                duration: duration * ANIMATION_TIME,
                 easing: 'out',
             });
             setTimeout(
@@ -571,7 +573,7 @@ export class Cube {
                         })
                         .addClass('cubeHidden');
                 },
-                duration * data.animTime,
+                duration * ANIMATION_TIME,
                 this
             );
         };
@@ -582,7 +584,7 @@ export class Cube {
                 {
                     scale: 1.5,
                     opacity: 0,
-                    duration: data.animTime,
+                    duration: ANIMATION_TIME,
                     easing: 'out',
                 },
                 () => {
@@ -652,7 +654,7 @@ export class Cube {
                 {
                     scale: 0,
                     opacity: 0,
-                    duration: duration * data.animTime,
+                    duration: duration * ANIMATION_TIME,
                     easing: 'out',
                 },
                 () => {
@@ -719,8 +721,8 @@ export class Cube {
             }
 
             //анимация скрытия/открытия
-            const transition1: Transition = { duration: data.animTime * 2 };
-            const transition2: Transition = { duration: data.animTime * 2 };
+            const transition1: Transition = { duration: ANIMATION_TIME * 2 };
+            const transition2: Transition = { duration: ANIMATION_TIME * 2 };
             if (this.field === 'main') {
                 transition1[prop] = '1,1,0,90deg';
                 transition2[prop] = '1,1,0,0deg';

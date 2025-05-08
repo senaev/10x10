@@ -1,10 +1,8 @@
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './cube';
-import {
-    data,
-} from './data';
 import { MoveMap } from './moveMap';
 import { TenOnTen } from './TenOnTen';
 export type CubesField = Record<number, Record<number, Cube | null>>;
@@ -32,9 +30,9 @@ export class Cubes {
         for (const key in FIELDS) {
             const field: CubesField = {};
             cubesLocal[FIELDS[key]] = field;
-            for (let x = 0; x < data.cubesWidth; x++) {
+            for (let x = 0; x < BOARD_SIZE; x++) {
                 field[x] = {};
-                for (let y = 0; y < data.cubesWidth; y++) {
+                for (let y = 0; y < BOARD_SIZE; y++) {
                     field[x][y] = null;
                 }
             }
@@ -79,8 +77,8 @@ export class Cubes {
                 return;
             }
 
-            for (let x = 0; x < data.cubesWidth; x++) {
-                for (let y = 0; y < data.cubesWidth; y++) {
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                for (let y = 0; y < BOARD_SIZE; y++) {
                     func(this[field][x][y]!, field, x, y);
                 }
             }
@@ -92,8 +90,8 @@ export class Cubes {
     public _mainEach(func: (cube: Cube, field: Field, x: number, y: number, i: number) => void) {
         let i;
         i = 0;
-        for (let x = 0; x < data.cubesWidth; x++) {
-            for (let y = 0; y < data.cubesWidth; y++) {
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            for (let y = 0; y < BOARD_SIZE; y++) {
                 const cube = this.main[x][y];
                 if (cube !== null) {
                     func(cube, 'main', x, y, i);
@@ -120,7 +118,7 @@ export class Cubes {
             dynamicProp = 'x';
         }
         if (o.field === 'top' || o.field === 'left') {
-            for (let key = 0; key < data.cubesWidth; key++) {
+            for (let key = 0; key < BOARD_SIZE; key++) {
                 coords = {
                     field: o.field,
                     x: 0,
@@ -131,7 +129,7 @@ export class Cubes {
                 line.push(coords);
             }
         } else {
-            for (let key = data.cubesWidth - 1; key >= 0; key--) {
+            for (let key = BOARD_SIZE - 1; key >= 0; key--) {
                 coords = {
                     field: o.field,
                     x: 0,
@@ -442,7 +440,7 @@ export class Cubes {
 
                 //вычисляем, какие кубики будем двигать при вставке в линию
                 const pos =
-              data.cubesWidth - allCubesToSideInThisLine.length + posInSide! - 1;
+              BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
                 let c1: Cube;
                 let c2: Cube;
                 let cr: Cube;

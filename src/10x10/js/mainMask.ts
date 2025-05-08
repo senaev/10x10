@@ -1,6 +1,7 @@
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
+
 import { Cube } from './cube';
 import { Cubes } from './cubes';
-import { data } from './data';
 import { MCube } from './mCube';
 import { MoveMap } from './moveMap';
 
@@ -53,13 +54,13 @@ export class MainMask {
                 if (startCube.field === 'top') {
                     startMCubeY = startCubes.length - Number(key) - 1;
                 } else {
-                    startMCubeY = data.cubesWidth - startCubes.length + parseInt(key);
+                    startMCubeY = BOARD_SIZE - startCubes.length + parseInt(key);
                 }
             } else {
                 if (startCube.field === 'left') {
                     startMCubeX = startCubes.length - Number(key) - 1;
                 } else {
-                    startMCubeX = data.cubesWidth - startCubes.length + parseInt(key);
+                    startMCubeX = BOARD_SIZE - startCubes.length + parseInt(key);
                 }
                 startMCubeY = startCube.y;
             }
@@ -169,9 +170,9 @@ export class MainMask {
             //добавляем в этот массив все кубики, которые есть на доске
             if (
                 mCube.x > -1 &&
-        mCube.x < data.cubesWidth &&
+        mCube.x < BOARD_SIZE &&
         mCube.y > -1 &&
-        mCube.y < data.cubesWidth
+        mCube.y < BOARD_SIZE
             ) {
                 byColorPrev[mCube.color].push(mCube);
             }

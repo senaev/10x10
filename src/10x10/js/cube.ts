@@ -58,12 +58,12 @@ export class Cube {
     public readonly app: TenOnTen;
     public readonly $el: JQuery<HTMLElement>;
 
-    private disapperance?: string;
+    private appearWithAnimation?: string;
 
-    constructor(o: {
+    constructor(params: {
         x: number;
         y: number;
-        disapperance?: string;
+        appearWithAnimation?: string;
         toMine?: number;
         field: Field;
         app: TenOnTen;
@@ -72,26 +72,26 @@ export class Cube {
     }) {
         let color; let visibleModeClasses;
 
-        this.x = o.x;
-        this.y = o.y;
+        this.x = params.x;
+        this.y = params.y;
 
-        if (o.disapperance !== undefined) {
-            this.disapperance = o.disapperance;
+        if (params.appearWithAnimation !== undefined) {
+            this.appearWithAnimation = params.appearWithAnimation;
         }
 
         //время попадания в главное поле
-        if (o.toMine === undefined) {
+        if (params.toMine === undefined) {
             this.toMine = null;
         } else {
-            this.toMine = o.toMine;
+            this.toMine = params.toMine;
         }
 
-        this.field = o.field;
+        this.field = params.field;
         //указатель на игру, к которой кубик привязан
-        this.app = o.app;
+        this.app = params.app;
 
         //направнение движения
-        if (o.direction === undefined) {
+        if (params.direction === undefined) {
             this.direction = (function (field) {
                 if (field === 'top') {
                     return 'bottom';
@@ -106,16 +106,16 @@ export class Cube {
                 }
             })(this.field);
         } else {
-            this.direction = o.direction;
+            this.direction = params.direction;
         }
         //задаем цвет кубика
-        if (o.color === undefined) {
+        if (params.color === undefined) {
             color =
         CUBE_COLORS[
             getRandomIntegerInARange(0, getLevelColorsCount(this.app.level) - 1)
         ];
         } else {
-            color = o.color;
+            color = params.color;
         }
         this.color = color;
 
@@ -231,15 +231,15 @@ export class Cube {
 
         this.toState();
 
-        if (this.disapperance !== undefined && this.disapperance === 'cool') {
+        if (this.appearWithAnimation !== undefined && this.appearWithAnimation === 'cool') {
             this.$el
                 .css({ scale: 0 })
                 .appendTo(this.app.container)
                 .transition({
                     scale: 1,
-                    duration: ANIMATION_TIME * 4,
+                    duration: ANIMATION_TIME * 10,
                 });
-            delete this.disapperance;
+            delete this.appearWithAnimation;
         } else {
             this.$el.appendTo(this.app.container);
         }

@@ -97,8 +97,17 @@ export class TenOnTen {
         })();
 
         //запускаем инициализацию приложения
-        this.initialize();
-        //запускаем ход, начиная движение со startCubes
+        //генерируем кубики в боковых панелях
+        this.cubes._sideEach((_cube, field, x, y) => {
+            new Cube({
+                x,
+                y,
+                field,
+                app: this,
+            });
+        });
+
+        this.generateMainCubes();
 
         //добавляем кнопку "назад"
         this.undoButton = new UndoButton({ app: this });
@@ -200,21 +209,6 @@ export class TenOnTen {
     // Возвращаем слово в необходимом переводе
     public word(w: keyof typeof I18N_DICTIONARY) {
         return I18N_DICTIONARY[w][this.lang];
-    }
-
-    //Initialize map function
-    private initialize() {
-    //генерируем кубики в боковых панелях
-        this.cubes._sideEach((_cube, field, x, y) => {
-            new Cube({
-                x,
-                y,
-                field,
-                app: this,
-            });
-        });
-
-        this.generateMainCubes();
     }
 
     //генерируем кубики на главном поле
@@ -320,7 +314,7 @@ export class TenOnTen {
                 field: 'main',
                 app: this,
                 color,
-                disapperance: 'cool',
+                appearWithAnimation: 'cool',
             });
         }
     }
@@ -393,7 +387,7 @@ export class TenOnTen {
 
         this.undoButton._set({ active: false });
 
-        //массив, в котором описаны все различия между текущим и предидущим состоянием
+        //массив, в котором описаны все различия между текущим и предыдущим состоянием
         const changed: {
             field: Field;
             x: number;
@@ -486,7 +480,7 @@ export class TenOnTen {
                     color: changed[key]!.pCube!.color,
                     direction: changed[key]!.pCube!.direction!,
                     app: this,
-                    disapperance: 'cool',
+                    appearWithAnimation: 'cool',
                 });
                 //console.log(cube);
                 break;

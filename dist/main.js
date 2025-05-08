@@ -553,7 +553,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   hintWebpackBuildTime: () => (/* binding */ hintWebpackBuildTime)\n/* harmony export */ });\nfunction hintWebpackBuildTime() {\n    const secondsSinceBuild = (Date.now() - 1746718392210) / 1000;\n    // eslint-disable-next-line no-console\n    console.log(`Built ${secondsSinceBuild} sec ago`);\n}\n\n\n//# sourceURL=webpack://10x10/./src/utils/hintWebpackBuildTime.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   hintWebpackBuildTime: () => (/* binding */ hintWebpackBuildTime)\n/* harmony export */ });\nfunction hintWebpackBuildTime() {\n    const millisecondsSinceBuild = Date.now() - 1746718493428;\n    const secondsSinceBuild = millisecondsSinceBuild / 1000;\n    const buildTimeString = secondsSinceBuild.toFixed(1);\n    // eslint-disable-next-line no-console\n    console.log(`Built ${buildTimeString} sec ago`);\n}\n\n\n//# sourceURL=webpack://10x10/./src/utils/hintWebpackBuildTime.ts?");
 
 /***/ })
 

@@ -1,32 +1,15 @@
-type PlayGamaGame = {
-    appID: unknown;
-    title: unknown;
-    url: unknown;
-    coverURL: unknown;
-    iconURL: unknown;
-    isAvailable: unknown;
-};
+import { UnixTimeMs } from 'senaev-utils/src/types/Time/UnixTimeMs';
 
-type PlayGamaBridge = {
+import { PlayGamaBridgeEventName, PlayGamaBridgeEventNames } from './types/PlayGamaBridgeEventNames';
+import { PlayGamaBridgePlatform } from './types/PlayGamaBridgePlatforms';
+import { PlayGamaBridgeStorage, PlayGamaBridgeStorageType } from './types/PlayGamaBridgeStorage';
+import { PlayGamaGame } from './types/PlayGamaGame';
+import { PlayGamaMessage } from './types/PlayGamaMessages';
+
+export type PlayGamaBridge = {
     initialize: () => Promise<void>;
     platform: {
-        id:
-        | 'playgama'
-        | 'vk'
-        | 'ok'
-        | 'yandex'
-        | 'facebook'
-        | 'crazy_games'
-        | 'game_distribution'
-        | 'wortal'
-        | 'playdeck'
-        | 'telegram'
-        | 'y8'
-        | 'lagged'
-        | 'msn'
-        | 'poki'
-        | 'qa_tool'
-        | 'mock';
+        id: PlayGamaBridgePlatform;
         sdk: null;
         language: 'en' | 'ru';
         payload: null;
@@ -38,38 +21,16 @@ type PlayGamaBridge = {
             gameId: string;
         }) => Promise<PlayGamaGame>;
         sendMessage: (message: PlayGamaMessage) => void;
-        getServerTime: () => Promise<number>;
+        getServerTime: () => Promise<UnixTimeMs>;
     };
+    game: {
+        visibilityState: 'visible' | 'hidden';
+        on: <T extends PlayGamaBridgeEventName>(event: T, callback: (state: PlayGamaBridgeEventNames[T]) => void) => void;
+    };
+    EVENT_NAME: Record<string, PlayGamaBridgeEventName>;
+    STORAGE_TYPE: Record<string, PlayGamaBridgeStorageType>;
+    storage: PlayGamaBridgeStorage;
 };
-
-type PlayGamaMessages = {
-    /**
-     * The game has loaded, all loading screens have passed, the player can interact with the game.
-     */
-    game_ready: void;
-    /**
-     * Any loading within the game has started. For example, when a level is loading.
-     */
-    in_game_loading_started: void;
-    /**
-     * In-game loading has finished.
-     */
-    in_game_loading_stopped: void;
-    /**
-     * Gameplay has started. For example, the player has entered a level from the main menu.
-     */
-    gameplay_started: void;
-    /**
-     * Gameplay has ended/paused. For example, when exiting a level to the main menu, opening the pause menu, etc.
-     */
-    gameplay_stopped: void;
-    /**
-     * The player reached a significant moment. For example, defeating a boss, setting a record, etc.
-     */
-    player_got_achievement: void;
-};
-
-type PlayGamaMessage = keyof PlayGamaMessages;
 
 declare const bridge: PlayGamaBridge;
 
@@ -78,7 +39,7 @@ export function initPlayGamaBridge() {
         .initialize()
         .then(() => {
             // eslint-disable-next-line no-console
-            console.log('PlayGamaBridge initialized');
+            console.log('PlayGamaBridge initialized', bridge.EVENT_NAME);
         })
         .catch((error) => {
             // eslint-disable-next-line no-console

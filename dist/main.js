@@ -410,7 +410,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   initPlayGamaBridge: () => (/* binding */ initPlayGamaBridge)\n/* harmony export */ });\nfunction initPlayGamaBridge() {\n    bridge\n        .initialize()\n        .then(() => {\n        // eslint-disable-next-line no-console\n        console.log('PlayGamaBridge initialized');\n    })\n        .catch((error) => {\n        // eslint-disable-next-line no-console\n        console.error('PlayGamaBridge initialization failed', error);\n    });\n}\n\n\n//# sourceURL=webpack://10x10/./src/PlayGama/initPlayGamaBridge.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   initPlayGamaBridge: () => (/* binding */ initPlayGamaBridge)\n/* harmony export */ });\nfunction initPlayGamaBridge() {\n    bridge\n        .initialize()\n        .then(() => {\n        // eslint-disable-next-line no-console\n        console.log('PlayGamaBridge initialized', bridge.EVENT_NAME);\n    })\n        .catch((error) => {\n        // eslint-disable-next-line no-console\n        console.error('PlayGamaBridge initialization failed', error);\n    });\n}\n\n\n//# sourceURL=webpack://10x10/./src/PlayGama/initPlayGamaBridge.ts?");
 
 /***/ })
 

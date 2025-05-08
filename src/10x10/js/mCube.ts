@@ -1,7 +1,9 @@
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
-import { Cube, Direction } from './cube';
-import { MainMask } from './mainMask';
+import { Direction } from '../types/Direction';
+
+import { Cube } from './Cube';
+import { MainMask } from './MainMask';
 
 export type Step = {
     do: string | null;

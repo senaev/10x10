@@ -14,14 +14,14 @@
 }
 
 /* само главное поле бэкграунда*/
-.tenOnTenContainer>.backgroungField {
+.tenOnTenContainer>.backgroundField {
     position: absolute;
     background-color: #999;
     border-radius: 3px;
 }
 
 /*кубики бэкграунда на главном поле*/
-.tenOnTenContainer>.backgroungField>.dCube {
+.tenOnTenContainer>.backgroundField>.dCube {
     height: 30px;
     width: 30px;
     margin: 1px;

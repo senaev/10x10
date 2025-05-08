@@ -1,9 +1,9 @@
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 
-import { Cube } from './cube';
-import { Cubes } from './cubes';
-import { MainMask } from './mainMask';
-import { MCube } from './mCube';
+import { Cube } from './Cube';
+import { Cubes } from './Cubes';
+import { MainMask } from './MainMask';
+import { MCube } from './MCube';
 import { TenOnTen } from './TenOnTen';
 
 export type Action = {
@@ -16,7 +16,7 @@ export type Action = {
  * класс для удобной работы с абстрактным классом MainMask
  * абстрагирует функции, связанные с анимацией от этого класса
  * сочетает в себе как функцию генерации хода, так и генерации анимации
- * предаставляет удобрый интерфейс для доступа к методам построения хода
+ * предоставляет удобный интерфейс для доступа к методам построения хода
  * для основного приложения
  */
 export class MoveMap {
@@ -43,7 +43,6 @@ export class MoveMap {
         this.mainMask = new MainMask({
             startCubes: this.startCubes,
             cubes: this.cubes,
-            moveMap: this,
         });
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля

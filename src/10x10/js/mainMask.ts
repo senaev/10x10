@@ -1,12 +1,12 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 
-import { Cube } from './cube';
-import { Cubes } from './cubes';
-import { MCube } from './mCube';
-import { MoveMap } from './moveMap';
+import { Cube } from './Cube';
+import { Cubes } from './Cubes';
+import { MCube } from './MCube';
 
 /**
- * класс для маски(слепок текущего состояния с возможностью создать пошагово один ход игры)
+ * класс для маски (слепок текущего состояния с возможностью создать пошагово один ход игры)
  * класс передается коллекция кубиков, а также кубик, с которого начинается анимация.
  * во время создания экземпляра класса создаётся массив м-кубиков (экземпляров класса МКубе),
  * затем пошагово - обращение к каждому м-кубику, методом oneStep, в котором автоматически меняются
@@ -16,15 +16,14 @@ export class MainMask {
     // основной массив со значениями
     // сюда будут попадать м-кубики, участвующие в анимации
     public readonly arr: MCube[] = [];
-    private moveMap: MoveMap;
 
-    public constructor(params: { cubes: Cubes; startCubes: Cube[]; moveMap: MoveMap }) {
-
+    public constructor(params: {
+        cubes: Cubes;
+        startCubes: Cube[];
+    }) {
         const {
-            cubes, startCubes, moveMap,
+            cubes, startCubes,
         } = params;
-
-        this.moveMap = moveMap;
 
         // вызываем инициализацию
 
@@ -47,7 +46,7 @@ export class MainMask {
         for (const key in startCubes) {
             const startCube = startCubes[key];
 
-            startCube.toMine = startCube.app.mainCounter();
+            startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
             if (startCube.field === 'top' || startCube.field === 'bottom') {
                 startMCubeX = startCube.x;
@@ -91,7 +90,7 @@ export class MainMask {
         }
 
         this.arr.sort(function (a, b) {
-            return a.cube.toMine! - b.cube.toMine!;
+            return a.cube.toMineOrder! - b.cube.toMineOrder!;
         });
 
         this.step();

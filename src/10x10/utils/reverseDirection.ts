@@ -1,5 +1,5 @@
 import { Field } from '../const/FIELDS';
-import { Direction } from '../js/cube';
+import { Direction } from '../types/Direction';
 
 export function reverseDirection (field: Field): Direction | null {
     if (field === 'top') {

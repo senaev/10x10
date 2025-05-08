@@ -1,10 +1,11 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { Cube } from './cube';
-import { MoveMap } from './moveMap';
+import { Cube } from './Cube';
+import { MoveMap } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 export type CubesField = Record<number, Record<number, Cube | null>>;
 export type CubesFields = Record<Field, CubesField>;
@@ -168,9 +169,10 @@ export class Cubes {
                     y: line[key].y,
                     field: line[key].field,
                     app: this._app,
-                    toMine: this._app.mainCounter(),
+                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
                     color: getRandomColorForCubeLevel(this._app.level),
                     appearWithAnimation: false,
+                    container: this._app.container,
                 })
             );
         }

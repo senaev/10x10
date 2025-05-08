@@ -4,13 +4,13 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
+import { Direction } from '../types/Direction';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { CubeAddress } from './cubes';
-import { Action } from './moveMap';
+import { CubeAddress } from './Cubes';
+import { Action } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
-
-export type Direction = 'top' | 'bottom' | 'left' | 'right';
 
 export type CubeAnimateAction = {
     action: string;
@@ -51,34 +51,36 @@ export class Cube {
     public y: number;
     public direction: Direction | null;
     public color: string;
-    public toMine?: number | null;
-    public readonly app: TenOnTen;
+    public toMineOrder?: number | null;
     public readonly $el: JQuery<HTMLElement>;
+    private readonly container: JQuery<HTMLElement>;
 
+    private readonly app: TenOnTen;
     private appearWithAnimation: boolean;
 
     public constructor(params: {
         x: number;
         y: number;
         appearWithAnimation: boolean;
-        toMine?: number;
+        toMineOrder?: number;
         field: Field;
         app: TenOnTen;
         direction?: Direction;
         color: string;
+        container: JQuery<HTMLElement>;
     }) {
         let visibleModeClasses;
 
         this.x = params.x;
         this.y = params.y;
-
+        this.container = params.container;
         this.appearWithAnimation = params.appearWithAnimation;
 
         // время попадания в главное поле
-        if (params.toMine === undefined) {
-            this.toMine = null;
+        if (params.toMineOrder === undefined) {
+            this.toMineOrder = null;
         } else {
-            this.toMine = params.toMine;
+            this.toMineOrder = params.toMineOrder;
         }
 
         this.field = params.field;
@@ -213,7 +215,7 @@ export class Cube {
 
         // время попадания в поле майн
         if (this.field === 'main') {
-            this.toMine = this.app.mainCounter();
+            this.toMineOrder = getIncrementalIntegerForMainFieldOrder();
         }
 
         this.toState();
@@ -221,14 +223,14 @@ export class Cube {
         if (this.appearWithAnimation) {
             this.$el
                 .css({ scale: 0 })
-                .appendTo(this.app.container)
+                .appendTo(this.container)
                 .transition({
                     scale: 1,
                     duration: ANIMATION_TIME * 10,
                 });
             this.appearWithAnimation = false;
         } else {
-            this.$el.appendTo(this.app.container);
+            this.$el.appendTo(this.container);
         }
     }
 

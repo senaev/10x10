@@ -79,14 +79,6 @@ export function initPlayGamaBridge() {
         .then(() => {
             // eslint-disable-next-line no-console
             console.log('PlayGamaBridge initialized');
-
-            bridge.platform.getAllGames().then((games) => {
-                // eslint-disable-next-line no-console
-                console.log('Games', games);
-            }).catch((error) => {
-                // eslint-disable-next-line no-console
-                console.error('PlayGamaBridge getAllGames failed', error);
-            });
         })
         .catch((error) => {
             // eslint-disable-next-line no-console

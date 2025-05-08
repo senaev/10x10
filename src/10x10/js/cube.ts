@@ -1,6 +1,6 @@
 import $ from 'jquery';
+import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
-import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';

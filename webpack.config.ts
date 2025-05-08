@@ -13,8 +13,17 @@ export default () => ({
         rules: [
             {
                 test: /\.(ts|tsx)$/,
-                exclude: /node_modules/,
-                use: 'ts-loader',
+                // exclude: /node_modules/,
+                // include: [
+                //     path.resolve(__dirname, 'src'),
+                //     path.resolve(__dirname, 'node_modules/senaev-utils'),
+                // ],
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        allowTsInNodeModules: true,
+                    },
+                },
             },
             {
                 test: /\.css$/i,

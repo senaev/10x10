@@ -1,4 +1,4 @@
-import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
+import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
 import { Cube, Direction } from './cube';
 import { MainMask } from './mainMask';

@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
@@ -161,8 +162,6 @@ export class Cube {
         } else {
             this.$el.appendTo(this.container);
         }
-
-        this.app.cubes._add(this);
     }
 
     public setRowVisibility(isVisible: boolean) {
@@ -173,33 +172,18 @@ export class Cube {
         }
     }
 
-    // Ищем первый кубик в одной линии бокового поля с кубиком, по  которому щелкнули
-    public findFirstInLine() {
-        const address: CubeAddress = {
-            field: this.field,
-            x: this.x,
-            y: this.y,
-        };
-        if (address.field === 'top' || address.field === 'bottom') {
-            address.y = address.field === 'top' ? 9 : 0;
-        } else {
-            address.x = address.field === 'left' ? 9 : 0;
-        }
-        return this.app.cubes._get(address);
-    }
-
     // Задаем html-элементу кубика положение на доске
     // Если параметры не переданы, устанавливаем текущую позицию кубика
     // Если переданы - устанавливаем в поле кубику, в позицию х/у, переданные в параметрах
-    public toState(o?: { x: number; y: number }) {
+    public toState(position?: { x: number; y: number }) {
         let x: number;
         let y: number;
-        if (o === undefined) {
+        if (position === undefined) {
             x = this.x;
             y = this.y;
         } else {
-            x = o.x;
-            y = o.y;
+            x = position.x;
+            y = position.y;
         }
         let left = x * CUBE_WIDTH;
         let top = y * CUBE_WIDTH;
@@ -247,10 +231,13 @@ export class Cube {
     }
 
     // добавляем объект анимации на обработку через время, полученное в атрибутах
-    public addAnimate(o: Action) {
-        const {
-            action, delay, duration,
-        } = o;
+    public addAnimate({
+        action,
+        delay,
+        duration,
+    }: Action) {
+        assertUnsignedInteger(delay);
+        assertUnsignedInteger(duration);
 
         setTimeout(
             () => {
@@ -324,14 +311,10 @@ export class Cube {
             // отправляем в коллекцию команду вставки кубика в линию,
             // чтобы остальные кубики в этой линии пододвинулись
             setTimeout(
-                function (cube) {
-                    cube.app.cubes.animate({
-                        action: 'inLine',
-                        cube,
-                    });
+                () => {
+                    this.app.cubes.animateInLine(this);
                 },
-                ANIMATION_TIME * (dur - 1),
-                this
+                ANIMATION_TIME * (dur - 1)
             );
 
             // анимируем движение, в конце - убираем стрелку, меняем классы
@@ -383,7 +366,8 @@ export class Cube {
             this.$el.transition(trans);
         };
 
-        const apperance = () => {
+        const appearance = () => {
+
             const pos = {
                 x: this.x,
                 y: this.y,
@@ -402,6 +386,7 @@ export class Cube {
                 pos.x = BOARD_SIZE - 3;
                 break;
             }
+
             this.toState(pos);
             this.$el
                 .removeClass('cubeHidden')
@@ -418,7 +403,7 @@ export class Cube {
                 });
         };
 
-        const disapperance = () => {
+        const disappearance = () => {
             this.$el.transition({
                 scale: 0,
                 opacity: 0,
@@ -494,12 +479,12 @@ export class Cube {
             nearer();
             break;
             // кубик появляется третим в боковом поле
-        case 'apperanceInSide':
-            apperance();
+        case 'appearanceInSide':
+            appearance();
             break;
             // третий кубик в боковой линии пропадает
-        case 'disapperanceInSide':
-            disapperance();
+        case 'disappearanceInSide':
+            disappearance();
             break;
             // передвигаем кубик в боковой панели дальше от mainField
         case 'forth':

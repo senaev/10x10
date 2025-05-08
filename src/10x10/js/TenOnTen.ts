@@ -10,7 +10,7 @@ import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { Direction } from '../types/Direction';
 import { getAllCubesInCursorPositionThatCouldGoToMain } from '../utils/getAllCubesInCursorPositionThatCouldGoToMain';
-import { getCubeAddressInSideFieldInOfderFromMain } from '../utils/getCubeAddressInSideFieldInOfderFromMain';
+import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
@@ -120,13 +120,17 @@ export class TenOnTen {
         direction: Direction | null;
         toMineOrder: number | null;
     }) {
-        return new Cube({
+        const cube = new Cube({
             ...params,
             app: this,
             container: this.container,
             onClick: this.handleCubeClick,
             onHover: this.handleHover,
         });
+
+        this.cubes._add(cube);
+
+        return cube;
     }
 
     // даем возможность пользователю при переходе на новый уровень выбрать из случайных
@@ -551,6 +555,7 @@ export class TenOnTen {
         });
         // пошаговый запуск анимации
         this.moveMap.animate();
+
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes
         this.cubes._mergeMoveMap(this.moveMap);
@@ -561,7 +566,7 @@ export class TenOnTen {
     // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
     public cutCubesFromLineAndFillByNewOnes(startCubes: Cube[]) {
         // получаем линию
-        const line = getCubeAddressInSideFieldInOfderFromMain({
+        const line = getCubeAddressInSideFieldInOrderFromMain({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field: startCubes[0].field,

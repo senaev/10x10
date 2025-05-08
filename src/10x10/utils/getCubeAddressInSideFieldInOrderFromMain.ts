@@ -5,7 +5,7 @@ import { CubeAddress } from '../js/Cubes';
  * получаем массив координат кубиков линии в порядке от дальнего (относительно main field)
  * до ближайшего
  */
-export function getCubeAddressInSideFieldInOfderFromMain(address: CubeAddress): CubeAddress[] {
+export function getCubeAddressInSideFieldInOrderFromMain(address: CubeAddress): CubeAddress[] {
     let staticProp: 'x' | 'y';
     let dynamicProp: 'x' | 'y';
     let line: CubeAddress[] = [];

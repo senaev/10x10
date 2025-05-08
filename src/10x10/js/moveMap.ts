@@ -199,10 +199,7 @@ export class MoveMap {
             this.app
         );
 
-        this.cubes.animate({
-            action: 'fromLine',
-            cube: startCubes,
-        });
+        this.cubes.animateFromLine(startCubes);
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {

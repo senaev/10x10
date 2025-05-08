@@ -1,5 +1,6 @@
 import 'jquery.transit';
 import { initPlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
+import { GlobalThis } from '../types/GlobalThis';
 
 import { TenOnTen } from './js/TenOnTen';
 
@@ -14,6 +15,10 @@ if (!container) {
 const tenOnTen = new TenOnTen({
     container,
 });
+
+(window as GlobalThis & {
+    tenOnTen: TenOnTen;
+}).tenOnTen = tenOnTen;
 
 // eslint-disable-next-line no-console
 console.log('App is ready', tenOnTen);

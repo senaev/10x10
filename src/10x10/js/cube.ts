@@ -57,7 +57,7 @@ export class Cube {
 
     private appearWithAnimation: boolean;
 
-    constructor(params: {
+    public constructor(params: {
         x: number;
         y: number;
         appearWithAnimation: boolean;
@@ -74,7 +74,7 @@ export class Cube {
 
         this.appearWithAnimation = params.appearWithAnimation;
 
-        //время попадания в главное поле
+        // время попадания в главное поле
         if (params.toMine === undefined) {
             this.toMine = null;
         } else {
@@ -82,10 +82,10 @@ export class Cube {
         }
 
         this.field = params.field;
-        //указатель на игру, к которой кубик привязан
+        // указатель на игру, к которой кубик привязан
         this.app = params.app;
 
-        //направнение движения
+        // направнение движения
         if (params.direction === undefined) {
             this.direction = (function (field) {
                 if (field === 'top') {
@@ -106,7 +106,7 @@ export class Cube {
 
         this.color = params.color;
 
-        //проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
+        // проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
         if (this.field !== 'main') {
             if (this._inFieldIsVisible()) {
                 visibleModeClasses = ' ';
@@ -122,7 +122,7 @@ export class Cube {
             directionClass = 'd' + this.direction;
         }
 
-        //указатель на DOM-элемент кубика с прослушиванием событий
+        // указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
             .addClass(this.color + ' f' + this.field + visibleModeClasses + directionClass)
             .hover(
@@ -132,7 +132,7 @@ export class Cube {
                     if (this.field === 'main') {
                         //
                     } else {
-                        //cube.findFirstInLine().$el.addClass("firstInHoverLine");
+                        // cube.findFirstInLine().$el.addClass("firstInHoverLine");
                         const allToFirstInLine = this.findAllInLineCanGoToMain();
                         if (typeof allToFirstInLine !== 'string') {
                             for (const key in allToFirstInLine) {
@@ -147,7 +147,7 @@ export class Cube {
                     if (this.field === 'main') {
                         //
                     } else {
-                        //cube.findFirstInLine().$el.removeClass("firstInHoverLine");
+                        // cube.findFirstInLine().$el.removeClass("firstInHoverLine");
                         const allToFirstInLine = this.findAllInLineCanGoToMain();
                         if (typeof allToFirstInLine !== 'string') {
                             for (const key in allToFirstInLine) {
@@ -158,25 +158,25 @@ export class Cube {
                 }
             )
             .click((e) => {
-                //не даем продолжить выполнение событий
+                // не даем продолжить выполнение событий
                 e.preventDefault();
-                //и снимаем курсор с элемента
+                // и снимаем курсор с элемента
                 this.$el.trigger('mouseout');
 
-                //если стоит блокировка событий приложения - не даём пользователю ничего сделать
+                // если стоит блокировка событий приложения - не даём пользователю ничего сделать
                 if (this.app.blockApp) {
                     return;
                 }
 
-                //если щелчек произошол по  полю - ничего не делаем
+                // если щелчек произошол по  полю - ничего не делаем
                 if (this.field === 'main') {
                     //
                 } else {
-                    //если по боковому
-                    //ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
-                    //которые могут выйти из поля
+                    // если по боковому
+                    // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
+                    // которые могут выйти из поля
                     const startCubes = this.findAllInLineCanGoToMain();
-                    //если пришел не массив - выполняем анимацию
+                    // если пришел не массив - выполняем анимацию
                     if (typeof startCubes === 'string') {
                         const scale =
               this.field === 'left' || this.field === 'right'
@@ -198,7 +198,7 @@ export class Cube {
                                 duration: ANIMATION_TIME,
                             });
                     } else {
-                        //и отправляем их в путь-дорогу
+                        // и отправляем их в путь-дорогу
                         this.app.run({ startCubes });
                     }
                 }
@@ -207,11 +207,11 @@ export class Cube {
         this.toField();
     }
 
-    //отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
+    // отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
     public toField() {
         this.app.cubes._add(this);
 
-        //время попадания в поле майн
+        // время попадания в поле майн
         if (this.field === 'main') {
             this.toMine = this.app.mainCounter();
         }
@@ -247,7 +247,7 @@ export class Cube {
         return this.app.cubes._get(address);
     }
 
-    //находим все кубики от этого до ближнего к майн в линии относительно этого
+    // находим все кубики от этого до ближнего к майн в линии относительно этого
     public findAllInLineCanGoToMain(): Cube[] | 'empty' | 'block' {
         let statProp: 'y' | 'x' = 'y';
         let dynamicProp: 'x' | 'y' = 'x';
@@ -256,8 +256,8 @@ export class Cube {
             dynamicProp = 'y';
         }
 
-        //проверяем, сколько кубиков можно достать из боковой линии
-        //по количеству свободных клеток в поле майн
+        // проверяем, сколько кубиков можно достать из боковой линии
+        // по количеству свободных клеток в поле майн
         const cellsMain: [number, number, number] =
       this.field === 'top' || this.field === 'left'
           ? [
@@ -299,7 +299,7 @@ export class Cube {
             }
         }
 
-        //проверяем, если линия пустая, ходить вообще нельзя
+        // проверяем, если линия пустая, ходить вообще нельзя
         let allNullInLine = true;
         for (let key = 0; key < BOARD_SIZE; key++) {
             address[dynamicProp] = key;
@@ -310,12 +310,12 @@ export class Cube {
         }
 
         const arr: Cube[] = [];
-        //если все нули в линии - возвращаем индикатор пустоты
+        // если все нули в линии - возвращаем индикатор пустоты
         if (allNullInLine) {
             return 'empty';
         }
 
-        //если сразу за полем кубик - ничего не возвращаем
+        // если сразу за полем кубик - ничего не возвращаем
         if (count === 0) {
             return 'block';
         }
@@ -329,7 +329,7 @@ export class Cube {
         for (let key = 0; key < 3 && key < count; key++) {
             address[dynamicProp] = cellsSide[key];
             arr.push(this.app.cubes._get(address)!);
-            //если доходим до кубика, над которым курсор - заканчиваем маневр
+            // если доходим до кубика, над которым курсор - заканчиваем маневр
             if (this.app.cubes._get(address) === this) {
                 break;
             }
@@ -372,7 +372,7 @@ export class Cube {
         });
     }
 
-    //добавляем объект анимации на обработку через время, полученное в атрибутах
+    // добавляем объект анимации на обработку через время, полученное в атрибутах
     public addAnimate(o: Action) {
         const {
             action, delay, duration,
@@ -438,7 +438,7 @@ export class Cube {
        * одним перемещением по возможности
        * */
             dur = duration;
-            //задаем нужный изинг
+            // задаем нужный изинг
             const easing =
         'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
             const trans: Transition = {
@@ -447,8 +447,8 @@ export class Cube {
             };
             trans[prop] = sign + '=' + dur * CUBE_WIDTH;
 
-            //отправляем в коллекцию команду вставки кубика в линию,
-            //чтобы остальные кубики в этой линии пододвинулись
+            // отправляем в коллекцию команду вставки кубика в линию,
+            // чтобы остальные кубики в этой линии пододвинулись
             setTimeout(
                 function (cube) {
                     cube.app.cubes.animate({
@@ -460,7 +460,7 @@ export class Cube {
                 this
             );
 
-            //анимируем движение, в конце - убираем стрелку, меняем классы
+            // анимируем движение, в конце - убираем стрелку, меняем классы
             this.$el.transition(trans, () => {
                 const dir = reverseDirection(this.field);
                 this.$el
@@ -566,7 +566,7 @@ export class Cube {
         };
 
         const boom = () => {
-            //console.log("boom:",cube.color, cube.x, cube.y);
+            // console.log("boom:",cube.color, cube.x, cube.y);
             this.$el.transition(
                 {
                     scale: 1.5,
@@ -581,23 +581,23 @@ export class Cube {
         };
 
         switch (action) {
-        //движение вправо со столкновением
+        // движение вправо со столкновением
         case 'srBump':
             slideWithBump('left', '+');
             break;
-            //движение вправо со столкновением
+            // движение вправо со столкновением
         case 'sbBump':
             slideWithBump('top', '+');
             break;
-            //движение вправо со столкновением
+            // движение вправо со столкновением
         case 'slBump':
             slideWithBump('left', '-');
             break;
-            //движение вправо со столкновением
+            // движение вправо со столкновением
         case 'stBump':
             slideWithBump('top', '-');
             break;
-            //движение с последующим вливанием в поле
+            // движение с последующим вливанием в поле
         case 'toSide':
             (() => {
                 let sign: '+' | '-' = '-';
@@ -615,27 +615,27 @@ export class Cube {
                 slideToSide(prop, sign);
             })();
             break;
-            //передвигаем кубик в боковом поле ближе к mainField
+            // передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':
             nearer();
             break;
-            //кубик появляется третим в боковом поле
+            // кубик появляется третим в боковом поле
         case 'apperanceInSide':
             apperance();
             break;
-            //третий кубик в боковой линии пропадает
+            // третий кубик в боковой линии пропадает
         case 'disapperanceInSide':
             disapperance();
             break;
-            //передвигаем кубик в боковой панели дальше от mainField
+            // передвигаем кубик в боковой панели дальше от mainField
         case 'forth':
             forth();
             break;
-            //передвигаем кубик в боковой панели дальше от mainField
+            // передвигаем кубик в боковой панели дальше от mainField
         case 'boom':
             boom();
             break;
-            //уменьшаем и в конце удаляем
+            // уменьшаем и в конце удаляем
         case 'remove':
             this.$el.transition(
                 {
@@ -656,7 +656,7 @@ export class Cube {
         }
     }
 
-    //проверка, показывать кубик или нет в поле
+    // проверка, показывать кубик или нет в поле
     public _inFieldIsVisible() {
         let pos;
         if (this.field === 'main') {
@@ -674,19 +674,19 @@ export class Cube {
     // Меняем параметры кубика, при этом его анимируем
     public change(o: { color?: string; direction?: Direction }) {
         const changeParams = () => {
-            //если меняем цвет и это не тот же цвет, что сейчас
+            // если меняем цвет и это не тот же цвет, что сейчас
             if (o.color !== undefined && o.color !== this.color) {
                 const prevColor = this.color;
                 this.color = o.color;
                 this.$el.removeClass(prevColor).addClass(this.color);
             }
-            //если меняем направление и это не то же направление, что сейчас
+            // если меняем направление и это не то же направление, что сейчас
             if (o.direction !== undefined && o.direction !== this.direction) {
                 const prevDirection = this.direction;
                 this.direction = o.direction;
 
-                //стили следует менять только у кубиков на главном поле, так как
-                //слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
+                // стили следует менять только у кубиков на главном поле, так как
+                // слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
                 if (this.field === 'main') {
                     this.$el.removeClass('d' + prevDirection);
                     if (this.direction !== null) {
@@ -698,7 +698,7 @@ export class Cube {
 
         if (this._inFieldIsVisible()) {
             let prop: keyof Transition;
-            //для красотенюшки задаем разную анимацию для разных полей
+            // для красотенюшки задаем разную анимацию для разных полей
             if (this.field === 'main') {
                 prop = 'rotate3d';
             } else if (this.field === 'top' || this.field === 'bottom') {
@@ -707,7 +707,7 @@ export class Cube {
                 prop = 'rotateY';
             }
 
-            //анимация скрытия/открытия
+            // анимация скрытия/открытия
             const transition1: Transition = { duration: ANIMATION_TIME * 2 };
             const transition2: Transition = { duration: ANIMATION_TIME * 2 };
             if (this.field === 'main') {
@@ -717,7 +717,7 @@ export class Cube {
                 transition1[prop] = String(90);
                 transition2[prop] = String(0);
             }
-            //сама анимация с изменением состояния по ходу
+            // сама анимация с изменением состояния по ходу
             this.$el
                 .transition(transition1, function () {
                     changeParams();

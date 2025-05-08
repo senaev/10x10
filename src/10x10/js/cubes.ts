@@ -23,7 +23,7 @@ export class Cubes {
     public readonly bottom: CubesField;
     public readonly left: CubesField;
 
-    constructor({ app }: { app: TenOnTen }) {
+    public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
 
         const cubesLocal: Partial<CubesFields> = {};
@@ -46,32 +46,32 @@ export class Cubes {
         this.left = cubesLocal.left!;
     }
 
-    //добавляем в коллекцию кубик(необходимо для инициализации приложения)
+    // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public _add(cube: Cube) {
         this[cube.field][cube.x][cube.y] = cube;
     }
 
-    //берем значение клетки из коллекции по полю, иксу, игреку
+    // берем значение клетки из коллекции по полю, иксу, игреку
     public _get(o: CubeAddress) {
-        //console.log(o);
+        // console.log(o);
         return this[o.field][o.x][o.y];
     }
 
-    //устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
+    // устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     public _set(o: CubeAddress, value: Cube | null) {
         if (o === undefined || value === undefined) {
             throw new Error('cubes._set не получил параметры: o: ' + o + ' value: ' + value);
         }
-        //console.log(o, value);
+        // console.log(o, value);
         this[o.field][o.x][o.y] = value;
-        /*if (value !== null && value instanceof Cube) {
+        /* if (value !== null && value instanceof Cube) {
                value.x = o.x;
                value.y = o.y;
-               }*/
+               } */
         return this[o.field][o.x][o.y];
     }
-    //пробегаемся по всем элементам боковых полей, выполняем переданную функцию
-    //с каждым кубиком
+    // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
+    // с каждым кубиком
     public _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
         FIELDS.forEach((field) => {
             if (field === 'main') {
@@ -86,8 +86,8 @@ export class Cubes {
         });
     }
 
-    //пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
-    //не нулевым найденным кубиком
+    // пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
+    // не нулевым найденным кубиком
     public _mainEach(func: (cube: Cube, field: Field, x: number, y: number, i: number) => void) {
         let i;
         i = 0;
@@ -102,8 +102,8 @@ export class Cubes {
         }
     }
 
-    //получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
-    //до ближайшего
+    // получаем массив координат кубиков линии в порядке от дальнего( относительно mainField)
+    // до ближайшего
     public _getLine(o: CubeAddress) {
         let staticProp: 'x' | 'y';
         let dynamicProp: 'x' | 'y';
@@ -144,22 +144,22 @@ export class Cubes {
         return line;
     }
 
-    //вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
     public _cutFromLine(startCubes: Cube[]) {
-        //получаем линию
+        // получаем линию
         const line = this._getLine({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field: startCubes[0].field,
         });
-            //пробегаемся, меняем значения в коллекции
+            // пробегаемся, меняем значения в коллекции
         for (let key = line.length - 1; key >= startCubes.length; key--) {
             const prevCube = this._get(line[key - startCubes.length])!;
             this._set(line[key], prevCube);
             prevCube.x = line[key].x;
             prevCube.y = line[key].y;
         }
-        //генерируем кубики для крайних значений в линии
+        // генерируем кубики для крайних значений в линии
         for (let key = 0; key < startCubes.length; key++) {
             this._set(
                 line[key],
@@ -183,28 +183,28 @@ export class Cubes {
          */
     }
 
-    //добавляем в линию кубик, по кубику мы должны определить, в какую линию
+    // добавляем в линию кубик, по кубику мы должны определить, в какую линию
     public _pushInLine(cube: Cube) {
-        //console.log(cube.color);
-        //меняем значения кубика
+        // console.log(cube.color);
+        // меняем значения кубика
         cube.field = cube.direction!;
         cube.direction = reverseDirection(cube.field);
-        //получаем линию, в которую вставим кубик
+        // получаем линию, в которую вставим кубик
         const line = this._getLine({
             x: cube.x,
             y: cube.y,
             field: cube.field,
         });
-            //присваиваем значения координат в поле кубику
+            // присваиваем значения координат в поле кубику
         cube.x = line[line.length - 1].x;
         cube.y = line[line.length - 1].y;
-        //получаем удаляемый (дальний от mainField в линии) кубик
+        // получаем удаляемый (дальний от mainField в линии) кубик
         const removedCube = this._get(line[0])!;
-        //сдвигаем линию на одну клетку от mainField
+        // сдвигаем линию на одну клетку от mainField
         for (let key = 0; key < line.length - 1; key++) {
             this._set(line[key], this._get(line[key + 1]));
         }
-        //устанавливаем значение первой клетки
+        // устанавливаем значение первой клетки
         this._set(line[line.length - 1], cube);
 
         /**
@@ -221,32 +221,32 @@ export class Cubes {
     public _mergeMoveMap(moveMap: MoveMap) {
         const arr = moveMap.mainMask.arr;
         const startCubes = moveMap.startCubes;
-        //извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
-        //могут меняться только при вхождении их в боковую панель
-        //вытаскиваем кубик из боковой панели коллекции
+        // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
+        // могут меняться только при вхождении их в боковую панель
+        // вытаскиваем кубик из боковой панели коллекции
         this._cutFromLine(startCubes);
-        //меняем значение field
+        // меняем значение field
         for (const key in startCubes) {
             startCubes[key].field = 'main';
         }
 
-        //пробегаемся по массиву м-кубиков и если м-кубик вошел в боковое поле,
-        //меняем его свойства direction, field, x, y в соответствии со значениями
-        //м-кубика и стороной поля, также перемещаем все кубики в линии, в которую вошел
-        //данный кубик
+        // пробегаемся по массиву м-кубиков и если м-кубик вошел в боковое поле,
+        // меняем его свойства direction, field, x, y в соответствии со значениями
+        // м-кубика и стороной поля, также перемещаем все кубики в линии, в которую вошел
+        // данный кубик
         for (const key in arr) {
             const mCube = arr[key];
             if (mCube.x > -1 && mCube.x < 10 && mCube.y > -1 && mCube.y < 10) {
-                //кубик просто перемещается и не входит не в какую панель
-                //устанавливаем кубик в новую клетку
+                // кубик просто перемещается и не входит не в какую панель
+                // устанавливаем кубик в новую клетку
                 this._set({
                     field: 'main',
                     x: mCube.x,
                     y: mCube.y,
                 }, mCube.cube);
-                //при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
-                //обнуляем эту клетку
-                //console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
+                // при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
+                // обнуляем эту клетку
+                // console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
 
                 if (
                     mCube.cube.x < 0 ||
@@ -274,7 +274,7 @@ export class Cubes {
                 mCube.cube.x = mCube.x;
                 mCube.cube.y = mCube.y;
             } else if (mCube.x === -1 && mCube.y === -1) {
-                //если кубик взорвался во время хода, убираем его с доски
+                // если кубик взорвался во время хода, убираем его с доски
 
                 if (
                     this._get({
@@ -292,12 +292,12 @@ export class Cubes {
                 }
             }
         }
-        //убираем в боковые поля кубики, которые ушли туда во время хода
-        //console.log(moveMap.toSideActions);
+        // убираем в боковые поля кубики, которые ушли туда во время хода
+        // console.log(moveMap.toSideActions);
         for (const key in moveMap.toSideActions) {
             const mCube = moveMap.toSideActions[key];
-            //если клетку, с которой сошел кубик, ещё не занял другой кубик
-            //обнуляем эту клетку
+            // если клетку, с которой сошел кубик, ещё не занял другой кубик
+            // обнуляем эту клетку
             if (mCube.mainMask._get({
                 x: mCube.cube.x,
                 y: mCube.cube.y,
@@ -308,37 +308,37 @@ export class Cubes {
                     y: mCube.cube.y,
                 }, null);
             }
-            /*mCube.cube.x = mCube.x;
-                   mCube.cube.y = mCube.y;*/
-            //пушим кубик в коллекцию боковой линии
+            /* mCube.cube.x = mCube.x;
+                   mCube.cube.y = mCube.y; */
+            // пушим кубик в коллекцию боковой линии
             this._pushInLine(mCube.cube);
         }
     }
 
-    //массовая анимация для кубиков, вспомогательная
-    //функция для удобства анимации сразу нескольких кубиков
+    // массовая анимация для кубиков, вспомогательная
+    // функция для удобства анимации сразу нескольких кубиков
     public animate(o: { action: 'fromLine'; cube: Cube[] } | { action: 'inLine'; cube: Cube }) {
         let line;
 
         const { cube, action } = o;
 
-        //в зависимости от типа действия
+        // в зависимости от типа действия
         switch (action) {
-        //при выходе одного кубика из линии, анимируем линию
+        // при выходе одного кубика из линии, анимируем линию
         case 'fromLine':
             (() => {
 
                 const startCubes = cube;
 
-                //получаем линию кубика
-                //коллекция пока в начальном состоянии (до хода)
+                // получаем линию кубика
+                // коллекция пока в начальном состоянии (до хода)
                 line = this._getLine({
                     x: startCubes[0].x,
                     y: startCubes[0].y,
                     field: startCubes[0].field,
                 });
 
-                //массив из возможных комбинаций анимаций
+                // массив из возможных комбинаций анимаций
                 let arr;
                 switch (startCubes.length) {
                 case 1:
@@ -396,30 +396,30 @@ export class Cubes {
                 }
             })();
             break;
-            //при входе кубика в линию, анимируем линию
+            // при входе кубика в линию, анимируем линию
         case 'inLine':
             (() => {
 
-                //получаем линию кубика
+                // получаем линию кубика
                 line = this._getLine({
                     x: cube.x,
                     y: cube.y,
                     field: cube.field,
                 });
 
-                //массив, в который по порядку попадут все кубики,
-                //которые войдут в эту же линию того же поля во время хода
-                //0 - который входит первым
+                // массив, в который по порядку попадут все кубики,
+                // которые войдут в эту же линию того же поля во время хода
+                // 0 - который входит первым
                 const allCubesToSideInThisLine = [];
-                //все кубики, которые попадают во время хода в боковую панель
+                // все кубики, которые попадают во время хода в боковую панель
                 const toSideActions = this._app.moveMap!.toSideActions;
-                //для идентификации линии
+                // для идентификации линии
                 let prop: 'x' | 'y' = 'y';
                 if (cube.field === 'top' || cube.field === 'bottom') {
                     prop = 'x';
                 }
-                //позиция кубика среди тех, которые во время данного хода
-                //попадают в данную линию данного поля 0-дальний от mainField
+                // позиция кубика среди тех, которые во время данного хода
+                // попадают в данную линию данного поля 0-дальний от mainField
                 let posInSide;
                 for (const key in toSideActions) {
                     const c = toSideActions[key].cube;
@@ -431,8 +431,8 @@ export class Cubes {
                     }
                 }
 
-                //массив кубиков, которые удалились за пределами этой линии во время хода
-                //0 - первый удалённый(самый дальний)
+                // массив кубиков, которые удалились за пределами этой линии во время хода
+                // 0 - первый удалённый(самый дальний)
                 const removeBS = [];
                 for (const key in this._app.moveMap!.beyondTheSide!) {
                     const c = this._app.moveMap!.beyondTheSide![key];
@@ -441,17 +441,17 @@ export class Cubes {
                     }
                 }
 
-                //вычисляем, какие кубики будем двигать при вставке в линию
+                // вычисляем, какие кубики будем двигать при вставке в линию
                 const pos =
               BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
                 let c1: Cube;
                 let c2: Cube;
                 let cr: Cube;
 
-                //смысл этих условий в том, что если кубик, который надо анимировать,
-                //еще присутствует в линии, мы берем этот кубик оттуда, если же
-                //он уже удален из линии, но его нужно анимировать, мы берем его
-                //из массива удаленных кубиков этой линии
+                // смысл этих условий в том, что если кубик, который надо анимировать,
+                // еще присутствует в линии, мы берем этот кубик оттуда, если же
+                // он уже удален из линии, но его нужно анимировать, мы берем его
+                // из массива удаленных кубиков этой линии
                 if (pos - 2 > -1) {
                     cr = this._get(line[pos - 2])!;
                 } else {
@@ -470,13 +470,13 @@ export class Cubes {
                     c2 = removeBS[removeBS.length + (pos - 1)];
                 }
 
-                //третий кубик пропадает
+                // третий кубик пропадает
                 cr.animate({
                     action: 'disapperanceInSide',
                     duration: 1,
                 });
 
-                //остальные два сдвигаются ближе к линии
+                // остальные два сдвигаются ближе к линии
                 c2.animate({
                     action: 'forth',
                     duration: 1,

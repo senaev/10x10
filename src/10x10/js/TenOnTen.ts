@@ -37,7 +37,7 @@ export class TenOnTen {
     public end: string | null;
     public readonly undoButton: UndoButton;
 
-    //счетчик для значений toMine кубиков, попадающих в главное поле
+    // счетчик для значений toMine кубиков, попадающих в главное поле
     public readonly mainCounter: () => number = (function () {
         let numberOfCalls = 0;
         return function () {
@@ -49,26 +49,26 @@ export class TenOnTen {
 
     private previousStepMap: Mask | undefined;
 
-    constructor({ container }: { container: HTMLElement }) {
-        //получаем коллекцию кубиков и устанавливаем в параметрах проложение,
-        //которому эти кубики принадлежат
+    public constructor({ container }: { container: HTMLElement }) {
+        // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
+        // которому эти кубики принадлежат
         this.cubes = new Cubes({ app: this });
 
-        //индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
+        // индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
 
-        //уровень 1-10 11-60(16-65)
+        // уровень 1-10 11-60(16-65)
         this.level = 1;
 
-        //язык
+        // язык
         this.lang = 'ru';
 
-        //датчик конца хода
+        // датчик конца хода
         this.end = null;
 
         this.container = $(container);
 
-        //Initialize container function
+        // Initialize container function
         (() => {
             const topRightPanel = '<div class="panel topRightPanel"></div>'; //
             let background = '<div class="backgroungField">';
@@ -97,8 +97,8 @@ export class TenOnTen {
                 .append(topRightPanel);
         })();
 
-        //запускаем инициализацию приложения
-        //генерируем кубики в боковых панелях
+        // запускаем инициализацию приложения
+        // генерируем кубики в боковых панелях
         this.cubes._sideEach((_cube, field, x, y) => {
             new Cube({
                 x,
@@ -112,16 +112,16 @@ export class TenOnTen {
 
         this.generateMainCubes();
 
-        //добавляем кнопку "назад"
+        // добавляем кнопку "назад"
         this.undoButton = new UndoButton({ app: this });
     }
 
-    //даем возможность пользователю при переходе на новый уровень выбрать из случайных
-    //комбинаций начальную
+    // даем возможность пользователю при переходе на новый уровень выбрать из случайных
+    // комбинаций начальную
     public refresh = () => {
         this.blockApp = true;
         const cubesLocal = this.cubes;
-        //удаляем нафиг кубики с главного поля
+        // удаляем нафиг кубики с главного поля
         cubesLocal._mainEach(function (cube, field, x, y) {
             cubesLocal._set({
                 field,
@@ -149,7 +149,7 @@ export class TenOnTen {
         );
     };
 
-    //генерируем маску для предидущего хода
+    // генерируем маску для предидущего хода
     private generateMask(): Mask {
         const mask: Partial<Mask> = {};
         const cubesLocal = this.cubes;
@@ -174,7 +174,7 @@ export class TenOnTen {
                             direction: c.direction,
                         };
                         fieldValue[x][y] = resultValue;
-                        //для корректной обработки порядка попадания в главное поле
+                        // для корректной обработки порядка попадания в главное поле
                         if (field === 'main') {
                             resultValue.toMine = c.toMine;
                         }
@@ -186,7 +186,7 @@ export class TenOnTen {
         return mask as Mask;
     }
 
-    //переводим игру на следующий уровень
+    // переводим игру на следующий уровень
     public nextLevel() {
         const colorsCount = getLevelColorsCount(this.level);
         this.level++;
@@ -196,7 +196,7 @@ export class TenOnTen {
         this.generateMainCubes();
     }
 
-    //при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
+    // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
     private plusColor() {
         const colorsCount = getLevelColorsCount(this.level);
         const newColor = CUBE_COLORS[colorsCount - 1];
@@ -214,7 +214,7 @@ export class TenOnTen {
         return I18N_DICTIONARY[w][this.lang];
     }
 
-    //генерируем кубики на главном поле
+    // генерируем кубики на главном поле
     private generateMainCubes() {
         const firstCubesPosition = getLevelCubesPositions(this.level);
         let nullCells: { x: number; y: number }[] = [];
@@ -232,7 +232,7 @@ export class TenOnTen {
             }
 
             if (fPos === null) {
-                //создаем массив из свободных ячеек, перемешиваем его
+                // создаем массив из свободных ячеек, перемешиваем его
                 if (nullCells === undefined) {
                     nullCells = [];
                     for (let x = 0; x < BOARD_SIZE; x++) {
@@ -249,7 +249,7 @@ export class TenOnTen {
                     shuffleArray(nullCells);
                 }
 
-                //шанс попадания кубика в крайнее поле - чем больше, тем ниже
+                // шанс попадания кубика в крайнее поле - чем больше, тем ниже
                 const chance = 2;
                 for (let key = 0; key < chance; key++) {
                     cell = nullCells.shift()!;
@@ -271,10 +271,10 @@ export class TenOnTen {
                 };
             }
 
-            //выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
+            // выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
             const colorsCount = getLevelColorsCount(this.level);
 
-            //цвета, которые есть в смежных кубиках
+            // цвета, которые есть в смежных кубиках
             const apperanceColors = [];
             for (let key = 0; key < 4; key++) {
                 const address: CubeAddress = {
@@ -299,7 +299,7 @@ export class TenOnTen {
                 }
             }
 
-            //цвета, которых нету в смежных
+            // цвета, которых нету в смежных
             const noApperanceColors = [];
             for (let key = 0; key < colorsCount; key++) {
                 if (apperanceColors.indexOf(CUBE_COLORS[key]) === -1) {
@@ -307,7 +307,7 @@ export class TenOnTen {
                 }
             }
 
-            //получаем итоговый цвет
+            // получаем итоговый цвет
             const color = noApperanceColors[getRandomIntegerInARange(0, noApperanceColors.length - 1)];
 
             new Cube({
@@ -321,7 +321,7 @@ export class TenOnTen {
         }
     }
 
-    //проверяем в конце хода на конец уровня или конец изры
+    // проверяем в конце хода на конец уровня или конец изры
     private checkStepEnd() {
     /**
      * если нет - заканчиваем ход
@@ -340,13 +340,13 @@ export class TenOnTen {
             for (let y = 0; y < BOARD_SIZE; y++) {
                 const cube = cubesLocal['main'][x][y];
 
-                //если на поле еще остались кубики, уровень не завершен
+                // если на поле еще остались кубики, уровень не завершен
                 if (cube !== null) {
                     next_level = false;
                 }
 
-                //если все крайние панели заполнены - конец игры,
-                //если хоть один пустой - игра продолжается
+                // если все крайние панели заполнены - конец игры,
+                // если хоть один пустой - игра продолжается
                 if (
                     x === 0 ||
           y === 0 ||
@@ -364,20 +364,20 @@ export class TenOnTen {
         }
 
         if (next_level) {
-            //меняем датчик на следующий уровень
+            // меняем датчик на следующий уровень
             this.end = 'next_level';
         } else if (game_over) {
-            //меняем датчик на конец игры
+            // меняем датчик на конец игры
             this.end = 'game_over';
         } else {
-            //иначе - ничего не делаем
+            // иначе - ничего не делаем
             this.end = null;
         }
     }
 
-    //делаем возврат хода
+    // делаем возврат хода
     public undo() {
-    //блокируем приложение до тех пор, пока не закончим анимацию
+    // блокируем приложение до тех пор, пока не закончим анимацию
         this.blockApp = true;
         setTimeout(
             function (app) {
@@ -389,7 +389,7 @@ export class TenOnTen {
 
         this.undoButton._set({ active: false });
 
-        //массив, в котором описаны все различия между текущим и предыдущим состоянием
+        // массив, в котором описаны все различия между текущим и предыдущим состоянием
         const changed: {
             field: Field;
             x: number;
@@ -399,7 +399,7 @@ export class TenOnTen {
             action: string;
         }[] = [];
 
-        //пробегаем в массиве по каждому кубику предыдущего массива
+        // пробегаем в массиве по каждому кубику предыдущего массива
         const previousStepMap = this.previousStepMap;
         if (previousStepMap) {
             for (const fieldName in previousStepMap) {
@@ -409,16 +409,16 @@ export class TenOnTen {
                         const yNumber = parseInt(y);
                         const pCube: MaskFieldValue | null =
               previousStepMap[fieldName as Field][xNumber][yNumber];
-                        //берем соответствующее значение текущей маски для сравнения
+                        // берем соответствующее значение текущей маски для сравнения
                         const cube = this.cubes._get({
                             field: fieldName as Field,
                             x: xNumber,
                             y: yNumber,
                         });
-                        //если предидущее - null
+                        // если предидущее - null
                         if (pCube === null) {
-                            //а новое - что-то другое
-                            //удаляем кубик из нового значения
+                            // а новое - что-то другое
+                            // удаляем кубик из нового значения
                             if (cube !== null) {
                                 changed.push({
                                     field: fieldName as Field,
@@ -430,9 +430,9 @@ export class TenOnTen {
                                 });
                             }
                         } else {
-                            //если же раньше тут тоже был кубик
-                            //а сейчас кубика нету
-                            //заполняем клетку кубиком
+                            // если же раньше тут тоже был кубик
+                            // а сейчас кубика нету
+                            // заполняем клетку кубиком
                             if (cube === null) {
                                 changed.push({
                                     field: fieldName as Field,
@@ -443,11 +443,11 @@ export class TenOnTen {
                                     action: 'add',
                                 });
                             } else {
-                            //если и раньше и сейчас - нужно сравнить эти значения
-                                //пробегаемся по каждому параметру
+                            // если и раньше и сейчас - нужно сравнить эти значения
+                                // пробегаемся по каждому параметру
                                 for (const prop in pCube) {
-                                    //если какие-то параметры различаются,
-                                    //меняем параметры кубика
+                                    // если какие-то параметры различаются,
+                                    // меняем параметры кубика
                                     if (
                                         cube[prop as keyof Cube] !==
                     pCube[prop as keyof MaskFieldValue]
@@ -474,7 +474,7 @@ export class TenOnTen {
             let cube = changed[key].cube;
             switch (changed[key].action) {
             case 'add':
-                //создаем новый кубик с теми же параметрами и подменяем им предидущий
+                // создаем новый кубик с теми же параметрами и подменяем им предидущий
                 cube = new Cube({
                     x: changed[key].x,
                     y: changed[key].y,
@@ -484,10 +484,10 @@ export class TenOnTen {
                     app: this,
                     appearWithAnimation: true,
                 });
-                //console.log(cube);
+                // console.log(cube);
                 break;
             case 'remove':
-                //удаляем нафиг кубик
+                // удаляем нафиг кубик
                 this.cubes._set(
                     {
                         field: changed[key].field,
@@ -512,7 +512,7 @@ export class TenOnTen {
             }
         }
 
-        //меняем значения ту майн всех кубиков на поле
+        // меняем значения ту майн всех кубиков на поле
         const mainField = this.previousStepMap!['main'];
         for (const x in mainField) {
             for (const y in mainField[x]) {
@@ -528,7 +528,7 @@ export class TenOnTen {
     }
 
     public run(o: { startCubes: Cube[] }) {
-    //создаем маску для возможности возврата хода
+    // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
         this.moveMap = new MoveMap({
@@ -536,10 +536,10 @@ export class TenOnTen {
             cubes: this.cubes,
             app: this,
         });
-        //пошаговый запуск анимации
+        // пошаговый запуск анимации
         this.moveMap.animate();
-        //подитоживание - внесение изменений, произошедших в абстрактном moveMap
-        //в реальную коллекцию cubes
+        // подитоживание - внесение изменений, произошедших в абстрактном moveMap
+        // в реальную коллекцию cubes
         this.cubes._mergeMoveMap(this.moveMap);
 
         this.checkStepEnd();

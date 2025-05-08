@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "npx eslint . --fix",
+    "test": "echo \"Error: no test specified\"",
     "typecheck": "tsc --noEmit",
     "serve:static": "ts-node ./src/serve-static/enableStaticFilesServing.ts",
     "webpack:watch": "webpack --watch",

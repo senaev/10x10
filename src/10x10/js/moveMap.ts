@@ -1,5 +1,5 @@
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
-import { animateCubesFromLineToMainField } from '../utils/animateCubesFromLineToMainField';
+import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 
 import { Cube } from './Cube';
 import { Cubes } from './Cubes';
@@ -200,7 +200,7 @@ export class MoveMap {
             this.app
         );
 
-        animateCubesFromLineToMainField(startCubes, this.app.cubes.mask);
+        animateCubesFromSideToMainField(startCubes, this.app.cubes.mask);
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {

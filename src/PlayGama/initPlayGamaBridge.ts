@@ -39,7 +39,7 @@ export function initPlayGamaBridge() {
         .initialize()
         .then(() => {
             // eslint-disable-next-line no-console
-            console.log('PlayGamaBridge initialized', bridge.EVENT_NAME);
+            console.log('PlayGamaBridge initialized', bridge);
         })
         .catch((error) => {
             // eslint-disable-next-line no-console

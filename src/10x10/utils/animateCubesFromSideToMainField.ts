@@ -6,7 +6,7 @@ import { CubesMask } from '../js/Cubes';
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getCubeByAddress } from './getCubeByAddress';
 
-export function animateCubesFromLineToMainField(startCubes: Cube[], mask: CubesMask): void {
+export function animateCubesFromSideToMainField(startCubes: Cube[], mask: CubesMask): void {
     // получаем линию кубика
     // коллекция пока в начальном состоянии (до хода)
     const line = getCubeAddressInSideFieldInOrderFromMain({

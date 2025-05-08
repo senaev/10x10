@@ -6,7 +6,6 @@ import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { Direction } from '../types/Direction';
 import { bezier } from '../utils/bezier';
-import { getAllCubesInCursorPositionThatCouldGoToMain } from '../utils/getAllCubesInCursorPositionThatCouldGoToMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
@@ -36,7 +35,7 @@ export class Cube {
     public y: number;
     public direction: Direction | null;
     public color: string;
-    public toMineOrder?: number | null;
+    public toMineOrder: number | null;
     public readonly $el: JQuery<HTMLElement>;
     private readonly container: JQuery<HTMLElement>;
 
@@ -47,13 +46,14 @@ export class Cube {
         x: number;
         y: number;
         appearWithAnimation: boolean;
-        toMineOrder?: number;
+        toMineOrder: number | null;
         field: Field;
         app: TenOnTen;
-        direction?: Direction;
+        direction: Direction| null;
         color: string;
         container: JQuery<HTMLElement>;
         onClick: (address: CubeAddress) => void;
+        onHover: (address: CubeAddress, isHovered: boolean) => void;
     }) {
         let visibleModeClasses;
 
@@ -63,18 +63,14 @@ export class Cube {
         this.appearWithAnimation = params.appearWithAnimation;
 
         // время попадания в главное поле
-        if (params.toMineOrder === undefined) {
-            this.toMineOrder = null;
-        } else {
-            this.toMineOrder = params.toMineOrder;
-        }
+        this.toMineOrder = params.toMineOrder;
 
         this.field = params.field;
         // указатель на игру, к которой кубик привязан
         this.app = params.app;
 
-        // направнение движения
-        if (params.direction === undefined) {
+        // направление движения
+        if (!params.direction) {
             this.direction = (function (field) {
                 if (field === 'top') {
                     return 'bottom';
@@ -117,38 +113,20 @@ export class Cube {
                 (e) => {
                     e.preventDefault();
 
-                    if (this.field === 'main') {
-                        //
-                    } else {
-                        const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain(this.app.cubes.mask, {
-                            field: this.field,
-                            x: this.x,
-                            y: this.y,
-                        });
-                        if (typeof allToFirstInLine !== 'string') {
-                            for (const key in allToFirstInLine) {
-                                allToFirstInLine[key].$el.addClass('firstInHoverLine');
-                            }
-                        }
-                    }
+                    params.onHover({
+                        field: this.field,
+                        x: this.x,
+                        y: this.y,
+                    }, true);
                 },
                 (e) => {
                     e.preventDefault();
 
-                    if (this.field === 'main') {
-                        //
-                    } else {
-                        const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain(this.app.cubes.mask, {
-                            field: this.field,
-                            x: this.x,
-                            y: this.y,
-                        });
-                        if (typeof allToFirstInLine !== 'string') {
-                            for (const key in allToFirstInLine) {
-                                allToFirstInLine[key].$el.removeClass('firstInHoverLine');
-                            }
-                        }
-                    }
+                    params.onHover({
+                        field: this.field,
+                        x: this.x,
+                        y: this.y,
+                    }, false);
                 }
             )
             .click((e) => {
@@ -163,13 +141,6 @@ export class Cube {
                     y: this.y,
                 });
             });
-
-        this.toField();
-    }
-
-    // отправляем созданный кубик в приложение - добавляем в коллекцию cubes и в html-контейнер
-    public toField() {
-        this.app.cubes._add(this);
 
         // время попадания в поле майн
         if (this.field === 'main') {
@@ -189,6 +160,16 @@ export class Cube {
             this.appearWithAnimation = false;
         } else {
             this.$el.appendTo(this.container);
+        }
+
+        this.app.cubes._add(this);
+    }
+
+    public setRowVisibility(isVisible: boolean) {
+        if (isVisible) {
+            this.$el.addClass('firstInHoverLine');
+        } else {
+            this.$el.removeClass('firstInHoverLine');
         }
     }
 

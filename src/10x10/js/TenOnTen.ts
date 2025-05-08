@@ -97,15 +97,14 @@ export class TenOnTen {
         // запускаем инициализацию приложения
         // генерируем кубики в боковых панелях
         this.cubes._sideEach((_cube, field, x, y) => {
-            new Cube({
+            this.createCube({
                 x,
                 y,
                 field,
-                app: this,
                 color: getRandomColorForCubeLevel(this.level),
                 appearWithAnimation: false,
-                container: this.container,
-                onClick: this.handleCubeClick,
+                direction: null,
+                toMineOrder: null,
             });
         });
 
@@ -113,6 +112,21 @@ export class TenOnTen {
 
         // добавляем кнопку "назад"
         this.undoButton = new UndoButton({ app: this });
+    }
+
+    private createCube(params: CubeAddress & {
+        appearWithAnimation: boolean;
+        color: string;
+        direction: Direction | null;
+        toMineOrder: number | null;
+    }) {
+        return new Cube({
+            ...params,
+            app: this,
+            container: this.container,
+            onClick: this.handleCubeClick,
+            onHover: this.handleHover,
+        });
     }
 
     // даем возможность пользователю при переходе на новый уровень выбрать из случайных
@@ -306,15 +320,14 @@ export class TenOnTen {
             // получаем итоговый цвет
             const color = noAppearanceColors[getRandomIntegerInARange(0, noAppearanceColors.length - 1)];
 
-            new Cube({
+            this.createCube({
                 x: cell!.x,
                 y: cell!.y,
                 field: 'main',
-                app: this,
                 color,
                 appearWithAnimation: true,
-                container: this.container,
-                onClick: this.handleCubeClick,
+                direction: null,
+                toMineOrder: null,
             });
         }
     }
@@ -473,16 +486,14 @@ export class TenOnTen {
             switch (changed[key].action) {
             case 'add':
                 // создаем новый кубик с теми же параметрами и подменяем им предыдущий
-                cube = new Cube({
+                cube = this.createCube({
                     x: changed[key].x,
                     y: changed[key].y,
                     field: changed[key].field,
                     color: changed[key]!.pCube!.color,
                     direction: changed[key]!.pCube!.direction!,
-                    app: this,
                     appearWithAnimation: true,
-                    container: this.container,
-                    onClick: this.handleCubeClick,
+                    toMineOrder: null,
                 });
                 // console.log(cube);
                 break;
@@ -567,16 +578,14 @@ export class TenOnTen {
         for (let key = 0; key < startCubes.length; key++) {
             this.cubes._set(
                 line[key],
-                new Cube({
+                this.createCube({
                     x: line[key].x,
                     y: line[key].y,
                     field: line[key].field,
-                    app: this,
                     toMineOrder: getIncrementalIntegerForMainFieldOrder(),
                     color: getRandomColorForCubeLevel(this.level),
                     appearWithAnimation: false,
-                    container: this.container,
-                    onClick: this.handleCubeClick,
+                    direction: null,
                 })
             );
         }
@@ -613,5 +622,21 @@ export class TenOnTen {
 
         // отправляем в путь-дорогу
         this.run(startCubes);
+    };
+
+    private readonly handleHover = (address: CubeAddress, isHovered: boolean) => {
+        if (address.field === 'main') {
+            return;
+        }
+
+        const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.mask, address);
+
+        if (typeof allToFirstInLine === 'string') {
+            return;
+        }
+
+        for (const cube of allToFirstInLine) {
+            cube.setRowVisibility(isHovered);
+        }
     };
 }

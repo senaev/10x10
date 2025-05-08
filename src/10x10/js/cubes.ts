@@ -1,3 +1,5 @@
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
+
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
@@ -297,7 +299,12 @@ export class Cubes {
         ];
         animationArr.forEach((animation, animationIndex) => {
             for (const num in animation) {
-                this._get(line[animation[num]])!.addAnimate({
+                const address = line[animation[num]];
+                const cube = getCubeByAddress(this.mask, address);
+
+                assertObject(cube);
+
+                cube.addAnimate({
                     action: animationNames[num],
                     duration: 1,
                     delay: animationIndex,

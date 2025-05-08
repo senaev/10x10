@@ -1,12 +1,9 @@
 import $ from 'jquery';
-import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CUBE_COLORS } from '../const/CUBE_COLORS';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
-import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { CubeAddress } from './cubes';
@@ -58,26 +55,24 @@ export class Cube {
     public readonly app: TenOnTen;
     public readonly $el: JQuery<HTMLElement>;
 
-    private appearWithAnimation?: string;
+    private appearWithAnimation: boolean;
 
     constructor(params: {
         x: number;
         y: number;
-        appearWithAnimation?: string;
+        appearWithAnimation: boolean;
         toMine?: number;
         field: Field;
         app: TenOnTen;
         direction?: Direction;
-        color?: string;
+        color: string;
     }) {
-        let color; let visibleModeClasses;
+        let visibleModeClasses;
 
         this.x = params.x;
         this.y = params.y;
 
-        if (params.appearWithAnimation !== undefined) {
-            this.appearWithAnimation = params.appearWithAnimation;
-        }
+        this.appearWithAnimation = params.appearWithAnimation;
 
         //время попадания в главное поле
         if (params.toMine === undefined) {
@@ -108,16 +103,8 @@ export class Cube {
         } else {
             this.direction = params.direction;
         }
-        //задаем цвет кубика
-        if (params.color === undefined) {
-            color =
-        CUBE_COLORS[
-            getRandomIntegerInARange(0, getLevelColorsCount(this.app.level) - 1)
-        ];
-        } else {
-            color = params.color;
-        }
-        this.color = color;
+
+        this.color = params.color;
 
         //проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
         if (this.field !== 'main') {
@@ -231,7 +218,7 @@ export class Cube {
 
         this.toState();
 
-        if (this.appearWithAnimation !== undefined && this.appearWithAnimation === 'cool') {
+        if (this.appearWithAnimation) {
             this.$el
                 .css({ scale: 0 })
                 .appendTo(this.app.container)
@@ -239,7 +226,7 @@ export class Cube {
                     scale: 1,
                     duration: ANIMATION_TIME * 10,
                 });
-            delete this.appearWithAnimation;
+            this.appearWithAnimation = false;
         } else {
             this.$el.appendTo(this.app.container);
         }

@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
+import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './cube';
@@ -168,6 +169,8 @@ export class Cubes {
                     field: line[key].field,
                     app: this._app,
                     toMine: this._app.mainCounter(),
+                    color: getRandomColorForCubeLevel(this._app.level),
+                    appearWithAnimation: false,
                 })
             );
         }

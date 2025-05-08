@@ -11,6 +11,7 @@ import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { getLevelCubesCount } from '../utils/getLevelCubesCount';
 import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
+import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 
 import { Cube, Direction } from './cube';
 import {
@@ -104,6 +105,8 @@ export class TenOnTen {
                 y,
                 field,
                 app: this,
+                color: getRandomColorForCubeLevel(this.level),
+                appearWithAnimation: false,
             });
         });
 
@@ -305,8 +308,7 @@ export class TenOnTen {
             }
 
             //получаем итоговый цвет
-            const color =
-        noApperanceColors[getRandomIntegerInARange(0, noApperanceColors.length - 1)];
+            const color = noApperanceColors[getRandomIntegerInARange(0, noApperanceColors.length - 1)];
 
             new Cube({
                 x: cell!.x,
@@ -314,7 +316,7 @@ export class TenOnTen {
                 field: 'main',
                 app: this,
                 color,
-                appearWithAnimation: 'cool',
+                appearWithAnimation: true,
             });
         }
     }
@@ -480,7 +482,7 @@ export class TenOnTen {
                     color: changed[key]!.pCube!.color,
                     direction: changed[key]!.pCube!.direction!,
                     app: this,
-                    appearWithAnimation: 'cool',
+                    appearWithAnimation: true,
                 });
                 //console.log(cube);
                 break;

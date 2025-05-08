@@ -9,7 +9,7 @@ export class UndoButton {
     private func: () => void;
     private $el: JQuery<HTMLElement>;
 
-    constructor(params: { app: TenOnTen }) {
+    public constructor(params: { app: TenOnTen }) {
 
         this.app = params.app;
         this.active = true;
@@ -18,7 +18,7 @@ export class UndoButton {
 
         this.$el = $('<div class="undoButton">' + this.app.word('refresh') + '</div>')
             .click((e) => {
-                //не даем продолжить выполнение событий
+                // не даем продолжить выполнение событий
                 e.preventDefault();
 
                 if (this.active && !this.app.blockApp) {

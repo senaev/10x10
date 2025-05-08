@@ -33,35 +33,35 @@ export class MoveMap {
     private readonly cubes: Cubes;
     private readonly animationLength: number;
 
-    constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
+    public constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
         this.cubes = params.cubes;
         this.startCubes = params.startCubes;
 
         this.app = params.app;
 
-        //создаем класс маски
+        // создаем класс маски
         this.mainMask = new MainMask({
             startCubes: this.startCubes,
             cubes: this.cubes,
             moveMap: this,
         });
 
-        //массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
-        //в последовательности,  в которой они туда попали
+        // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
+        // в последовательности,  в которой они туда попали
         this.toSideActions = [];
 
-        //поскольку у каждого кубика одинаковое число шагов анимации, чтобы
-        //узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
+        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
+        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
         this.animationLength = this.mainMask.arr[0].steps.length;
 
-        //console.log("////inMainActions:", this.mainMask.arr);
+        // console.log("////inMainActions:", this.mainMask.arr);
 
-        //проходимся в цикле по всем кубикам
+        // проходимся в цикле по всем кубикам
         for (const key in this.mainMask.arr) {
             const mCube = this.mainMask.arr[key];
             const steps = mCube.steps;
 
-            //массив с действиями одного кубика
+            // массив с действиями одного кубика
             const actions: Action[] = [
                 {
                     action: null,
@@ -69,26 +69,26 @@ export class MoveMap {
                 },
             ];
 
-            //пробегаемся по массиву шагов анимации
+            // пробегаемся по массиву шагов анимации
             for (let key1 = 0; key1 < steps.length; key1++) {
-                //один шаг анимации
+                // один шаг анимации
                 const step = steps[key1];
-                //последний шаг анимации, к которому добавляем продолжительность
-                //в случае совпадения со следующим шагом
+                // последний шаг анимации, к которому добавляем продолжительность
+                // в случае совпадения со следующим шагом
                 const lastAction = actions[actions.length - 1];
-                //если это такой же шаг, как и предидущий
+                // если это такой же шаг, как и предидущий
                 if (step.do === lastAction.action) {
-                    //иначе просто увеличиваем продолжительность предидущего
+                    // иначе просто увеличиваем продолжительность предидущего
                     lastAction.duration++;
                 } else {
-                    //для каждого действия - по-своему, в том числе в зависимости от предидущих действий
+                    // для каждого действия - по-своему, в том числе в зависимости от предидущих действий
                     switch (step.do) {
                     case 'toSide':
                         lastAction.action = 'toSide';
                         lastAction.duration++;
-                        //для сортиравки попаданий в боковое поле
+                        // для сортиравки попаданий в боковое поле
                         mCube.toSideTime = key1;
-                        //заносим м-кубик в массив попадания в боковое поле
+                        // заносим м-кубик в массив попадания в боковое поле
                         this.toSideActions.push(mCube);
                         break;
                     case null:
@@ -120,19 +120,19 @@ export class MoveMap {
                 actions.shift();
             }
 
-            //console.log(actions);
+            // console.log(actions);
 
-            //подтягиваем задержки
+            // подтягиваем задержки
             if (actions.length !== 0) {
-                //итоговый массив, в котором продолжительность анимаций
-                //и задержки выстроены, как надо
+                // итоговый массив, в котором продолжительность анимаций
+                // и задержки выстроены, как надо
                 const nullToDelayActions = [];
                 let delay = 0;
                 for (let key1 = 0; key1 < actions.length; key1++) {
                     const action: Action = actions[key1];
-                    //выставляем задержку от начала хода
+                    // выставляем задержку от начала хода
                     action.delay = delay;
-                    //добавляем к задержке следующего действия текущую продолжительность
+                    // добавляем к задержке следующего действия текущую продолжительность
                     delay += action.duration;
                     if (action.action !== null) {
                         nullToDelayActions.push(action);
@@ -144,30 +144,30 @@ export class MoveMap {
                 });
             }
         }
-        //сортируем попавшие в боковое поле м-кубики по времени попадания
+        // сортируем попавшие в боковое поле м-кубики по времени попадания
         this.toSideActions.sort(function (a, b) {
             return a.toSideTime! - b.toSideTime!;
         });
     }
 
-    //когда ход прощитан, запускаем саму анимацию
+    // когда ход прощитан, запускаем саму анимацию
     public animate() {
         const startCubes = this.startCubes;
 
-        //блокируем приложение от начала до конца анимации
-        //минус один - потому, что в последний такт обычно анимация чисто символическая
+        // блокируем приложение от начала до конца анимации
+        // минус один - потому, что в последний такт обычно анимация чисто символическая
         this.app.blockApp = true;
         setTimeout(
             (app) => {
                 app.blockApp = false;
 
-                //удаляем ненужные html-элементы
+                // удаляем ненужные html-элементы
                 for (const key in this.beyondTheSide) {
                     this.beyondTheSide[key].remove();
                 }
 
-                //разблокируем кнопку назад, если не случился переход на новый уровень
-                //иначе - блокируем
+                // разблокируем кнопку назад, если не случился переход на новый уровень
+                // иначе - блокируем
                 if (app.end === 'next_level') {
                     app.undoButton._set({
                         active: true,
@@ -205,14 +205,14 @@ export class MoveMap {
             cube: startCubes,
         });
 
-        //добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
+        // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {
             startCubes[key].$el.addClass('d' + startCubes[key].direction);
         }
 
-        //перебираем карту анимации и передаем каждому кубику объект действия,
-        //состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
-        //далее кубик запускает таймер до выполнения и выполняет нужную анимацию
+        // перебираем карту анимации и передаем каждому кубику объект действия,
+        // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
+        // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
         const map = this.animationMap;
         for (const key in map) {
             const cube = map[key].cube;

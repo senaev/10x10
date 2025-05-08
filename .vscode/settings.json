@@ -1,13 +1,13 @@
 {
     "cSpell.words": [
-        "BOARD",
-        "cubes",
         "Gama",
-        "Games",
-        "initialized",
-        "POSITIONS",
-        "senaev"
+        "playdeck",
+        "playgama",
+        "poki",
+        "senaev",
+        "wortal"
     ],
+    "cSpell.language": "en,ru",
     "search.exclude": {
         "**/node_modules": true,
         "**/public/playgama-bridge.js": true,

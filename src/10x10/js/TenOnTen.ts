@@ -1,9 +1,13 @@
 import $ from 'jquery';
 
+import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
+import { shuffleArray } from '../../utils/shuffleArray';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
+import { getLevelCubesCount } from '../utils/getLevelCubesCount';
+import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 
 import { Cube, Direction } from './cube';
 import {
@@ -185,7 +189,7 @@ export class TenOnTen {
         const colorsCount = getLevelColorsCount(this.level);
         const newColor = CUBE_COLORS[colorsCount - 1];
         this.cubes._sideEach(function (cube) {
-            if (data.f.rand(0, colorsCount - 1) === 0) {
+            if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
                 cube.change({
                     color: newColor,
                 });
@@ -215,11 +219,11 @@ export class TenOnTen {
 
     //генерируем кубики на главном поле
     private generateMainCubes() {
-        const firstCubesPosition = data.f.level.getPositions(this.level);
+        const firstCubesPosition = getLevelCubesPositions(this.level);
         let nullCells: { x: number; y: number }[] = [];
 
         for (
-            let number = 0, len = data.f.level.cubesCount(this.level);
+            let number = 0, len = getLevelCubesCount(this.level);
             number < len;
             number++
         ) {
@@ -244,7 +248,8 @@ export class TenOnTen {
                             }
                         }
                     }
-                    data.f.shuffle(nullCells);
+
+                    shuffleArray(nullCells);
                 }
 
                 //шанс попадания кубика в крайнее поле - чем больше, тем ниже
@@ -307,7 +312,7 @@ export class TenOnTen {
 
             //получаем итоговый цвет
             const color =
-        noApperanceColors[data.f.rand(0, noApperanceColors.length - 1)];
+        noApperanceColors[getRandomIntegerInARange(0, noApperanceColors.length - 1)];
 
             new Cube({
                 x: cell!.x,

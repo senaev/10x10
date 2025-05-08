@@ -1,4 +1,5 @@
 import { Field, FIELDS } from '../const/FIELDS';
+import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './cube';
 import {
@@ -186,7 +187,7 @@ export class Cubes {
         //console.log(cube.color);
         //меняем значения кубика
         cube.field = cube.direction!;
-        cube.direction = data.f.reverseField(cube.field);
+        cube.direction = reverseDirection(cube.field);
         //получаем линию, в которую вставим кубик
         const line = this._getLine({
             x: cube.x,

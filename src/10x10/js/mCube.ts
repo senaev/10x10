@@ -1,5 +1,6 @@
+import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
+
 import { Cube, Direction } from './cube';
-import { data } from './data';
 import { MainMask } from './mainMask';
 
 export type Step = {
@@ -38,7 +39,7 @@ export class MCube {
         this.direction = o.direction;
         this.mainMask = o.mainMask;
 
-        this.rand = data.f.rand(0, 1000000);
+        this.rand = getRandomIntegerInARange(0, 1000000);
 
         //метка, означающая, что м-кубик вошел в группу по цветам(у него есть смежные кубики того же цвета)
         //если значение null - нету, или еще не найдено, если не null - адрес заданной группы

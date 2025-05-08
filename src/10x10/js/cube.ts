@@ -1,8 +1,10 @@
 import $ from 'jquery';
 
+import { getRandomIntegerInARange } from '../../utils/getRandomIntegerInARange';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
 import { Field } from '../const/FIELDS';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
+import { reverseDirection } from '../utils/reverseDirection';
 
 import { CubeAddress } from './cubes';
 import { data } from './data';
@@ -108,7 +110,7 @@ export class Cube {
         if (o.color === undefined) {
             color =
         CUBE_COLORS[
-            data.f.rand(0, getLevelColorsCount(this.app.level) - 1)
+            getRandomIntegerInARange(0, getLevelColorsCount(this.app.level) - 1)
         ];
         } else {
             color = o.color;
@@ -471,7 +473,7 @@ export class Cube {
 
             //анимируем движение, в конце - убираем стрелку, меняем классы
             this.$el.transition(trans, () => {
-                const dir = data.f.reverseField(this.field);
+                const dir = reverseDirection(this.field);
                 this.$el
                     .removeClass('d' + this.field + ' f' + dir)
                     .addClass('f' + this.field);

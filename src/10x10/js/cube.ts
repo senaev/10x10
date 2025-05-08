@@ -5,10 +5,11 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { Direction } from '../types/Direction';
+import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { CubeAddress } from './Cubes';
+import { CubeAddress, CubesMask } from './Cubes';
 import { Action } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 
@@ -134,8 +135,11 @@ export class Cube {
                     if (this.field === 'main') {
                         //
                     } else {
-                        // cube.findFirstInLine().$el.addClass("firstInHoverLine");
-                        const allToFirstInLine = this.findAllInLineCanGoToMain();
+                        const allToFirstInLine = this.findAllInLineCanGoToMain(this.app.cubes.mask, {
+                            field: this.field,
+                            x: this.x,
+                            y: this.y,
+                        });
                         if (typeof allToFirstInLine !== 'string') {
                             for (const key in allToFirstInLine) {
                                 allToFirstInLine[key].$el.addClass('firstInHoverLine');
@@ -150,7 +154,11 @@ export class Cube {
                         //
                     } else {
                         // cube.findFirstInLine().$el.removeClass("firstInHoverLine");
-                        const allToFirstInLine = this.findAllInLineCanGoToMain();
+                        const allToFirstInLine = this.findAllInLineCanGoToMain(this.app.cubes.mask, {
+                            field: this.field,
+                            x: this.x,
+                            y: this.y,
+                        });
                         if (typeof allToFirstInLine !== 'string') {
                             for (const key in allToFirstInLine) {
                                 allToFirstInLine[key].$el.removeClass('firstInHoverLine');
@@ -177,7 +185,11 @@ export class Cube {
                     // если по боковому
                     // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
                     // которые могут выйти из поля
-                    const startCubes = this.findAllInLineCanGoToMain();
+                    const startCubes = this.findAllInLineCanGoToMain(this.app.cubes.mask, {
+                        field: this.field,
+                        x: this.x,
+                        y: this.y,
+                    });
                     // если пришел не массив - выполняем анимацию
                     if (typeof startCubes === 'string') {
                         const scale =
@@ -250,52 +262,44 @@ export class Cube {
     }
 
     // находим все кубики от этого до ближнего к майн в линии относительно этого
-    public findAllInLineCanGoToMain(): Cube[] | 'empty' | 'block' {
-        let statProp: 'y' | 'x' = 'y';
-        let dynamicProp: 'x' | 'y' = 'x';
-        if (this.field === 'top' || this.field === 'bottom') {
-            statProp = 'x';
-            dynamicProp = 'y';
-        }
+    public findAllInLineCanGoToMain(mask: CubesMask, originCubeAddress: CubeAddress): Cube[] | 'empty' | 'block' {
+        const isVertical = originCubeAddress.field === 'top' || originCubeAddress.field === 'bottom';
+        const isLeftOrTop = originCubeAddress.field === 'left' || originCubeAddress.field === 'top';
+        const statProp: 'x' | 'y' = isVertical ? 'x' : 'y';
+        const dynamicProp: 'x' | 'y' = isVertical ? 'y' : 'x';
+
+        const START_OF_ARRAY: number[] = [
+            0,
+            1,
+            2,
+        ];
+        const END_OF_ARRAY: number[] = [
+            9,
+            8,
+            7,
+        ];
 
         // проверяем, сколько кубиков можно достать из боковой линии
         // по количеству свободных клеток в поле майн
-        const cellsMain: [number, number, number] =
-      this.field === 'top' || this.field === 'left'
-          ? [
-              0,
-              1,
-              2,
-          ]
-          : [
-              9,
-              8,
-              7,
-          ];
-        const cellsSide: [number, number, number] =
-      this.field === 'top' || this.field === 'left'
-          ? [
-              9,
-              8,
-              7,
-          ]
-          : [
-              0,
-              1,
-              2,
-          ];
+        const cellsMain: number[] = isLeftOrTop
+            ? START_OF_ARRAY
+            : END_OF_ARRAY;
+        const cellsSide: number[] = isLeftOrTop
+            ? END_OF_ARRAY
+            : START_OF_ARRAY;
 
         let address: CubeAddress = {
             field: 'main',
-            x: 0,
-            y: 0,
+            x: isVertical ? originCubeAddress.x : 0,
+            y: isVertical ? 0 : originCubeAddress.y,
         };
-        address[statProp] = this[statProp];
-        let count = 0;
+        address[statProp] = originCubeAddress[statProp];
+        let countOfCubesThatCanBeMoved = 0;
         for (const key in cellsMain) {
             address[dynamicProp] = cellsMain[key];
-            if (this.app.cubes._get(address) === null) {
-                count++;
+            // mask.main
+            if (getCubeByAddress(mask, address) === null) {
+                countOfCubesThatCanBeMoved++;
             } else {
                 break;
             }
@@ -305,37 +309,40 @@ export class Cube {
         let allNullInLine = true;
         for (let key = 0; key < BOARD_SIZE; key++) {
             address[dynamicProp] = key;
-            if (this.app.cubes._get(address) !== null) {
+            if (getCubeByAddress(mask, address) !== null) {
                 allNullInLine = false;
                 break;
             }
         }
-
-        const arr: Cube[] = [];
         // если все нули в линии - возвращаем индикатор пустоты
         if (allNullInLine) {
             return 'empty';
         }
 
         // если сразу за полем кубик - ничего не возвращаем
-        if (count === 0) {
+        if (countOfCubesThatCanBeMoved === 0) {
             return 'block';
         }
 
         address = {
-            field: this.field,
+            field: originCubeAddress.field,
             x: 0,
             y: 0,
         };
-        address[statProp] = this[statProp];
-        for (let key = 0; key < 3 && key < count; key++) {
+        address[statProp] = originCubeAddress[statProp];
+
+        const arr: Cube[] = [];
+        for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
             address[dynamicProp] = cellsSide[key];
-            arr.push(this.app.cubes._get(address)!);
+            arr.push(getCubeByAddress(mask, address)!);
             // если доходим до кубика, над которым курсор - заканчиваем маневр
-            if (this.app.cubes._get(address) === this) {
+            if (getCubeByAddress(mask, address) === this) {
                 break;
             }
         }
+
+        console.log(arr.map((cube) => cube.color));
+
         return arr;
     }
 

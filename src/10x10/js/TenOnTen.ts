@@ -228,7 +228,7 @@ export class TenOnTen {
                     nullCells = [];
                     for (let x = 0; x < BOARD_SIZE; x++) {
                         for (let y = 0; y < BOARD_SIZE; y++) {
-                            if (this.cubes.main[x][y] === null) {
+                            if (this.cubes.mask.main[x][y] === null) {
                                 nullCells.push({
                                     x,
                                     y,
@@ -330,7 +330,7 @@ export class TenOnTen {
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal['main'][x][y];
+                const cube = cubesLocal.mask.main[x][y];
 
                 // если на поле еще остались кубики, уровень не завершен
                 if (cube !== null) {

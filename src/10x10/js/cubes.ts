@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
+import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { reverseDirection } from '../utils/reverseDirection';
@@ -7,8 +8,10 @@ import { reverseDirection } from '../utils/reverseDirection';
 import { Cube } from './Cube';
 import { MoveMap } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
-export type CubesField = Record<number, Record<number, Cube | null>>;
-export type CubesFields = Record<Field, CubesField>;
+
+export type CubesFieldOptional = Record<number, Record<number, Cube | null>>;
+export type CubesFieldRequired = Record<number, Record<number, Cube>>;
+export type CubesFields = Record<Field, CubesFieldOptional>;
 
 export type CubeAddress = {
     field: Field;
@@ -16,13 +19,17 @@ export type CubeAddress = {
     y: number;
 };
 
+export type CubesMask = {
+    readonly main: CubesFieldOptional;
+    readonly top: CubesFieldRequired;
+    readonly right: CubesFieldRequired;
+    readonly bottom: CubesFieldRequired;
+    readonly left: CubesFieldRequired;
+};
+
 export class Cubes {
     public readonly _app: TenOnTen;
-    public readonly main: CubesField;
-    public readonly top: CubesField;
-    public readonly right: CubesField;
-    public readonly bottom: CubesField;
-    public readonly left: CubesField;
+    public mask: CubesMask;
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
@@ -30,7 +37,7 @@ export class Cubes {
         const cubesLocal: Partial<CubesFields> = {};
 
         for (const key in FIELDS) {
-            const field: CubesField = {};
+            const field: CubesFieldOptional = {};
             cubesLocal[FIELDS[key]] = field;
             for (let x = 0; x < BOARD_SIZE; x++) {
                 field[x] = {};
@@ -40,22 +47,23 @@ export class Cubes {
             }
         }
 
-        this.main = cubesLocal.main!;
-        this.top = cubesLocal.top!;
-        this.right = cubesLocal.right!;
-        this.bottom = cubesLocal.bottom!;
-        this.left = cubesLocal.left!;
+        this.mask = {
+            main: cubesLocal.main!,
+            top: cubesLocal.top as CubesFieldRequired,
+            right: cubesLocal.right as CubesFieldRequired,
+            bottom: cubesLocal.bottom as CubesFieldRequired,
+            left: cubesLocal.left as CubesFieldRequired,
+        };
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public _add(cube: Cube) {
-        this[cube.field][cube.x][cube.y] = cube;
+        this.mask[cube.field][cube.x][cube.y] = cube;
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
     public _get(o: CubeAddress) {
-        // console.log(o);
-        return this[o.field][o.x][o.y];
+        return getCubeByAddress(this.mask, o);
     }
 
     // устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -63,13 +71,10 @@ export class Cubes {
         if (o === undefined || value === undefined) {
             throw new Error('cubes._set не получил параметры: o: ' + o + ' value: ' + value);
         }
-        // console.log(o, value);
-        this[o.field][o.x][o.y] = value;
-        /* if (value !== null && value instanceof Cube) {
-               value.x = o.x;
-               value.y = o.y;
-               } */
-        return this[o.field][o.x][o.y];
+
+        this.mask[o.field][o.x][o.y] = value;
+
+        return this.mask[o.field][o.x][o.y];
     }
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
@@ -81,7 +86,7 @@ export class Cubes {
 
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    func(this[field][x][y]!, field, x, y);
+                    func(this.mask[field][x][y]!, field, x, y);
                 }
             }
         });
@@ -94,7 +99,7 @@ export class Cubes {
         i = 0;
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = this.main[x][y];
+                const cube = this.mask.main[x][y];
                 if (cube !== null) {
                     func(cube, 'main', x, y, i);
                     i++;

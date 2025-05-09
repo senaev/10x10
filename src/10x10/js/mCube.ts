@@ -2,7 +2,7 @@ import { Direction } from '../types/Direction';
 import { directionToAnimation } from '../utils/directionToAnimation';
 
 import { Cube } from './Cube';
-import { MainMask } from './MainMask';
+import { MainMask, __findCubeInMainMask } from './MainMask';
 
 export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
 
@@ -84,7 +84,7 @@ export class MCube {
                     step.do = 'toSide';
                 } else {
                     // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
-                    if (this.mainMask._get(nextPos) === null) {
+                    if (!__findCubeInMainMask(this.mainMask.arr, nextPos)) {
                         const animation = directionToAnimation(this.direction);
                         // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
                         this.x = nextPos.x;

@@ -5,6 +5,7 @@ import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './Cube';
+import { __findCubeInMainMask } from './MainMask';
 import { MoveMap } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 
@@ -183,10 +184,10 @@ export class Cubes {
                 }
 
                 if (
-                    mCube.mainMask._get({
+                    !__findCubeInMainMask(mCube.mainMask.arr, {
                         x: mCube.cube.x,
                         y: mCube.cube.y,
-                    }) === null
+                    })
                 ) {
                     this._set({
                         field: 'main',
@@ -220,10 +221,10 @@ export class Cubes {
             const mCube = moveMap.toSideActions[key];
             // если клетку, с которой сошел кубик, ещё не занял другой кубик
             // обнуляем эту клетку
-            if (mCube.mainMask._get({
+            if (!__findCubeInMainMask(mCube.mainMask.arr, {
                 x: mCube.cube.x,
                 y: mCube.cube.y,
-            }) === null) {
+            })) {
                 this._set({
                     field: 'main',
                     x: mCube.cube.x,

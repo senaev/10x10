@@ -3,11 +3,21 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
-import { searchAdjacentCubesByColor } from '../utils/searchAdjacentCubesByColor';
+import { searchAdjacentCubes } from '../utils/searchAdjacentCubes';
 
 import { Cube } from './Cube';
 import { Cubes } from './Cubes';
 import { MCube } from './MCube';
+
+// Поскольку маска - несортированный массив, получаем куб методом перебора
+export function __findCubeInMainMask(arr: MCube[], o: { x: number; y: number }): MCube | null {
+    for (const key in arr) {
+        if (arr[key].x === o.x && arr[key].y === o.y) {
+            return arr[key];
+        }
+    }
+    return null;
+}
 
 /**
  * Класс для маски (слепок текущего состояния с возможностью создать пошагово один ход игры).
@@ -127,7 +137,7 @@ export class MainMask {
         } else {
             // Ищем, появились ли у нас в результате хода смежные кубики
             // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
-            const adjacentCubes = this.searchAdjacentCubes();
+            const adjacentCubes = searchAdjacentCubes(this.arr);
             if (adjacentCubes.length) {
                 // Если такие группы кубиков имеются, подрываем их и запускаем
                 // еще один шаг хода, при этом обновляем массив м-кубиков
@@ -156,49 +166,4 @@ export class MainMask {
         }
     }
 
-    public searchAdjacentCubes() {
-        const arr = this.arr;
-        const byColorPrev: Record<string, MCube[]> = {};
-        const byColor: Record<string, MCube[]> = {};
-
-        // создаем объект с массивами м-кубиков по цветам
-        for (const key in arr) {
-            const mCube = arr[key];
-            // Если такого значения в объекте еще нет - создаем его
-            if (byColorPrev[mCube.color] === undefined) {
-                byColorPrev[mCube.color] = [];
-            }
-            // добавляем в этот массив все кубики, которые есть на доске
-            if (
-                mCube.x > -1 && mCube.x < BOARD_SIZE && mCube.y > -1 && mCube.y < BOARD_SIZE
-            ) {
-                byColorPrev[mCube.color].push(mCube);
-            }
-        }
-        // Если количество кубиков определенного цвета на доске меньше двух,
-        // исключаем эту группу кубиков из обработки
-        for (const key in byColorPrev) {
-            if (byColorPrev[key].length > 2) {
-                byColor[key] = byColorPrev[key];
-            }
-        }
-
-        // ищем группы смежных кубиков и помещаем их в массив groups
-        let groups: MCube[][] = [];
-        for (const key in byColor) {
-            groups = groups.concat(searchAdjacentCubesByColor(byColor[key]));
-        }
-        return groups;
-    }
-
-    // Поскольку маска - несортированный массив, получаем куб методом перебора
-    public _get(o: { x: number; y: number }): MCube | null {
-        const arr = this.arr;
-        for (const key in arr) {
-            if (arr[key].x === o.x && arr[key].y === o.y) {
-                return arr[key];
-            }
-        }
-        return null;
-    }
 }

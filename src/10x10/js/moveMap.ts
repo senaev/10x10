@@ -188,18 +188,10 @@ export class MoveMap {
         // иначе - блокируем
         if (app.end === 'next_level') {
             app.undoButtonNew.setState('hidden');
-            app.undoButton._set({
-                active: true,
-                func: app.refresh,
-                caption: app.word('refresh'),
-            });
+            app.refreshButton.setVisible(true);
         } else {
             app.undoButtonNew.setState('active');
-            app.undoButton._set({
-                active: true,
-                func: app.undo,
-                caption: app.word('undo'),
-            });
+            app.refreshButton.setVisible(false);
         }
 
         if (app.end !== null) {

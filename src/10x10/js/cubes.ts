@@ -68,7 +68,7 @@ export class Cubes {
     // устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
     public _set(o: CubeAddress, value: Cube | null) {
         if (o === undefined || value === undefined) {
-            throw new Error('cubes._set не получил параметры: o: ' + o + ' value: ' + value);
+            throw new Error(`cubes._set не получил параметры: o: ${o} value: ${value}`);
         }
 
         this.mask[o.field][o.x][o.y] = value;

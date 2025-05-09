@@ -104,12 +104,12 @@ export class Cube {
 
         let directionClass = '';
         if (this.field === 'main' && this.direction !== null) {
-            directionClass = 'd' + this.direction;
+            directionClass = `d${this.direction}`;
         }
 
         // указатель на DOM-элемент кубика с прослушиванием событий
         this.$el = $('<div class="cube"></div>')
-            .addClass(this.color + ' f' + this.field + visibleModeClasses + directionClass)
+            .addClass(`${this.color} f${this.field}${visibleModeClasses}${directionClass}`)
             .hover(
                 (e) => {
                     e.preventDefault();
@@ -276,19 +276,19 @@ export class Cube {
 
             const trans0: Transition = {
                 duration: ANIMATION_TIME * dur,
-                easing: 'cubic-bezier(.' + bezier(dur) + ', 0, 1, 1)',
+                easing: `cubic-bezier(.${bezier(dur)}, 0, 1, 1)`,
             };
-            trans0[prop] = sign + '=' + dur * CUBE_WIDTH;
+            trans0[prop] = `${sign}=${dur * CUBE_WIDTH}`;
             const trans1: Transition = {
                 scale,
                 duration: ANIMATION_TIME / 2,
             };
-            trans1[prop] = (sign === '+' ? '+' : '-') + '=4';
+            trans1[prop] = `${sign === '+' ? '+' : '-'}=4`;
             const trans2: Transition = {
                 scale: 1,
                 duration: ANIMATION_TIME / 2,
             };
-            trans2[prop] = (sign === '+' ? '-' : '+') + '=4';
+            trans2[prop] = `${sign === '+' ? '-' : '+'}=4`;
             this.$el.transition(trans0).transition(trans1).transition(trans2);
         };
 
@@ -301,12 +301,12 @@ export class Cube {
             dur = duration;
             // задаем нужный изинг
             const easing =
-        'cubic-bezier(.' + bezier(dur) + ', 0,.' + (100 - bezier(dur)) + ', 1)';
+        `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
             const trans: Transition = {
                 duration: ANIMATION_TIME * dur,
                 easing,
             };
-            trans[prop] = sign + '=' + dur * CUBE_WIDTH;
+            trans[prop] = `${sign}=${dur * CUBE_WIDTH}`;
 
             // отправляем в коллекцию команду вставки кубика в линию,
             // чтобы остальные кубики в этой линии пододвинулись
@@ -321,8 +321,8 @@ export class Cube {
             this.$el.transition(trans, () => {
                 const dir = reverseDirection(this.field);
                 this.$el
-                    .removeClass('d' + this.field + ' f' + dir)
-                    .addClass('f' + this.field);
+                    .removeClass(`d${this.field} f${dir}`)
+                    .addClass(`f${this.field}`);
             });
         };
 
@@ -342,7 +342,7 @@ export class Cube {
                     sign = '+';
                 }
             }
-            trans[prop] = sign + '=' + duration * CUBE_WIDTH;
+            trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
             this.$el.transition(trans);
         };
 
@@ -362,7 +362,7 @@ export class Cube {
                     sign = '-';
                 }
             }
-            trans[prop] = sign + '=' + duration * CUBE_WIDTH;
+            trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
             this.$el.transition(trans);
         };
 
@@ -510,7 +510,7 @@ export class Cube {
             break;
         default:
             // eslint-disable-next-line no-console
-            console.log('Неизвестная анимация: ' + action);
+            console.log(`Неизвестная анимация: ${action}`);
             break;
         }
     }
@@ -547,9 +547,9 @@ export class Cube {
                 // стили следует менять только у кубиков на главном поле, так как
                 // слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
                 if (this.field === 'main') {
-                    this.$el.removeClass('d' + prevDirection);
+                    this.$el.removeClass(`d${prevDirection}`);
                     if (this.direction !== null) {
-                        this.$el.addClass('d' + this.direction);
+                        this.$el.addClass(`d${this.direction}`);
                     }
                 }
             }

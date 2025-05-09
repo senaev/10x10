@@ -55,7 +55,7 @@ export function animateCubesFromSideToMainField(startCubes: Cube[], mask: CubesM
         ];
         break;
     default:
-        throw new Error('Неверное значение длинны startCubes: ' + startCubes.length);
+        throw new Error(`Неверное значение длинны startCubes: ${startCubes.length}`);
     }
     const animationNames = [
         'appearanceInSide',

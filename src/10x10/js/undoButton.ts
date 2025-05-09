@@ -1,6 +1,6 @@
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 
-export class UndoButtonNew {
+export class UndoButton {
     private readonly element: HTMLElement;
 
     public constructor(params: {

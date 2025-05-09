@@ -26,7 +26,7 @@ import {
 } from './Cubes';
 import { MoveMap } from './MoveMap';
 import {
-    UndoButtonNew,
+    UndoButton,
 } from './UndoButton';
 export type MaskFieldValue = {
     color: string;
@@ -45,7 +45,7 @@ export class TenOnTen {
     public moveMap: MoveMap | undefined;
     public end: string | null;
 
-    public readonly undoButtonNew: UndoButtonNew;
+    public readonly undoButton: UndoButton;
     public readonly refreshButton: RefreshButton;
 
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
@@ -120,11 +120,11 @@ export class TenOnTen {
         assertObject(topRightPanelElement);
         this.topRightPanelElement = topRightPanelElement;
 
-        this.undoButtonNew = new UndoButtonNew({
+        this.undoButton = new UndoButton({
             onClick: this.undo,
             container: topRightPanelElement,
         });
-        this.undoButtonNew.setState('hidden');
+        this.undoButton.setState('hidden');
 
         this.refreshButton = new RefreshButton({
             onClick: this.refresh,
@@ -420,7 +420,7 @@ export class TenOnTen {
             this
         );
 
-        this.undoButtonNew.setState('inactive');
+        this.undoButton.setState('inactive');
 
         // массив, в котором описаны все различия между текущим и предыдущим состоянием
         const changed: {
@@ -541,7 +541,7 @@ export class TenOnTen {
                 });
                 break;
             default:
-                throw new Error('Неизвестное значение в changed[key].action: ' + changed[key].action);
+                throw new Error(`Неизвестное значение в changed[key].action: ${changed[key].action}`);
             }
         }
 
@@ -578,6 +578,30 @@ export class TenOnTen {
 
         // пошаговый запуск анимации
         this.moveMap.animate().then(() => {
+            // разблокируем кнопку назад, если не случился переход на новый уровень
+            // иначе - блокируем
+            if (this.end === 'next_level') {
+                this.undoButton.setState('hidden');
+                this.refreshButton.setVisible(true);
+            } else {
+                this.undoButton.setState('active');
+                this.refreshButton.setVisible(false);
+            }
+
+            if (this.end !== null) {
+                switch (this.end) {
+                case 'next_level':
+                    this.nextLevel();
+                    break;
+                case 'game_over':
+
+                    alert('game over');
+                    break;
+                default:
+                    throw new Error(`Неверное значение в app.end: ${this.end}`);
+                }
+            }
+
             this.blockApp = false;
         });
 

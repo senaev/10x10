@@ -100,7 +100,7 @@ export class MoveMap {
                             'sl',
                             'sb',
                         ].indexOf(lastAction.action!) > -1) {
-                            lastAction.action = lastAction.action + 'Bump';
+                            lastAction.action = `${lastAction.action}Bump`;
                             lastAction.duration++;
                         } else {
                             actions.push({
@@ -160,7 +160,7 @@ export class MoveMap {
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {
-            startCubes[key].$el.addClass('d' + startCubes[key].direction);
+            startCubes[key].$el.addClass(`d${startCubes[key].direction}`);
         }
 
         // перебираем карту анимации и передаем каждому кубику объект действия,
@@ -178,34 +178,10 @@ export class MoveMap {
 
         await promiseTimeout(this.animationLength * ANIMATION_TIME - 1);
 
-        const app = this.app;
         // удаляем ненужные html-элементы
         for (const key in this.beyondTheSide) {
             this.beyondTheSide[key].remove();
         }
 
-        // разблокируем кнопку назад, если не случился переход на новый уровень
-        // иначе - блокируем
-        if (app.end === 'next_level') {
-            app.undoButtonNew.setState('hidden');
-            app.refreshButton.setVisible(true);
-        } else {
-            app.undoButtonNew.setState('active');
-            app.refreshButton.setVisible(false);
-        }
-
-        if (app.end !== null) {
-            switch (app.end) {
-            case 'next_level':
-                app.nextLevel();
-                break;
-            case 'game_over':
-
-                alert('game over');
-                break;
-            default:
-                throw new Error('Неверное значение в app.end: ' + app.end);
-            }
-        }
     }
 }

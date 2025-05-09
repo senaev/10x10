@@ -212,8 +212,7 @@ export class TenOnTen {
                     for (const y in previousStepMap[fieldName as Field][x]) {
                         const xNumber = parseInt(x);
                         const yNumber = parseInt(y);
-                        const pCube: MaskFieldValue | null =
-              previousStepMap[fieldName as Field][xNumber][yNumber];
+                        const pCube: MaskFieldValue | null = previousStepMap[fieldName as Field][xNumber][yNumber];
                         // берем соответствующее значение текущей маски для сравнения
                         const cube = this.cubes._get({
                             field: fieldName as Field,
@@ -254,8 +253,7 @@ export class TenOnTen {
                                     // если какие-то параметры различаются,
                                     // меняем параметры кубика
                                     if (
-                                        cube[prop as keyof Cube] !==
-                    pCube[prop as keyof MaskFieldValue]
+                                        cube[prop as keyof Cube] !== pCube[prop as keyof MaskFieldValue]
                                     ) {
                                         changed.push({
                                             field: fieldName as Field,
@@ -349,7 +347,11 @@ export class TenOnTen {
         this.blockApp = true;
 
         // пошаговый запуск анимации
-        this.moveMap.animate(this.cubes.mask).then(() => {
+        this.moveMap.animate({
+            startCubes,
+            cubesMask: this.cubes.mask,
+            animationsScript: this.moveMap.animationsScript,
+        }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
             if (this.end === 'next_level') {
@@ -506,10 +508,7 @@ export class TenOnTen {
                 for (let key = 0; key < chance; key++) {
                     cell = nullCells.shift()!;
                     if (
-                        cell.x === 0 ||
-            cell.y === 0 ||
-            cell.x === BOARD_SIZE - 1 ||
-            cell.y === BOARD_SIZE - 1
+                        cell.x === 0 || cell.y === 0 || cell.x === BOARD_SIZE - 1 || cell.y === BOARD_SIZE - 1
                     ) {
                         nullCells.push(cell);
                     } else {
@@ -539,10 +538,7 @@ export class TenOnTen {
                 address[prop] = key < 2 ? address[prop] + 1 : address[prop] - 1;
 
                 if (
-                    address.x > -1 &&
-          address.y > -1 &&
-          address.x < 10 &&
-          address.y < 10
+                    address.x > -1 && address.y > -1 && address.x < 10 && address.y < 10
                 ) {
                     const c = this.cubes._get(address);
                     if (c !== null) {
@@ -601,10 +597,7 @@ export class TenOnTen {
                 // если все крайние панели заполнены - конец игры,
                 // если хоть один пустой - игра продолжается
                 if (
-                    x === 0 ||
-          y === 0 ||
-          x === BOARD_SIZE - 1 ||
-          y === BOARD_SIZE - 1
+                    x === 0 || y === 0 || x === BOARD_SIZE - 1 || y === BOARD_SIZE - 1
                 ) {
                     if (cube === null) {
                         game_over = false;

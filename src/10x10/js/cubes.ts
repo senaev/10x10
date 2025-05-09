@@ -176,10 +176,7 @@ export class Cubes {
                 // console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
 
                 if (
-                    mCube.cube.x < 0 ||
-              mCube.cube.x > 9 ||
-              mCube.cube.y < 0 ||
-              mCube.cube.y > 9
+                    mCube.cube.x < 0 || mCube.cube.x > 9 || mCube.cube.y < 0 || mCube.cube.y > 9
                 ) {
                     // eslint-disable-next-line no-console
                     console.log(mCube, mCube.cube.x, mCube.cube.y, mCube.x, mCube.y);
@@ -286,8 +283,7 @@ export class Cubes {
         }
 
         // вычисляем, какие кубики будем двигать при вставке в линию
-        const pos =
-              BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
+        const pos = BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
         let c1: Cube;
         let c2: Cube;
         let cr: Cube;

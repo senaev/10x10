@@ -70,7 +70,7 @@ export function animateCubesFromSideToMainField(startCubes: Cube[], mask: CubesM
             assertObject(cube);
 
             cube.addAnimate({
-                action: animationNames[num],
+                animation: animationNames[num],
                 duration: 1,
                 delay: animationIndex,
             });

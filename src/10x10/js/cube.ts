@@ -11,7 +11,7 @@ import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalI
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { CubeAddress } from './Cubes';
-import { Action } from './MoveMap';
+import { CubeAnimation } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 
 export type CubeAnimateAction = {
@@ -208,16 +208,15 @@ export class Cube {
     }
 
     public performIHavePawsAnimation() {
-        const scale =
-              this.field === 'left' || this.field === 'right'
-                  ? [
-                      0.8,
-                      1.2,
-                  ]
-                  : [
-                      1.2,
-                      0.8,
-                  ];
+        const scale = this.field === 'left' || this.field === 'right'
+            ? [
+                0.8,
+                1.2,
+            ]
+            : [
+                1.2,
+                0.8,
+            ];
 
         this.$el
             .transition({
@@ -232,10 +231,10 @@ export class Cube {
 
     // добавляем объект анимации на обработку через время, полученное в атрибутах
     public addAnimate({
-        action,
+        animation: action,
         delay,
         duration,
-    }: Action) {
+    }: CubeAnimation) {
         assertUnsignedInteger(delay);
         assertUnsignedInteger(duration);
 
@@ -300,8 +299,7 @@ export class Cube {
        * */
             dur = duration;
             // задаем нужный изинг
-            const easing =
-        `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
+            const easing = `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
             const trans: Transition = {
                 duration: ANIMATION_TIME * dur,
                 easing,

@@ -9,10 +9,15 @@ import { MainMask } from './MainMask';
 import { MCube } from './MCube';
 import { TenOnTen } from './TenOnTen';
 
-export type Action = {
-    action: string | null;
+export type CubeAnimation = {
+    animation: string | null;
     duration: number;
     delay?: number;
+};
+
+export type CubeAnimationStep = {
+    animations: CubeAnimation[];
+    cube: Cube;
 };
 
 /**
@@ -27,20 +32,14 @@ export class MoveMap {
     public readonly beyondTheSide: Cube[] = [];
     public readonly startCubes: Cube[];
     public readonly toSideActions: MCube[] = [];
+    public readonly animationsScript: CubeAnimationStep[] = [];
 
-    private readonly animationMap: {
-        actions: Action[];
-        cube: Cube;
-    }[] = [];
-    private readonly app: TenOnTen;
     private readonly cubes: Cubes;
     private readonly animationLength: number;
 
     public constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
         this.cubes = params.cubes;
         this.startCubes = params.startCubes;
-
-        this.app = params.app;
 
         // создаем класс маски
         this.mainMask = new MainMask({
@@ -64,9 +63,9 @@ export class MoveMap {
             const steps = mCube.steps;
 
             // массив с действиями одного кубика
-            const actions: Action[] = [
+            const actions: CubeAnimation[] = [
                 {
-                    action: null,
+                    animation: null,
                     duration: 0,
                 },
             ];
@@ -79,14 +78,14 @@ export class MoveMap {
                 // в случае совпадения со следующим шагом
                 const lastAction = actions[actions.length - 1];
                 // если это такой же шаг, как и предыдущий
-                if (step.do === lastAction.action) {
+                if (step.do === lastAction.animation) {
                     // иначе просто увеличиваем продолжительность предыдущего
                     lastAction.duration++;
                 } else {
                     // для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
                     switch (step.do) {
                     case 'toSide':
-                        lastAction.action = 'toSide';
+                        lastAction.animation = 'toSide';
                         lastAction.duration++;
                         // для сортировки попаданий в боковое поле
                         mCube.toSideTime = key1;
@@ -99,26 +98,26 @@ export class MoveMap {
                             'sr',
                             'sl',
                             'sb',
-                        ].indexOf(lastAction.action!) > -1) {
-                            lastAction.action = `${lastAction.action}Bump`;
+                        ].indexOf(lastAction.animation!) > -1) {
+                            lastAction.animation = `${lastAction.animation}Bump`;
                             lastAction.duration++;
                         } else {
                             actions.push({
-                                action: step.do,
+                                animation: step.do,
                                 duration: 1,
                             });
                         }
                         break;
                     default:
                         actions.push({
-                            action: step.do,
+                            animation: step.do,
                             duration: 1,
                         });
                         break;
                     }
                 }
             }
-            if (actions.length === 1 && actions[0].action === null) {
+            if (actions.length === 1 && actions[0].animation === null) {
                 actions.shift();
             }
 
@@ -131,17 +130,17 @@ export class MoveMap {
                 const nullToDelayActions = [];
                 let delay = 0;
                 for (let key1 = 0; key1 < actions.length; key1++) {
-                    const action: Action = actions[key1];
+                    const action: CubeAnimation = actions[key1];
                     // выставляем задержку от начала хода
                     action.delay = delay;
                     // добавляем к задержке следующего действия текущую продолжительность
                     delay += action.duration;
-                    if (action.action !== null) {
+                    if (action.animation !== null) {
                         nullToDelayActions.push(action);
                     }
                 }
-                this.animationMap.push({
-                    actions: nullToDelayActions,
+                this.animationsScript.push({
+                    animations: nullToDelayActions,
                     cube: this.mainMask.arr[key].cube,
                 });
             }
@@ -153,9 +152,15 @@ export class MoveMap {
     }
 
     // когда ход просчитан, запускаем саму анимацию
-    public async animate(cubesMask: CubesMask): Promise<void> {
-        const startCubes = this.startCubes;
-
+    public async animate({
+        startCubes,
+        cubesMask,
+        animationsScript,
+    }: {
+        startCubes: Cube[];
+        cubesMask: CubesMask;
+        animationsScript: CubeAnimationStep[];
+    }): Promise<void> {
         animateCubesFromSideToMainField(startCubes, cubesMask);
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
@@ -166,10 +171,9 @@ export class MoveMap {
         // перебираем карту анимации и передаем каждому кубику объект действия,
         // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
         // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
-        const map = this.animationMap;
-        for (const key in map) {
-            const cube = map[key].cube;
-            const actions: Action[] = map[key].actions;
+        for (const key in animationsScript) {
+            const cube = animationsScript[key].cube;
+            const actions: CubeAnimation[] = animationsScript[key].animations;
             for (const key1 in actions) {
                 const action = actions[key1];
                 cube.addAnimate(action);

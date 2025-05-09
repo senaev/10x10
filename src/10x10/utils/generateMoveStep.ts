@@ -1,0 +1,54 @@
+import { MovingCube } from '../js/MovingCube';
+
+import { searchAdjacentCubes } from './searchAdjacentCubes';
+
+/**
+     * Один ход для всех кубиков на доске
+     */
+export function generateMoveStep({ movingCubes }: { movingCubes: MovingCube[] }) {
+    // Индикатор конца движений, если что-то происходит во время шага анимации -
+    // Индикатор конца движений, если что-то происходит во время шага анимации -
+    // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
+    // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
+    let somethingHappened = false;
+    for (const key in movingCubes) {
+        const oneStep = movingCubes[key].oneStep();
+        if (oneStep.do !== null) {
+            somethingHappened = true;
+        }
+    }
+
+    // Проверяем, произошло что-то или нет в конце каждого хода
+    if (somethingHappened) {
+        generateMoveStep({ movingCubes });
+        return;
+    }
+
+    // Ищем, появились ли у нас в результате хода смежные кубики
+    // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
+    const adjacentCubes = searchAdjacentCubes(movingCubes);
+    if (!adjacentCubes.length) {
+        // заканчиваем ход
+        return;
+    }
+
+    // Если такие группы кубиков имеются, подрываем их и запускаем
+    // еще один шаг хода, при этом обновляем массив м-кубиков
+    // сюда попадут все кубики, которые будут взорваны
+    adjacentCubes.forEach((group) => {
+        movingCubes.forEach((mCube) => {
+            if (group.indexOf(mCube) === -1) {
+                mCube.steps.push({ do: null });
+            } else {
+                mCube.steps.push({ do: 'boom' });
+                // взорвавшимся м-кубикам присваиваем координаты -1 -1,
+                // чтобы в дальнейшей анимации они не участвовали
+                mCube.x = -1;
+                mCube.y = -1;
+            }
+        });
+    });
+
+    // продолжаем ход
+    generateMoveStep({ movingCubes });
+}

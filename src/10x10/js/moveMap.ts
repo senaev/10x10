@@ -6,7 +6,7 @@ import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideTo
 import { Cube } from './Cube';
 import { Cubes, CubesMask } from './Cubes';
 import { MainMask } from './MainMask';
-import { MCube } from './MCube';
+import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
 export type CubeAnimation = {
@@ -31,7 +31,7 @@ export class MoveMap {
     public readonly mainMask: MainMask;
     public readonly beyondTheSide: Cube[] = [];
     public readonly startCubes: Cube[];
-    public readonly toSideActions: MCube[] = [];
+    public readonly toSideActions: MovingCube[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
 
     private readonly cubes: Cubes;
@@ -53,13 +53,13 @@ export class MoveMap {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        this.animationLength = this.mainMask.arr[0].steps.length;
+        this.animationLength = this.mainMask.movingCubes[0].steps.length;
 
         // console.log("////inMainActions:", this.mainMask.arr);
 
         // проходимся в цикле по всем кубикам
-        for (const key in this.mainMask.arr) {
-            const mCube = this.mainMask.arr[key];
+        for (const key in this.mainMask.movingCubes) {
+            const mCube = this.mainMask.movingCubes[key];
             const steps = mCube.steps;
 
             // массив с действиями одного кубика
@@ -141,7 +141,7 @@ export class MoveMap {
                 }
                 this.animationsScript.push({
                     animations: nullToDelayActions,
-                    cube: this.mainMask.arr[key].cube,
+                    cube: this.mainMask.movingCubes[key].cube,
                 });
             }
         }

@@ -1,4 +1,4 @@
-import { MoveAnimation } from '../js/MCube';
+import { MoveAnimation } from '../js/MovingCube';
 import { Direction } from '../types/Direction';
 
 export function directionToAnimation(direction: Direction): MoveAnimation {

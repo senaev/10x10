@@ -145,7 +145,7 @@ export class Cubes {
     }
 
     public _mergeMoveMap(moveMap: MoveMap) {
-        const arr = moveMap.mainMask.arr;
+        const arr = moveMap.mainMask.movingCubes;
         const startCubes = moveMap.startCubes;
 
         // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
@@ -184,7 +184,7 @@ export class Cubes {
                 }
 
                 if (
-                    !__findCubeInMainMask(mCube.mainMask.arr, {
+                    !__findCubeInMainMask(mCube.movingCubes, {
                         x: mCube.cube.x,
                         y: mCube.cube.y,
                     })
@@ -221,7 +221,7 @@ export class Cubes {
             const mCube = moveMap.toSideActions[key];
             // если клетку, с которой сошел кубик, ещё не занял другой кубик
             // обнуляем эту клетку
-            if (!__findCubeInMainMask(mCube.mainMask.arr, {
+            if (!__findCubeInMainMask(mCube.movingCubes, {
                 x: mCube.cube.x,
                 y: mCube.cube.y,
             })) {

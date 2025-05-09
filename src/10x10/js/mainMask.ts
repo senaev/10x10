@@ -2,15 +2,15 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { directionToAnimation } from '../utils/directionToAnimation';
+import { generateMoveStep } from '../utils/generateMoveStep';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
-import { searchAdjacentCubes } from '../utils/searchAdjacentCubes';
 
 import { Cube } from './Cube';
 import { Cubes } from './Cubes';
-import { MCube } from './MCube';
+import { MovingCube } from './MovingCube';
 
 // Поскольку маска - несортированный массив, получаем куб методом перебора
-export function __findCubeInMainMask(arr: MCube[], o: { x: number; y: number }): MCube | null {
+export function __findCubeInMainMask(arr: MovingCube[], o: { x: number; y: number }): MovingCube | null {
     for (const key in arr) {
         if (arr[key].x === o.x && arr[key].y === o.y) {
             return arr[key];
@@ -29,7 +29,7 @@ export function __findCubeInMainMask(arr: MCube[], o: { x: number; y: number }):
 export class MainMask {
     // Основной массив со значениями
     // Сюда будут попадать м-кубики, участвующие в анимации
-    public readonly arr: MCube[] = [];
+    public readonly movingCubes: MovingCube[] = [];
 
     public constructor(params: {
         cubes: Cubes;
@@ -46,17 +46,18 @@ export class MainMask {
 
         // создаем массив из всех кубиков, которые есть на доске
         cubes._mainEach((cube) => {
-            this.arr.push(new MCube({
+            this.movingCubes.push(new MovingCube({
                 x: cube.x,
                 y: cube.y,
                 color: cube.color,
                 direction: cube.direction,
-                mainMask: this,
+                movingCubes: this.movingCubes,
                 cube,
             }));
         });
+
         // добавляем в маску кубик, с которого начинаем анимацию
-        const startMCubes: MCube[] = [];
+        const startMCubes: MovingCube[] = [];
         for (const key in startCubes) {
             const startCube = startCubes[key];
 
@@ -78,21 +79,21 @@ export class MainMask {
                 startMCubeY = startCube.y;
             }
 
-            const startMCube = new MCube({
+            const startMCube = new MovingCube({
                 x: startMCubeX,
                 y: startMCubeY,
                 color: startCube.color,
                 direction: startCube.direction,
-                mainMask: this,
+                movingCubes: this.movingCubes,
                 cube: startCube,
             });
-            this.arr.push(startMCube);
+            this.movingCubes.push(startMCube);
             startMCubes.push(startMCube);
         }
 
         // добавим шаги анимации для выплывающих из боковой линии кубиков
         for (const _step in startMCubes) {
-            this.arr.forEach((mCube) => {
+            this.movingCubes.forEach((mCube) => {
                 if (startMCubes.indexOf(mCube) === -1) {
                     mCube.steps.push({ do: null });
                 } else {
@@ -107,63 +108,10 @@ export class MainMask {
             });
         }
 
-        this.arr.sort(function (a, b) {
+        this.movingCubes.sort(function (a, b) {
             return a.cube.toMineOrder! - b.cube.toMineOrder!;
         });
 
-        this.step();
+        generateMoveStep({ movingCubes: this.movingCubes });
     }
-
-    /**
-     * Один ход для всех кубиков на доске
-     */
-    public step() {
-        // Индикатор конца движений, если что-то происходит во время шага анимации -
-        // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
-        // либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
-        let somethingHappened;
-
-        somethingHappened = false;
-        for (const key in this.arr) {
-            const oneStep = this.arr[key].oneStep();
-            if (oneStep.do !== null) {
-                somethingHappened = true;
-            }
-        }
-
-        // Проверяем, произошло что-то или нет в конце каждого хода
-        if (somethingHappened) {
-            this.step();
-        } else {
-            // Ищем, появились ли у нас в результате хода смежные кубики
-            // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
-            const adjacentCubes = searchAdjacentCubes(this.arr);
-            if (adjacentCubes.length) {
-                // Если такие группы кубиков имеются, подрываем их и запускаем
-                // еще один шаг хода, при этом обновляем массив м-кубиков
-                // сюда попадут все кубики, которые будут взорваны
-                for (const key in adjacentCubes) {
-                    const group = adjacentCubes[key];
-
-                    for (const key2 in this.arr) {
-                        if (group.indexOf(this.arr[key2]) === -1) {
-                            this.arr[key2].steps.push({ do: null });
-                        } else {
-                            // console.log("add boom in:",this.arr[key]);
-                            this.arr[key2].steps.push({ do: 'boom' });
-                            // взорвавшимся м-кубикам присваиваем координаты -1 -1,
-                            // чтобы в дальнейшей анимации они не участвовали
-                            this.arr[key2].x = -1;
-                            this.arr[key2].y = -1;
-                        }
-                    }
-                }
-                // продолжаем ход
-                this.step();
-            } else {
-                // заканчиваем ход
-            }
-        }
-    }
-
 }

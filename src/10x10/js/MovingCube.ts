@@ -2,7 +2,7 @@ import { Direction } from '../types/Direction';
 import { directionToAnimation } from '../utils/directionToAnimation';
 
 import { Cube } from './Cube';
-import { MainMask, __findCubeInMainMask } from './MainMask';
+import { __findCubeInMainMask } from './MainMask';
 
 export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
 
@@ -16,12 +16,12 @@ export type AnimationStep = {
  * необходимыми данными для построения карты хода и карты
  * анимации этого хода, м-кубики хранятся в массиве mainMask.arr
  */
-export class MCube {
+export class MovingCube {
     public x: number;
     public y: number;
     public color: string;
     public direction: Direction | null;
-    public mainMask: MainMask;
+    public movingCubes: MovingCube[];
     public cube: Cube;
     public steps: AnimationStep[];
     public toSideTime: number | undefined;
@@ -31,14 +31,14 @@ export class MCube {
         y: number;
         color: string;
         direction: Direction | null;
-        mainMask: MainMask;
+        movingCubes: MovingCube[];
         cube: Cube;
     }) {
         this.x = o.x;
         this.y = o.y;
         this.color = o.color;
         this.direction = o.direction;
-        this.mainMask = o.mainMask;
+        this.movingCubes = o.movingCubes;
 
         // массив шагов анимации для кубика, в м-кубике это просто массив, каждое значение которого -
         // действие кубика последовательно в каждый шаг анимации, может быть полностью заполнен
@@ -48,7 +48,7 @@ export class MCube {
     }
 
     // один шаг для м-кубика, возвращает информацию о шаге для анимации
-    public oneStep() {
+    public oneStep(): AnimationStep {
         const step: AnimationStep = { do: null };
         // если м-кубик взорван, он стоит на месте
         if (this.x === -1 && this.y === -1) {
@@ -84,7 +84,7 @@ export class MCube {
                     step.do = 'toSide';
                 } else {
                     // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
-                    if (!__findCubeInMainMask(this.mainMask.arr, nextPos)) {
+                    if (!__findCubeInMainMask(this.movingCubes, nextPos)) {
                         const animation = directionToAnimation(this.direction);
                         // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
                         this.x = nextPos.x;

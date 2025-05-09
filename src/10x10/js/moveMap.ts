@@ -1,3 +1,5 @@
+import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
+
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 
@@ -14,11 +16,11 @@ export type Action = {
 };
 
 /**
- * класс для удобной работы с абстрактным классом MainMask
- * абстрагирует функции, связанные с анимацией от этого класса
- * сочетает в себе как функцию генерации хода, так и генерации анимации
- * предоставляет удобный интерфейс для доступа к методам построения хода
- * для основного приложения
+ * Класс для удобной работы с абстрактным классом MainMask.
+ * Абстрагирует функции, связанные с анимацией от этого класса.
+ * Сочетает в себе как функцию генерации хода, так и генерации анимации.
+ * Предоставляет удобный интерфейс для доступа к методам построения хода
+ * для основного приложения.
  */
 export class MoveMap {
     public readonly mainMask: MainMask;
@@ -76,17 +78,17 @@ export class MoveMap {
                 // последний шаг анимации, к которому добавляем продолжительность
                 // в случае совпадения со следующим шагом
                 const lastAction = actions[actions.length - 1];
-                // если это такой же шаг, как и предидущий
+                // если это такой же шаг, как и предыдущий
                 if (step.do === lastAction.action) {
-                    // иначе просто увеличиваем продолжительность предидущего
+                    // иначе просто увеличиваем продолжительность предыдущего
                     lastAction.duration++;
                 } else {
-                    // для каждого действия - по-своему, в том числе в зависимости от предидущих действий
+                    // для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
                     switch (step.do) {
                     case 'toSide':
                         lastAction.action = 'toSide';
                         lastAction.duration++;
-                        // для сортиравки попаданий в боковое поле
+                        // для сортировки попаданий в боковое поле
                         mCube.toSideTime = key1;
                         // заносим м-кубик в массив попадания в боковое поле
                         this.toSideActions.push(mCube);
@@ -150,55 +152,9 @@ export class MoveMap {
         });
     }
 
-    // когда ход прощитан, запускаем саму анимацию
-    public animate() {
+    // когда ход просчитан, запускаем саму анимацию
+    public async animate(): Promise<void> {
         const startCubes = this.startCubes;
-
-        // блокируем приложение от начала до конца анимации
-        // минус один - потому, что в последний такт обычно анимация чисто символическая
-        this.app.blockApp = true;
-        setTimeout(
-            (app) => {
-                app.blockApp = false;
-
-                // удаляем ненужные html-элементы
-                for (const key in this.beyondTheSide) {
-                    this.beyondTheSide[key].remove();
-                }
-
-                // разблокируем кнопку назад, если не случился переход на новый уровень
-                // иначе - блокируем
-                if (app.end === 'next_level') {
-                    app.undoButton._set({
-                        active: true,
-                        func: app.refresh,
-                        caption: app.word('refresh'),
-                    });
-                } else {
-                    app.undoButton._set({
-                        active: true,
-                        func: app.undo,
-                        caption: app.word('undo'),
-                    });
-                }
-
-                if (app.end !== null) {
-                    switch (app.end) {
-                    case 'next_level':
-                        app.nextLevel();
-                        break;
-                    case 'game_over':
-
-                        alert('game over');
-                        break;
-                    default:
-                        throw new Error('Неверное значение в app.end: ' + app.end);
-                    }
-                }
-            },
-            this.animationLength * ANIMATION_TIME - 1,
-            this.app
-        );
 
         animateCubesFromSideToMainField(startCubes, this.app.cubes.mask);
 
@@ -217,6 +173,46 @@ export class MoveMap {
             for (const key1 in actions) {
                 const action = actions[key1];
                 cube.addAnimate(action);
+            }
+        }
+
+        await promiseTimeout(this.animationLength * ANIMATION_TIME - 1);
+
+        const app = this.app;
+        // удаляем ненужные html-элементы
+        for (const key in this.beyondTheSide) {
+            this.beyondTheSide[key].remove();
+        }
+
+        // разблокируем кнопку назад, если не случился переход на новый уровень
+        // иначе - блокируем
+        if (app.end === 'next_level') {
+            app.undoButtonNew.setState('hidden');
+            app.undoButton._set({
+                active: true,
+                func: app.refresh,
+                caption: app.word('refresh'),
+            });
+        } else {
+            app.undoButtonNew.setState('active');
+            app.undoButton._set({
+                active: true,
+                func: app.undo,
+                caption: app.word('undo'),
+            });
+        }
+
+        if (app.end !== null) {
+            switch (app.end) {
+            case 'next_level':
+                app.nextLevel();
+                break;
+            case 'game_over':
+
+                alert('game over');
+                break;
+            default:
+                throw new Error('Неверное значение в app.end: ' + app.end);
             }
         }
     }

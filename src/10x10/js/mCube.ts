@@ -1,5 +1,3 @@
-import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
-
 import { Direction } from '../types/Direction';
 import { directionToAnimation } from '../utils/directionToAnimation';
 
@@ -27,7 +25,6 @@ export class MCube {
     public cube: Cube;
     public inGroup: MCube[] | null;
     public steps: AnimationStep[];
-    public rand: number;
     public toSideTime: number | undefined;
 
     public constructor(o: {
@@ -43,8 +40,6 @@ export class MCube {
         this.color = o.color;
         this.direction = o.direction;
         this.mainMask = o.mainMask;
-
-        this.rand = getRandomIntegerInARange(0, 1000000);
 
         // метка, означающая, что м-кубик вошел в группу по цветам(у него есть смежные кубики того же цвета)
         // если значение null - нету, или еще не найдено, если не null - адрес заданной группы

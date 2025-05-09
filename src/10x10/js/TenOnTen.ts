@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
@@ -23,7 +24,7 @@ import {
     CubeAddress, Cubes,
 } from './Cubes';
 import { MoveMap } from './MoveMap';
-import { UndoButton } from './UndoButton';
+import { UndoButton, UndoButtonNew } from './UndoButton';
 
 export type MaskFieldValue = {
     color: string;
@@ -34,16 +35,15 @@ export type CubesPositions = Record<Field, (MaskFieldValue | null)[][]>;
 
 export class TenOnTen {
     public readonly container: JQuery<HTMLElement>;
-    public blockApp: boolean;
     public level: number;
     public readonly cubes: Cubes;
 
     public moveMap: MoveMap | undefined;
     public end: string | null;
     public readonly undoButton: UndoButton;
-
+    public readonly undoButtonNew: UndoButtonNew;
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
-
+    public blockApp: boolean;
     private previousStepMap: CubesPositions | undefined;
 
     public constructor({ container }: { container: HTMLElement }) {
@@ -111,7 +111,18 @@ export class TenOnTen {
         this.generateMainCubes();
 
         // добавляем кнопку "назад"
-        this.undoButton = new UndoButton({ app: this });
+        this.undoButton = new UndoButton({
+            app: this,
+        });
+
+        const undoButtonContainer = this.container[0].querySelector('.panel.topRightPanel');
+        assertObject(undoButtonContainer);
+
+        this.undoButtonNew = new UndoButtonNew({
+            onClick: this.undo,
+            container: undoButtonContainer,
+        });
+        this.undoButtonNew.setState('hidden');
     }
 
     private createCube(params: CubeAddress & {
@@ -391,7 +402,7 @@ export class TenOnTen {
     }
 
     // делаем возврат хода
-    public undo() {
+    public readonly undo = () => {
     // блокируем приложение до тех пор, пока не закончим анимацию
         this.blockApp = true;
         setTimeout(
@@ -403,6 +414,7 @@ export class TenOnTen {
         );
 
         this.undoButton._set({ active: false });
+        this.undoButtonNew.setState('inactive');
 
         // массив, в котором описаны все различия между текущим и предыдущим состоянием
         const changed: {
@@ -542,9 +554,9 @@ export class TenOnTen {
                 }
             }
         }
-    }
+    };
 
-    public run(startCubes: Cube[]) {
+    public async run(startCubes: Cube[]) {
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
@@ -553,8 +565,15 @@ export class TenOnTen {
             cubes: this.cubes,
             app: this,
         });
+
+        // блокируем приложение от начала до конца анимации
+        // минус один - потому, что в последний такт обычно анимация чисто символическая
+        this.blockApp = true;
+
         // пошаговый запуск анимации
-        this.moveMap.animate();
+        this.moveMap.animate().then(() => {
+            this.blockApp = false;
+        });
 
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes

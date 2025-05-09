@@ -6,6 +6,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { Direction } from '../types/Direction';
+import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
 import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
@@ -291,12 +292,12 @@ export class Cube {
             this.$el.transition(trans0).transition(trans1).transition(trans2);
         };
 
+        /*
+        * движение в боковую панель без разрывов анимации,
+        * чтобы сохранить максимальную плавность анимации, делать
+        * одним перемещением по возможности
+        */
         const slideToSide = (prop: 'left' | 'top', sign: '+' | '-') => {
-            /*
-       * движение в боковую панель без разрывов анимации,
-       * чтобы сохранить максимальную плавность анимации, делать
-       * одним перемещением по возможности
-       * */
             dur = duration;
             // задаем нужный изинг
             const easing = `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
@@ -310,7 +311,12 @@ export class Cube {
             // чтобы остальные кубики в этой линии пододвинулись
             setTimeout(
                 () => {
-                    this.app.cubes.animateInLine(this);
+                    animateMovingCubesFromMainFieldToSide({
+                        cube: this,
+                        toSideActions: this.app.moveMap!.toSideActions,
+                        beyondTheSide: this.app.moveMap!.beyondTheSide,
+                        cubesMask: this.app.cubes.cubesMask,
+                    });
                 },
                 ANIMATION_TIME * (dur - 1)
             );

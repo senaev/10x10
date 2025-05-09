@@ -1,18 +1,19 @@
 import { MovingCube } from '../js/MovingCube';
 
+import { makeOneStepForOneCube } from './makeOneStepForOneCube';
 import { searchAdjacentCubes } from './searchAdjacentCubes';
 
 /**
-     * Один ход для всех кубиков на доске
-     */
-export function generateMoveStep({ movingCubes }: { movingCubes: MovingCube[] }) {
+ * Один ход для всех кубиков на доске
+ */
+export function generateMoveStep(movingCubes: MovingCube[]) {
     // Индикатор конца движений, если что-то происходит во время шага анимации -
     // Индикатор конца движений, если что-то происходит во время шага анимации -
     // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
     // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
     let somethingHappened = false;
     for (const key in movingCubes) {
-        const oneStep = movingCubes[key].oneStep();
+        const oneStep = makeOneStepForOneCube(movingCubes[key], movingCubes);
         if (oneStep.do !== null) {
             somethingHappened = true;
         }
@@ -20,7 +21,7 @@ export function generateMoveStep({ movingCubes }: { movingCubes: MovingCube[] })
 
     // Проверяем, произошло что-то или нет в конце каждого хода
     if (somethingHappened) {
-        generateMoveStep({ movingCubes });
+        generateMoveStep(movingCubes);
         return;
     }
 
@@ -50,5 +51,5 @@ export function generateMoveStep({ movingCubes }: { movingCubes: MovingCube[] })
     });
 
     // продолжаем ход
-    generateMoveStep({ movingCubes });
+    generateMoveStep(movingCubes);
 }

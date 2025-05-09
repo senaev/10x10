@@ -26,7 +26,6 @@ export function __findCubeInMainMask(arr: MovingCube[], o: { x: number; y: numbe
  * затем пошагово - обращение к каждому м-кубику, методом oneStep, в котором автоматически меняются
  * параметры состояния и создаётся объект из последовательности шагов для построения анимации
  */
-
 export function generateMainFieldMoves({
     cubes, startCubes,
 }: {
@@ -36,9 +35,6 @@ export function generateMainFieldMoves({
     // Основной массив со значениями
     // Сюда будут попадать м-кубики, участвующие в анимации
     const movingCubes: MovingCube[] = [];
-
-    let startMCubeX;
-    let startMCubeY;
 
     // создаем массив из всех кубиков, которые есть на доске
     cubes._mainEach((cube) => {
@@ -59,6 +55,8 @@ export function generateMainFieldMoves({
 
         startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
+        let startMCubeX;
+        let startMCubeY;
         if (startCube.field === 'top' || startCube.field === 'bottom') {
             startMCubeX = startCube.x;
             if (startCube.field === 'top') {
@@ -108,7 +106,7 @@ export function generateMainFieldMoves({
         return a.cube.toMineOrder! - b.cube.toMineOrder!;
     });
 
-    generateMoveStep({ movingCubes });
+    generateMoveStep(movingCubes);
 
     return movingCubes;
 }

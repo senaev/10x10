@@ -6,7 +6,7 @@ import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './Cube';
 import { __findCubeInMainMask } from './MainMask';
-import { MoveMap } from './MoveMap';
+import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
 export type CubesFieldOptional = Record<number, Record<number, Cube | null>>;
@@ -29,7 +29,7 @@ export type CubesMask = {
 
 export class Cubes {
     public readonly _app: TenOnTen;
-    public mask: CubesMask;
+    public cubesMask: CubesMask;
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
@@ -47,7 +47,7 @@ export class Cubes {
             }
         }
 
-        this.mask = {
+        this.cubesMask = {
             main: cubesLocal.main!,
             top: cubesLocal.top as CubesFieldRequired,
             right: cubesLocal.right as CubesFieldRequired,
@@ -58,12 +58,12 @@ export class Cubes {
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public _add(cube: Cube) {
-        this.mask[cube.field][cube.x][cube.y] = cube;
+        this.cubesMask[cube.field][cube.x][cube.y] = cube;
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
-    public _get(o: CubeAddress) {
-        return getCubeByAddress(this.mask, o);
+    public _get(address: CubeAddress) {
+        return getCubeByAddress(this.cubesMask, address);
     }
 
     // устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -72,9 +72,9 @@ export class Cubes {
             throw new Error(`cubes._set не получил параметры: o: ${o} value: ${value}`);
         }
 
-        this.mask[o.field][o.x][o.y] = value;
+        this.cubesMask[o.field][o.x][o.y] = value;
 
-        return this.mask[o.field][o.x][o.y];
+        return this.cubesMask[o.field][o.x][o.y];
     }
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
@@ -86,7 +86,7 @@ export class Cubes {
 
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    func(this.mask[field][x][y]!, field, x, y);
+                    func(this.cubesMask[field][x][y]!, field, x, y);
                 }
             }
         });
@@ -99,7 +99,7 @@ export class Cubes {
         i = 0;
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = this.mask.main[x][y];
+                const cube = this.cubesMask.main[x][y];
                 if (cube !== null) {
                     func(cube, 'main', x, y, i);
                     i++;
@@ -144,9 +144,15 @@ export class Cubes {
         this._app.moveMap!.beyondTheSide!.push(removedCube);
     }
 
-    public _mergeMoveMap(moveMap: MoveMap) {
-        const arr = moveMap.movingCubes;
-        const startCubes = moveMap.startCubes;
+    public _mergeMoveMap({
+        movingCubes,
+        startCubes,
+        toSideActions,
+    }: {
+        movingCubes: MovingCube[];
+        startCubes: Cube[];
+        toSideActions: MovingCube[];
+    }) {
 
         // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
         // могут меняться только при вхождении их в боковую панель
@@ -162,169 +168,78 @@ export class Cubes {
         // меняем его свойства direction, field, x, y в соответствии со значениями
         // м-кубика и стороной поля, также перемещаем все кубики в линии, в которую вошел
         // данный кубик
-        for (const key in arr) {
-            const mCube = arr[key];
-            if (mCube.x > -1 && mCube.x < 10 && mCube.y > -1 && mCube.y < 10) {
+        movingCubes.forEach((movingCube) => {
+            if (movingCube.x > -1 && movingCube.x < 10 && movingCube.y > -1 && movingCube.y < 10) {
                 // кубик просто перемещается и не входит не в какую панель
                 // устанавливаем кубик в новую клетку
                 this._set({
                     field: 'main',
-                    x: mCube.x,
-                    y: mCube.y,
-                }, mCube.cube);
+                    x: movingCube.x,
+                    y: movingCube.y,
+                }, movingCube.cube);
                 // при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
                 // обнуляем эту клетку
                 // console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
 
                 if (
-                    mCube.cube.x < 0 || mCube.cube.x > 9 || mCube.cube.y < 0 || mCube.cube.y > 9
+                    movingCube.cube.x < 0 || movingCube.cube.x > 9 || movingCube.cube.y < 0 || movingCube.cube.y > 9
                 ) {
                     // eslint-disable-next-line no-console
-                    console.log(mCube, mCube.cube.x, mCube.cube.y, mCube.x, mCube.y);
+                    console.log(movingCube, movingCube.cube.x, movingCube.cube.y, movingCube.x, movingCube.y);
                 }
 
                 if (
-                    !__findCubeInMainMask(mCube.movingCubes, {
-                        x: mCube.cube.x,
-                        y: mCube.cube.y,
+                    !__findCubeInMainMask(movingCubes, {
+                        x: movingCube.cube.x,
+                        y: movingCube.cube.y,
                     })
                 ) {
                     this._set({
                         field: 'main',
-                        x: mCube.cube.x,
-                        y: mCube.cube.y,
+                        x: movingCube.cube.x,
+                        y: movingCube.cube.y,
                     }, null);
                 }
 
-                mCube.cube.x = mCube.x;
-                mCube.cube.y = mCube.y;
-            } else if (mCube.x === -1 && mCube.y === -1) {
+                movingCube.cube.x = movingCube.x;
+                movingCube.cube.y = movingCube.y;
+            } else if (movingCube.x === -1 && movingCube.y === -1) {
                 // если кубик взорвался во время хода, убираем его с доски
 
                 if (
                     this._get({
                         field: 'main',
-                        x: mCube.cube.x,
-                        y: mCube.cube.y,
-                    }) === mCube.cube
+                        x: movingCube.cube.x,
+                        y: movingCube.cube.y,
+                    }) === movingCube.cube
                 ) {
                     this._set({
                         field: 'main',
-                        x: mCube.cube.x,
-                        y: mCube.cube.y,
+                        x: movingCube.cube.x,
+                        y: movingCube.cube.y,
                     }, null);
                 }
             }
-        }
+        });
+
         // убираем в боковые поля кубики, которые ушли туда во время хода
-        for (const key in moveMap.toSideActions) {
-            const mCube = moveMap.toSideActions[key];
+        toSideActions.forEach((movingCube) => {
             // если клетку, с которой сошел кубик, ещё не занял другой кубик
             // обнуляем эту клетку
-            if (!__findCubeInMainMask(mCube.movingCubes, {
-                x: mCube.cube.x,
-                y: mCube.cube.y,
+            if (!__findCubeInMainMask(movingCubes, {
+                x: movingCube.cube.x,
+                y: movingCube.cube.y,
             })) {
                 this._set({
                     field: 'main',
-                    x: mCube.cube.x,
-                    y: mCube.cube.y,
+                    x: movingCube.cube.x,
+                    y: movingCube.cube.y,
                 }, null);
             }
 
             // пушим кубик в коллекцию боковой линии
-            this._pushInLine(mCube.cube);
-        }
-    }
-
-    // массовая анимация для кубиков, вспомогательная
-    // функция для удобства анимации сразу нескольких кубиков
-    public animateInLine(cube: Cube) {
-        // получаем линию кубика
-        const line = getCubeAddressInSideFieldInOrderFromMain({
-            x: cube.x,
-            y: cube.y,
-            field: cube.field,
-        });
-
-        // массив, в который по порядку попадут все кубики,
-        // которые войдут в эту же линию того же поля во время хода
-        // 0 - который входит первым
-        const allCubesToSideInThisLine = [];
-
-        // все кубики, которые попадают во время хода в боковую панель
-        const toSideActions = this._app.moveMap!.toSideActions;
-
-        // для идентификации линии
-        let prop: 'x' | 'y' = 'y';
-        if (cube.field === 'top' || cube.field === 'bottom') {
-            prop = 'x';
-        }
-        // позиция кубика среди тех, которые во время данного хода
-        // попадают в данную линию данного поля 0-дальний от mainField
-        let posInSide;
-        for (const key in toSideActions) {
-            const c = toSideActions[key].cube;
-            if (c.field === cube.field && c[prop] === cube[prop]) {
-                if (c === cube) {
-                    posInSide = allCubesToSideInThisLine.length;
-                }
-                allCubesToSideInThisLine.push(c);
-            }
-        }
-
-        // массив кубиков, которые удалились за пределами этой линии во время хода
-        // 0 - первый удалённый(самый дальний)
-        const removeBS = [];
-        for (const key in this._app.moveMap!.beyondTheSide!) {
-            const c = this._app.moveMap!.beyondTheSide![key];
-            if (c.field === cube.field && c[prop] === cube[prop]) {
-                removeBS.push(c);
-            }
-        }
-
-        // вычисляем, какие кубики будем двигать при вставке в линию
-        const pos = BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
-        let c1: Cube;
-        let c2: Cube;
-        let cr: Cube;
-
-        // смысл этих условий в том, что если кубик, который надо анимировать,
-        // еще присутствует в линии, мы берем этот кубик оттуда, если же
-        // он уже удален из линии, но его нужно анимировать, мы берем его
-        // из массива удаленных кубиков этой линии
-        if (pos - 2 > -1) {
-            cr = this._get(line[pos - 2])!;
-        } else {
-            cr = removeBS[removeBS.length + (pos - 2)];
-        }
-
-        if (pos > -1) {
-            c1 = this._get(line[pos])!;
-        } else {
-            c1 = removeBS[removeBS.length + pos];
-        }
-
-        if (pos - 1 > -1) {
-            c2 = this._get(line[pos - 1])!;
-        } else {
-            c2 = removeBS[removeBS.length + (pos - 1)];
-        }
-
-        // третий кубик пропадает
-        cr.animate({
-            action: 'disappearanceInSide',
-            duration: 1,
-        });
-
-        // остальные два сдвигаются ближе к линии
-        c2.animate({
-            action: 'forth',
-            duration: 1,
-        });
-        c1.animate({
-            action: 'forth',
-            duration: 1,
+            this._pushInLine(movingCube.cube);
         });
     }
+
 };

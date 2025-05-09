@@ -349,7 +349,7 @@ export class TenOnTen {
         // пошаговый запуск анимации
         this.moveMap.animate({
             startCubes,
-            cubesMask: this.cubes.mask,
+            cubesMask: this.cubes.cubesMask,
             animationsScript: this.moveMap.animationsScript,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
@@ -440,11 +440,11 @@ export class TenOnTen {
         // если по боковому
         // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
-        const startCubes = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.mask, address);
+        const startCubes = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.cubesMask, address);
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
-            getCubeByAddress(this.cubes.mask, address)!.performIHavePawsAnimation();
+            getCubeByAddress(this.cubes.cubesMask, address)!.performIHavePawsAnimation();
             return;
         }
 
@@ -457,7 +457,7 @@ export class TenOnTen {
             return;
         }
 
-        const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.mask, address);
+        const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain(this.cubes.cubesMask, address);
 
         if (typeof allToFirstInLine === 'string') {
             return;
@@ -491,7 +491,7 @@ export class TenOnTen {
                     nullCells = [];
                     for (let x = 0; x < BOARD_SIZE; x++) {
                         for (let y = 0; y < BOARD_SIZE; y++) {
-                            if (this.cubes.mask.main[x][y] === null) {
+                            if (this.cubes.cubesMask.main[x][y] === null) {
                                 nullCells.push({
                                     x,
                                     y,
@@ -587,7 +587,7 @@ export class TenOnTen {
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal.mask.main[x][y];
+                const cube = cubesLocal.cubesMask.main[x][y];
 
                 // если на поле еще остались кубики, уровень не завершен
                 if (cube !== null) {

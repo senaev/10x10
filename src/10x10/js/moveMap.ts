@@ -121,8 +121,6 @@ export class MoveMap {
                 actions.shift();
             }
 
-            // console.log(actions);
-
             // подтягиваем задержки
             if (actions.length !== 0) {
                 // итоговый массив, в котором продолжительность анимаций

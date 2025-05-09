@@ -26,92 +26,89 @@ export function __findCubeInMainMask(arr: MovingCube[], o: { x: number; y: numbe
  * затем пошагово - обращение к каждому м-кубику, методом oneStep, в котором автоматически меняются
  * параметры состояния и создаётся объект из последовательности шагов для построения анимации
  */
-export class MainMask {
+
+export function generateMainFieldMoves({
+    cubes, startCubes,
+}: {
+    cubes: Cubes;
+    startCubes: Cube[];
+}): MovingCube[] {
     // Основной массив со значениями
     // Сюда будут попадать м-кубики, участвующие в анимации
-    public readonly movingCubes: MovingCube[] = [];
+    const movingCubes: MovingCube[] = [];
 
-    public constructor(params: {
-        cubes: Cubes;
-        startCubes: Cube[];
-    }) {
-        const {
-            cubes, startCubes,
-        } = params;
+    let startMCubeX;
+    let startMCubeY;
 
-        // вызываем инициализацию
+    // создаем массив из всех кубиков, которые есть на доске
+    cubes._mainEach((cube) => {
+        movingCubes.push(new MovingCube({
+            x: cube.x,
+            y: cube.y,
+            color: cube.color,
+            direction: cube.direction,
+            movingCubes,
+            cube,
+        }));
+    });
 
-        let startMCubeX;
-        let startMCubeY;
+    // добавляем в маску кубик, с которого начинаем анимацию
+    const startMCubes: MovingCube[] = [];
+    for (const key in startCubes) {
+        const startCube = startCubes[key];
 
-        // создаем массив из всех кубиков, которые есть на доске
-        cubes._mainEach((cube) => {
-            this.movingCubes.push(new MovingCube({
-                x: cube.x,
-                y: cube.y,
-                color: cube.color,
-                direction: cube.direction,
-                movingCubes: this.movingCubes,
-                cube,
-            }));
-        });
+        startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
-        // добавляем в маску кубик, с которого начинаем анимацию
-        const startMCubes: MovingCube[] = [];
-        for (const key in startCubes) {
-            const startCube = startCubes[key];
-
-            startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
-
-            if (startCube.field === 'top' || startCube.field === 'bottom') {
-                startMCubeX = startCube.x;
-                if (startCube.field === 'top') {
-                    startMCubeY = startCubes.length - Number(key) - 1;
-                } else {
-                    startMCubeY = BOARD_SIZE - startCubes.length + parseInt(key);
-                }
+        if (startCube.field === 'top' || startCube.field === 'bottom') {
+            startMCubeX = startCube.x;
+            if (startCube.field === 'top') {
+                startMCubeY = startCubes.length - Number(key) - 1;
             } else {
-                if (startCube.field === 'left') {
-                    startMCubeX = startCubes.length - Number(key) - 1;
-                } else {
-                    startMCubeX = BOARD_SIZE - startCubes.length + parseInt(key);
-                }
-                startMCubeY = startCube.y;
+                startMCubeY = BOARD_SIZE - startCubes.length + parseInt(key);
             }
-
-            const startMCube = new MovingCube({
-                x: startMCubeX,
-                y: startMCubeY,
-                color: startCube.color,
-                direction: startCube.direction,
-                movingCubes: this.movingCubes,
-                cube: startCube,
-            });
-            this.movingCubes.push(startMCube);
-            startMCubes.push(startMCube);
+        } else {
+            if (startCube.field === 'left') {
+                startMCubeX = startCubes.length - Number(key) - 1;
+            } else {
+                startMCubeX = BOARD_SIZE - startCubes.length + parseInt(key);
+            }
+            startMCubeY = startCube.y;
         }
 
-        // добавим шаги анимации для выплывающих из боковой линии кубиков
-        for (const _step in startMCubes) {
-            this.movingCubes.forEach((mCube) => {
-                if (startMCubes.indexOf(mCube) === -1) {
-                    mCube.steps.push({ do: null });
-                } else {
-                    const { direction } = mCube;
-
-                    assertNonEmptyString(direction);
-
-                    mCube.steps.push({
-                        do: directionToAnimation(direction),
-                    });
-                }
-            });
-        }
-
-        this.movingCubes.sort(function (a, b) {
-            return a.cube.toMineOrder! - b.cube.toMineOrder!;
+        const startMCube = new MovingCube({
+            x: startMCubeX,
+            y: startMCubeY,
+            color: startCube.color,
+            direction: startCube.direction,
+            movingCubes,
+            cube: startCube,
         });
-
-        generateMoveStep({ movingCubes: this.movingCubes });
+        movingCubes.push(startMCube);
+        startMCubes.push(startMCube);
     }
+
+    // добавим шаги анимации для выплывающих из боковой линии кубиков
+    for (const _step in startMCubes) {
+        movingCubes.forEach((mCube) => {
+            if (startMCubes.indexOf(mCube) === -1) {
+                mCube.steps.push({ do: null });
+            } else {
+                const { direction } = mCube;
+
+                assertNonEmptyString(direction);
+
+                mCube.steps.push({
+                    do: directionToAnimation(direction),
+                });
+            }
+        });
+    }
+
+    movingCubes.sort(function (a, b) {
+        return a.cube.toMineOrder! - b.cube.toMineOrder!;
+    });
+
+    generateMoveStep({ movingCubes });
+
+    return movingCubes;
 }

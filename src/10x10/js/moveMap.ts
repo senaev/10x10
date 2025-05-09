@@ -5,7 +5,7 @@ import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideTo
 
 import { Cube } from './Cube';
 import { Cubes, CubesMask } from './Cubes';
-import { MainMask } from './MainMask';
+import { generateMainFieldMoves } from './MainMask';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
@@ -28,7 +28,7 @@ export type CubeAnimationStep = {
  * для основного приложения.
  */
 export class MoveMap {
-    public readonly mainMask: MainMask;
+    public readonly movingCubes: MovingCube[];
     public readonly beyondTheSide: Cube[] = [];
     public readonly startCubes: Cube[];
     public readonly toSideActions: MovingCube[] = [];
@@ -42,7 +42,7 @@ export class MoveMap {
         this.startCubes = params.startCubes;
 
         // создаем класс маски
-        this.mainMask = new MainMask({
+        this.movingCubes = generateMainFieldMoves({
             startCubes: this.startCubes,
             cubes: this.cubes,
         });
@@ -53,13 +53,13 @@ export class MoveMap {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        this.animationLength = this.mainMask.movingCubes[0].steps.length;
+        this.animationLength = this.movingCubes[0].steps.length;
 
         // console.log("////inMainActions:", this.mainMask.arr);
 
         // проходимся в цикле по всем кубикам
-        for (const key in this.mainMask.movingCubes) {
-            const mCube = this.mainMask.movingCubes[key];
+        for (const key in this.movingCubes) {
+            const mCube = this.movingCubes[key];
             const steps = mCube.steps;
 
             // массив с действиями одного кубика
@@ -141,7 +141,7 @@ export class MoveMap {
                 }
                 this.animationsScript.push({
                     animations: nullToDelayActions,
-                    cube: this.mainMask.movingCubes[key].cube,
+                    cube: this.movingCubes[key].cube,
                 });
             }
         }

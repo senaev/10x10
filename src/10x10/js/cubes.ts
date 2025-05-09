@@ -145,7 +145,7 @@ export class Cubes {
     }
 
     public _mergeMoveMap(moveMap: MoveMap) {
-        const arr = moveMap.mainMask.movingCubes;
+        const arr = moveMap.movingCubes;
         const startCubes = moveMap.startCubes;
 
         // извлекаем startCube из боковой панели, все дальнейшие значения field кубиков

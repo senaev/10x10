@@ -1,4 +1,7 @@
+import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
+
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { directionToAnimation } from '../utils/directionToAnimation';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 
 import { Cube } from './Cube';
@@ -42,7 +45,7 @@ export class MainMask {
             }));
         });
         // добавляем в маску кубик, с которого начинаем анимацию
-        const startMCubes = [];
+        const startMCubes: MCube[] = [];
         for (const key in startCubes) {
             const startCube = startCubes[key];
 
@@ -78,15 +81,19 @@ export class MainMask {
 
         // добавим шаги анимации для выплывающих из боковой линии кубиков
         for (const _step in startMCubes) {
-            for (const key in this.arr) {
-                if (startMCubes.indexOf(this.arr[key]) === -1) {
-                    this.arr[key].steps.push({ do: null });
+            this.arr.forEach((mCube) => {
+                if (startMCubes.indexOf(mCube) === -1) {
+                    mCube.steps.push({ do: null });
                 } else {
-                    this.arr[key].steps.push({
-                        do: 's' + this.arr[key].direction!.charAt(0),
+                    const { direction } = mCube;
+
+                    assertNonEmptyString(direction);
+
+                    mCube.steps.push({
+                        do: directionToAnimation(direction),
                     });
                 }
-            }
+            });
         }
 
         this.arr.sort(function (a, b) {

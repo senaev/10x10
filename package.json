@@ -42,7 +42,7 @@
     "jquery.transit": "^0.9.12",
     "lefthook": "^1.11.12",
     "postcss-loader": "^8.1.1",
-    "senaev-utils": "github:senaev/senaev-utils#5153bdb80da0e2451d88037f46e45818bceb9320",
+    "senaev-utils": "github:senaev/senaev-utils#d65974255de9669d83045fad343a656c6d8857c1",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",

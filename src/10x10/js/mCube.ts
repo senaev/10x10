@@ -1,12 +1,15 @@
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
 import { Direction } from '../types/Direction';
+import { directionToAnimation } from '../utils/directionToAnimation';
 
 import { Cube } from './Cube';
 import { MainMask } from './MainMask';
 
-export type Step = {
-    do: string | null;
+export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
+
+export type AnimationStep = {
+    do: 'toSide' | MoveAnimation | 'boom' | null;
 };
 
 /**
@@ -23,7 +26,7 @@ export class MCube {
     public mainMask: MainMask;
     public cube: Cube;
     public inGroup: MCube[] | null;
-    public steps: Step[];
+    public steps: AnimationStep[];
     public rand: number;
     public toSideTime: number | undefined;
 
@@ -56,7 +59,7 @@ export class MCube {
 
     // один шаг для м-кубика, возвращает информацию о шаге для анимации
     public oneStep() {
-        const step: Step = { do: null };
+        const step: AnimationStep = { do: null };
         // если м-кубик взорван, он стоит на месте
         if (this.x === -1 && this.y === -1) {
             step.do = null;
@@ -92,10 +95,11 @@ export class MCube {
                 } else {
                     // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
                     if (this.mainMask._get(nextPos) === null) {
+                        const animation = directionToAnimation(this.direction);
                         // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
                         this.x = nextPos.x;
                         this.y = nextPos.y;
-                        step.do = 's' + this.direction.charAt(0);
+                        step.do = animation;
                     } else {
                         // если клетка занята - кубик стоит на месте
                         step.do = null;

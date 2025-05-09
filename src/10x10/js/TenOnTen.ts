@@ -45,11 +45,11 @@ export class TenOnTen {
     public moveMap: MoveMap | undefined;
     public end: string | null;
 
-    public readonly undoButton: UndoButton;
-    public readonly refreshButton: RefreshButton;
+    private readonly undoButton: UndoButton;
+    private readonly refreshButton: RefreshButton;
 
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
-    public blockApp: boolean;
+    private blockApp: boolean;
     private previousStepMap: CubesPositions | undefined;
 
     public constructor({ container }: { container: HTMLElement }) {
@@ -132,25 +132,6 @@ export class TenOnTen {
         });
     }
 
-    private createCube(params: CubeAddress & {
-        appearWithAnimation: boolean;
-        color: string;
-        direction: Direction | null;
-        toMineOrder: number | null;
-    }) {
-        const cube = new Cube({
-            ...params,
-            app: this,
-            container: this.container,
-            onClick: this.handleCubeClick,
-            onHover: this.handleHover,
-        });
-
-        this.cubes._add(cube);
-
-        return cube;
-    }
-
     // даем возможность пользователю при переходе на новый уровень выбрать из случайных
     // комбинаций начальную
     public refresh = () => {
@@ -184,40 +165,6 @@ export class TenOnTen {
         );
     };
 
-    // генерируем маску для предыдущего хода
-    private generateMask(): CubesPositions {
-        const mask: Partial<CubesPositions> = {};
-        const cubesLocal = this.cubes;
-
-        for (const field of FIELDS) {
-            const fieldValue: (MaskFieldValue | null)[][] = [];
-            mask[field] = fieldValue;
-            for (let x = 0; x < BOARD_SIZE; x++) {
-                fieldValue[x] = [];
-                for (let y = 0; y < BOARD_SIZE; y++) {
-                    const c = cubesLocal._get({
-                        field,
-                        x,
-                        y,
-                    });
-
-                    if (c === null) {
-                        fieldValue[x][y] = null;
-                    } else {
-                        const resultValue: MaskFieldValue = {
-                            color: c.color,
-                            direction: c.direction,
-                            toMineOrder: c.toMineOrder,
-                        };
-                        fieldValue[x][y] = resultValue;
-                    }
-                }
-            }
-        }
-
-        return mask as CubesPositions;
-    }
-
     // переводим игру на следующий уровень
     public nextLevel() {
         const colorsCount = getLevelColorsCount(this.level);
@@ -228,184 +175,9 @@ export class TenOnTen {
         this.generateMainCubes();
     }
 
-    // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
-    private plusColor() {
-        const colorsCount = getLevelColorsCount(this.level);
-        const newColor = CUBE_COLORS[colorsCount - 1];
-        this.cubes._sideEach(function (cube) {
-            if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
-                cube.change({
-                    color: newColor,
-                });
-            }
-        });
-    }
-
     // Возвращаем слово в необходимом переводе
     public word(w: keyof typeof I18N_DICTIONARY) {
         return I18N_DICTIONARY[w][this.lang];
-    }
-
-    // генерируем кубики на главном поле
-    private generateMainCubes() {
-        const firstCubesPosition = getLevelCubesPositions(this.level);
-        let nullCells: { x: number; y: number }[] = [];
-
-        for (
-            let number = 0, len = getLevelCubesCount(this.level);
-            number < len;
-            number++
-        ) {
-            let cell: { x: number; y: number } | undefined;
-            let fPos = null;
-
-            if (firstCubesPosition[number] !== undefined) {
-                fPos = firstCubesPosition[number];
-            }
-
-            if (fPos === null) {
-                // создаем массив из свободных ячеек, перемешиваем его
-                if (nullCells === undefined) {
-                    nullCells = [];
-                    for (let x = 0; x < BOARD_SIZE; x++) {
-                        for (let y = 0; y < BOARD_SIZE; y++) {
-                            if (this.cubes.mask.main[x][y] === null) {
-                                nullCells.push({
-                                    x,
-                                    y,
-                                });
-                            }
-                        }
-                    }
-
-                    shuffleArray(nullCells);
-                }
-
-                // шанс попадания кубика в крайнее поле - чем больше, тем ниже
-                const chance = 2;
-                for (let key = 0; key < chance; key++) {
-                    cell = nullCells.shift()!;
-                    if (
-                        cell.x === 0 ||
-            cell.y === 0 ||
-            cell.x === BOARD_SIZE - 1 ||
-            cell.y === BOARD_SIZE - 1
-                    ) {
-                        nullCells.push(cell);
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                cell = {
-                    x: fPos[0],
-                    y: fPos[1],
-                };
-            }
-
-            // выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
-            const colorsCount = getLevelColorsCount(this.level);
-
-            // цвета, которые есть в смежных кубиках
-            const appearanceColors = [];
-            for (let key = 0; key < 4; key++) {
-                const address: CubeAddress = {
-                    x: cell!.x,
-                    y: cell!.y,
-                    field: 'main',
-                };
-
-                const prop: 'x' | 'y' = key % 2 == 0 ? 'x' : 'y';
-                address[prop] = key < 2 ? address[prop] + 1 : address[prop] - 1;
-
-                if (
-                    address.x > -1 &&
-          address.y > -1 &&
-          address.x < 10 &&
-          address.y < 10
-                ) {
-                    const c = this.cubes._get(address);
-                    if (c !== null) {
-                        appearanceColors.push(c.color);
-                    }
-                }
-            }
-
-            // цвета, которых нету в смежных
-            const noAppearanceColors = [];
-            for (let key = 0; key < colorsCount; key++) {
-                if (appearanceColors.indexOf(CUBE_COLORS[key]) === -1) {
-                    noAppearanceColors.push(CUBE_COLORS[key]);
-                }
-            }
-
-            // получаем итоговый цвет
-            const color = noAppearanceColors[getRandomIntegerInARange(0, noAppearanceColors.length - 1)];
-
-            this.createCube({
-                x: cell!.x,
-                y: cell!.y,
-                field: 'main',
-                color,
-                appearWithAnimation: true,
-                direction: null,
-                toMineOrder: null,
-            });
-        }
-    }
-
-    // проверяем в конце хода на конец уровня или конец игры
-    private checkStepEnd() {
-    /**
-     * если нет - заканчиваем ход
-     * и проверяем, это просто ход или пользователь проиграл или
-     * пользователь перешел на новый уровень
-     * записываем в this.end:
-     * null - просто ход,
-     * game_over - конец игры,
-     * next_level - конец уровня, переход на следующий
-     */
-        const cubesLocal = this.cubes;
-        let game_over = true;
-        let next_level = true;
-
-        for (let x = 0; x < BOARD_SIZE; x++) {
-            for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal.mask.main[x][y];
-
-                // если на поле еще остались кубики, уровень не завершен
-                if (cube !== null) {
-                    next_level = false;
-                }
-
-                // если все крайние панели заполнены - конец игры,
-                // если хоть один пустой - игра продолжается
-                if (
-                    x === 0 ||
-          y === 0 ||
-          x === BOARD_SIZE - 1 ||
-          y === BOARD_SIZE - 1
-                ) {
-                    if (cube === null) {
-                        game_over = false;
-                    }
-                }
-            }
-            if (!next_level && !game_over) {
-                break;
-            }
-        }
-
-        if (next_level) {
-            // меняем датчик на следующий уровень
-            this.end = 'next_level';
-        } else if (game_over) {
-            // меняем датчик на конец игры
-            this.end = 'game_over';
-        } else {
-            // иначе - ничего не делаем
-            this.end = null;
-        }
     }
 
     // делаем возврат хода
@@ -577,7 +349,7 @@ export class TenOnTen {
         this.blockApp = true;
 
         // пошаговый запуск анимации
-        this.moveMap.animate().then(() => {
+        this.moveMap.animate(this.cubes.mask).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
             if (this.end === 'next_level') {
@@ -693,4 +465,233 @@ export class TenOnTen {
             cube.setRowVisibility(isHovered);
         }
     };
+
+    // генерируем кубики на главном поле
+    private generateMainCubes() {
+        const firstCubesPosition = getLevelCubesPositions(this.level);
+        let nullCells: { x: number; y: number }[] = [];
+
+        for (
+            let number = 0, len = getLevelCubesCount(this.level);
+            number < len;
+            number++
+        ) {
+            let cell: { x: number; y: number } | undefined;
+            let fPos = null;
+
+            if (firstCubesPosition[number] !== undefined) {
+                fPos = firstCubesPosition[number];
+            }
+
+            if (fPos === null) {
+                // создаем массив из свободных ячеек, перемешиваем его
+                if (nullCells === undefined) {
+                    nullCells = [];
+                    for (let x = 0; x < BOARD_SIZE; x++) {
+                        for (let y = 0; y < BOARD_SIZE; y++) {
+                            if (this.cubes.mask.main[x][y] === null) {
+                                nullCells.push({
+                                    x,
+                                    y,
+                                });
+                            }
+                        }
+                    }
+
+                    shuffleArray(nullCells);
+                }
+
+                // шанс попадания кубика в крайнее поле - чем больше, тем ниже
+                const chance = 2;
+                for (let key = 0; key < chance; key++) {
+                    cell = nullCells.shift()!;
+                    if (
+                        cell.x === 0 ||
+            cell.y === 0 ||
+            cell.x === BOARD_SIZE - 1 ||
+            cell.y === BOARD_SIZE - 1
+                    ) {
+                        nullCells.push(cell);
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                cell = {
+                    x: fPos[0],
+                    y: fPos[1],
+                };
+            }
+
+            // выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
+            const colorsCount = getLevelColorsCount(this.level);
+
+            // цвета, которые есть в смежных кубиках
+            const appearanceColors = [];
+            for (let key = 0; key < 4; key++) {
+                const address: CubeAddress = {
+                    x: cell!.x,
+                    y: cell!.y,
+                    field: 'main',
+                };
+
+                const prop: 'x' | 'y' = key % 2 == 0 ? 'x' : 'y';
+                address[prop] = key < 2 ? address[prop] + 1 : address[prop] - 1;
+
+                if (
+                    address.x > -1 &&
+          address.y > -1 &&
+          address.x < 10 &&
+          address.y < 10
+                ) {
+                    const c = this.cubes._get(address);
+                    if (c !== null) {
+                        appearanceColors.push(c.color);
+                    }
+                }
+            }
+
+            // цвета, которых нету в смежных
+            const noAppearanceColors = [];
+            for (let key = 0; key < colorsCount; key++) {
+                if (appearanceColors.indexOf(CUBE_COLORS[key]) === -1) {
+                    noAppearanceColors.push(CUBE_COLORS[key]);
+                }
+            }
+
+            // получаем итоговый цвет
+            const color = noAppearanceColors[getRandomIntegerInARange(0, noAppearanceColors.length - 1)];
+
+            this.createCube({
+                x: cell!.x,
+                y: cell!.y,
+                field: 'main',
+                color,
+                appearWithAnimation: true,
+                direction: null,
+                toMineOrder: null,
+            });
+        }
+    }
+
+    // проверяем в конце хода на конец уровня или конец игры
+    private checkStepEnd() {
+    /**
+     * если нет - заканчиваем ход
+     * и проверяем, это просто ход или пользователь проиграл или
+     * пользователь перешел на новый уровень
+     * записываем в this.end:
+     * null - просто ход,
+     * game_over - конец игры,
+     * next_level - конец уровня, переход на следующий
+     */
+        const cubesLocal = this.cubes;
+        let game_over = true;
+        let next_level = true;
+
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                const cube = cubesLocal.mask.main[x][y];
+
+                // если на поле еще остались кубики, уровень не завершен
+                if (cube !== null) {
+                    next_level = false;
+                }
+
+                // если все крайние панели заполнены - конец игры,
+                // если хоть один пустой - игра продолжается
+                if (
+                    x === 0 ||
+          y === 0 ||
+          x === BOARD_SIZE - 1 ||
+          y === BOARD_SIZE - 1
+                ) {
+                    if (cube === null) {
+                        game_over = false;
+                    }
+                }
+            }
+            if (!next_level && !game_over) {
+                break;
+            }
+        }
+
+        if (next_level) {
+            // меняем датчик на следующий уровень
+            this.end = 'next_level';
+        } else if (game_over) {
+            // меняем датчик на конец игры
+            this.end = 'game_over';
+        } else {
+            // иначе - ничего не делаем
+            this.end = null;
+        }
+    }
+
+    // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
+    private plusColor() {
+        const colorsCount = getLevelColorsCount(this.level);
+        const newColor = CUBE_COLORS[colorsCount - 1];
+        this.cubes._sideEach(function (cube) {
+            if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
+                cube.change({
+                    color: newColor,
+                });
+            }
+        });
+    }
+
+    // генерируем маску для предыдущего хода
+    private generateMask(): CubesPositions {
+        const mask: Partial<CubesPositions> = {};
+        const cubesLocal = this.cubes;
+
+        for (const field of FIELDS) {
+            const fieldValue: (MaskFieldValue | null)[][] = [];
+            mask[field] = fieldValue;
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                fieldValue[x] = [];
+                for (let y = 0; y < BOARD_SIZE; y++) {
+                    const c = cubesLocal._get({
+                        field,
+                        x,
+                        y,
+                    });
+
+                    if (c === null) {
+                        fieldValue[x][y] = null;
+                    } else {
+                        const resultValue: MaskFieldValue = {
+                            color: c.color,
+                            direction: c.direction,
+                            toMineOrder: c.toMineOrder,
+                        };
+                        fieldValue[x][y] = resultValue;
+                    }
+                }
+            }
+        }
+
+        return mask as CubesPositions;
+    }
+
+    private createCube(params: CubeAddress & {
+        appearWithAnimation: boolean;
+        color: string;
+        direction: Direction | null;
+        toMineOrder: number | null;
+    }) {
+        const cube = new Cube({
+            ...params,
+            app: this,
+            container: this.container,
+            onClick: this.handleCubeClick,
+            onHover: this.handleHover,
+        });
+
+        this.cubes._add(cube);
+
+        return cube;
+    }
+
 }

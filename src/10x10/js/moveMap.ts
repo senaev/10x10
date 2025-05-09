@@ -4,7 +4,7 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 
 import { Cube } from './Cube';
-import { Cubes } from './Cubes';
+import { Cubes, CubesMask } from './Cubes';
 import { MainMask } from './MainMask';
 import { MCube } from './MCube';
 import { TenOnTen } from './TenOnTen';
@@ -153,10 +153,10 @@ export class MoveMap {
     }
 
     // когда ход просчитан, запускаем саму анимацию
-    public async animate(): Promise<void> {
+    public async animate(cubesMask: CubesMask): Promise<void> {
         const startCubes = this.startCubes;
 
-        animateCubesFromSideToMainField(startCubes, this.app.cubes.mask);
+        animateCubesFromSideToMainField(startCubes, cubesMask);
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {

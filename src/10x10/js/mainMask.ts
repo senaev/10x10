@@ -3,6 +3,7 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
+import { searchAdjacentCubesByColor } from '../utils/searchAdjacentCubesByColor';
 
 import { Cube } from './Cube';
 import { Cubes } from './Cubes';
@@ -16,8 +17,8 @@ import { MCube } from './MCube';
  * параметры состояния и создаётся объект из последовательности шагов для построения анимации
  */
 export class MainMask {
-    // основной массив со значениями
-    // сюда будут попадать м-кубики, участвующие в анимации
+    // Основной массив со значениями
+    // Сюда будут попадать м-кубики, участвующие в анимации
     public readonly arr: MCube[] = [];
 
     public constructor(params: {
@@ -103,11 +104,13 @@ export class MainMask {
         this.step();
     }
 
-    // один ход для всех кубиков на доске
+    /**
+     * Один ход для всех кубиков на доске
+     */
     public step() {
-    // индикатор конца движений, если что-то происходит во время шага анимации -
-    // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
-    // либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
+        // Индикатор конца движений, если что-то происходит во время шага анимации -
+        // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
+        // либо вызываем подрыв эких кубиков и вызываем следующий шаг анимации
         let somethingHappened;
 
         somethingHappened = false;
@@ -118,16 +121,15 @@ export class MainMask {
             }
         }
 
-        // проверяем, произошло что-то или нет в конце каждого хода
+        // Проверяем, произошло что-то или нет в конце каждого хода
         if (somethingHappened) {
             this.step();
         } else {
-            // ищем, появились ли у нас в результате хода смежные кубики
+            // Ищем, появились ли у нас в результате хода смежные кубики
             // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
             const adjacentCubes = this.searchAdjacentCubes();
             if (adjacentCubes.length) {
-                // console.log(adjacentCubes);
-                // если такие группы кубиков имеются, подрываем их и запускаем
+                // Если такие группы кубиков имеются, подрываем их и запускаем
                 // еще один шаг хода, при этом обновляем массив м-кубиков
                 // сюда попадут все кубики, которые будут взорваны
                 for (const key in adjacentCubes) {
@@ -161,13 +163,6 @@ export class MainMask {
 
         // создаем объект с массивами м-кубиков по цветам
         for (const key in arr) {
-            // Необходимо сбрасывать каждый раз иначе может возникнуть ситуация:
-            // Кубики летели, соприкоснулись, создалась группа, взорвались другие
-            // кубики, один из кубиков полетел дальше, нашел кубик того же цвета
-            // и добавил его в группу, в итоге образовалась группа из трех кубиков,
-            // которые по факту не вместе
-            arr[key].inGroup = null;
-
             const mCube = arr[key];
             // Если такого значения в объекте еще нет - создаем его
             if (byColorPrev[mCube.color] === undefined) {
@@ -191,78 +186,8 @@ export class MainMask {
         // ищем группы смежных кубиков и помещаем их в массив groups
         let groups: MCube[][] = [];
         for (const key in byColor) {
-            groups = groups.concat(this.searchAdjacentCubesByColor(byColor[key]));
+            groups = groups.concat(searchAdjacentCubesByColor(byColor[key]));
         }
-        return groups;
-    }
-
-    // Функция поиска смежных в массиве по цветам
-    public searchAdjacentCubesByColor(arr: MCube[]): MCube[][] {
-        let group;
-        for (let key = 0; key < arr.length - 1; key++) {
-            // Текущий кубик
-            const current = arr[key];
-            for (let key1 = key + 1; key1 < arr.length; key1++) {
-                // Кубик, который проверяем на смежность текущему кубику
-                const compare: MCube = arr[key1];
-                // Если кубики смежные
-                if (
-                    Math.abs(current.x - compare.x) + Math.abs(current.y - compare.y) === 1
-                ) {
-                    // Если текущий кубик не принадлежит группе
-                    if (current.inGroup === null) {
-                        // И кубик, с которым сравниваем не принадлежит группе
-                        if (compare.inGroup === null) {
-                            // Создаём группу
-                            group = [
-                                current,
-                                compare,
-                            ];
-                        } else {
-                            // А если кубик, с которым сравниваем, принадлежит группе
-                            // Закидываем текущий кубик в группу кубика, с которым сравниваем
-                            group = compare.inGroup;
-                            compare.inGroup.push(current);
-                        }
-                    } else {
-                        // Если же текущий кубик принадлежит группе
-                        // А кубик, с которым сравниваем принадлежит
-                        if (compare.inGroup === null) {
-                            // Закидываем кубик, с которым сравниваем, в группу текущего
-                            group = current.inGroup;
-                            current.inGroup.push(compare);
-                        } else {
-                            // Иначе закидываем все кубики и группы сравниваемого в группу текущего
-                            group = current.inGroup;
-                            if (current.inGroup !== compare.inGroup) {
-                                for (const key2 in compare.inGroup) {
-                                    if (current.inGroup.indexOf(compare.inGroup[key2]) === -1) {
-                                        group.push(compare.inGroup[key2]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // Пробегаем в цикле по измененной или созданной группе
-                    // И меняем значение принадлежности к группе кубиков на измененную группу
-                    for (const key2 in group) {
-                        group[key2].inGroup = group;
-                    }
-                }
-            }
-        }
-
-        // Теперь, когда группы созданы, выбираем из кубиков все
-        // существующие неповторяющиеся группы
-        const groups: MCube[][] = [];
-        for (const key in arr) {
-            const groupLocal = arr[key].inGroup;
-            // добавляем ненулевые, уникальные, имеющие не менее трёх кубиков группы
-            if (groupLocal !== null && groupLocal.length > 2 && groups.indexOf(groupLocal) === -1) {
-                groups.push(groupLocal);
-            }
-        }
-
         return groups;
     }
 

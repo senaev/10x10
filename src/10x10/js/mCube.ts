@@ -23,7 +23,6 @@ export class MCube {
     public direction: Direction | null;
     public mainMask: MainMask;
     public cube: Cube;
-    public inGroup: MCube[] | null;
     public steps: AnimationStep[];
     public toSideTime: number | undefined;
 
@@ -40,10 +39,6 @@ export class MCube {
         this.color = o.color;
         this.direction = o.direction;
         this.mainMask = o.mainMask;
-
-        // метка, означающая, что м-кубик вошел в группу по цветам(у него есть смежные кубики того же цвета)
-        // если значение null - нету, или еще не найдено, если не null - адрес заданной группы
-        this.inGroup = null;
 
         // массив шагов анимации для кубика, в м-кубике это просто массив, каждое значение которого -
         // действие кубика последовательно в каждый шаг анимации, может быть полностью заполнен

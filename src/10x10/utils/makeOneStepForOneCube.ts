@@ -3,62 +3,60 @@ import { AnimationStep, MovingCube } from '../js/MovingCube';
 
 import { directionToAnimation } from './directionToAnimation';
 
-// один шаг для м-кубика, возвращает информацию о шаге для анимации
+/**
+ * Один шаг для м-кубика, возвращает информацию о шаге для анимации
+ */
 export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): AnimationStep {
-    let step: AnimationStep = null;
     // если м-кубик взорван, он стоит на месте
     if (cube.x === -1 && cube.y === -1) {
-        step = null;
-    } else {
-        // если м-кубик не имеет направления - он стоит на месте
-        if (cube.direction !== null) {
-            // если у м-кубика имеется направление, подсчитываем, где он может оказаться
-            const nextPos = {
-                x: cube.x,
-                y: cube.y,
-            };
+        return null;
+    }
 
-            if (cube.direction === 'top' || cube.direction === 'bottom') {
-                if (cube.direction === 'top') {
-                    nextPos.y--;
-                } else {
-                    nextPos.y++;
-                }
-            } else {
-                if (cube.direction === 'left') {
-                    nextPos.x--;
-                } else {
-                    nextPos.x++;
-                }
-            }
+    // если м-кубик не имеет направления - он стоит на месте
+    if (cube.direction === null) {
+        return null;
+    }
 
-            // если следующая позиция - одно из боковых полей - отправляем кубик туда
-            if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
-                cube.x = nextPos.x;
-                cube.y = nextPos.y;
-                cube.direction = null;
-                step = { do: 'toSide' };
-            } else {
-                const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
+    // если у м-кубика имеется направление, подсчитываем, где он может оказаться
+    const nextPos = {
+        x: cube.x,
+        y: cube.y,
+    };
 
-                // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
-                if (!cubeInNextPosition) {
-                    const animation = directionToAnimation(cube.direction);
-                    // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
-                    cube.x = nextPos.x;
-                    cube.y = nextPos.y;
-                    step = { do: animation };
-                } else {
-                    // если клетка занята - кубик стоит на месте
-                    step = null;
-                }
-            }
+    if (cube.direction === 'top' || cube.direction === 'bottom') {
+        if (cube.direction === 'top') {
+            nextPos.y--;
         } else {
-            // если не имеет - стоит на мется
-            step = null;
+            nextPos.y++;
+        }
+    } else {
+        if (cube.direction === 'left') {
+            nextPos.x--;
+        } else {
+            nextPos.x++;
         }
     }
 
-    // возвращаем значение объекту mainMask, чтобы он знал, что что-то произошло
-    return step;
+    // если следующая позиция - одно из боковых полей - отправляем кубик туда
+    if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
+        cube.x = nextPos.x;
+        cube.y = nextPos.y;
+        cube.direction = null;
+
+        return { do: 'toSide' };
+    }
+    const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
+
+    // если следующая клетка занята - кубик стоит на месте
+    if (cubeInNextPosition) {
+        return null;
+    }
+
+    // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
+    const animation = directionToAnimation(cube.direction);
+    // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
+    cube.x = nextPos.x;
+    cube.y = nextPos.y;
+
+    return { do: animation };
 }

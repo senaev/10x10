@@ -1,4 +1,5 @@
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
+import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
@@ -131,8 +132,7 @@ export class MoveMap {
     public readonly toSideActions: MovingCube[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
 
-    private readonly movingCubes: MovingCube[];
-    private readonly animationLength: number;
+    public readonly cubesMove: CubesMove;
 
     public constructor(params: { startCubes: Cube[]; mainFieldCubes: Cube[]; app: TenOnTen }) {
         const mainFieldCubes = params.mainFieldCubes;
@@ -140,10 +140,12 @@ export class MoveMap {
         const startCubes = params.startCubes;
         this.startCubes = startCubes;
 
-        const { cubesToMove } = createMovingCubes({
+        this.cubesMove = createMovingCubes({
             startCubes,
             mainFieldCubes,
         });
+
+        const { cubesToMove } = this.cubesMove;
 
         // добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
         callTimes(startCubes.length, () => {
@@ -162,19 +164,11 @@ export class MoveMap {
             });
         });
 
-        const movingCubes = cubesToMove.map(({ moving }) => moving);
-
-        this.movingCubes = movingCubes;
-
-        generateMoveSteps(movingCubes);
+        generateMoveSteps(this.cubesMove.cubesToMove.map(({ moving }) => moving));
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
         this.toSideActions = [];
-
-        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
-        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        this.animationLength = cubesToMove[0].moving.steps.length;
 
         // проходимся в цикле по всем кубикам
         for (const { original, moving } of cubesToMove) {
@@ -273,10 +267,12 @@ export class MoveMap {
         startCubes,
         cubesMask,
         animationsScript,
+        animationLength,
     }: {
         startCubes: Cube[];
         cubesMask: CubesMask;
         animationsScript: CubeAnimationStep[];
+        animationLength: UnsignedInteger;
     }): Promise<void> {
         animateCubesFromSideToMainField(startCubes, cubesMask);
 
@@ -288,20 +284,17 @@ export class MoveMap {
         // перебираем карту анимации и передаем каждому кубику объект действия,
         // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
         // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
-        for (const key in animationsScript) {
-            const cube = animationsScript[key].cube;
-            const actions: CubeAnimation[] = animationsScript[key].animations;
-            for (const key1 in actions) {
-                const action = actions[key1];
-                cube.addAnimate(action);
+        for (const { cube, animations } of animationsScript) {
+            for (const animation of animations) {
+                cube.addAnimate(animation);
             }
         }
 
-        await promiseTimeout(this.animationLength * ANIMATION_TIME - 1);
+        await promiseTimeout(animationLength * ANIMATION_TIME - 1);
 
         // удаляем ненужные html-элементы
-        for (const key in this.beyondTheSide) {
-            this.beyondTheSide[key].remove();
+        for (const cube of this.beyondTheSide) {
+            cube.remove();
         }
 
     }

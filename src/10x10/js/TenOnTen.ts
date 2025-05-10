@@ -342,21 +342,29 @@ export class TenOnTen {
             mainFieldCubes.push(cube);
         });
 
-        this.moveMap = new MoveMap({
+        const moveMap = new MoveMap({
             startCubes,
             mainFieldCubes,
             app: this,
         });
+        this.moveMap = moveMap;
+
+        const { cubesMove } = moveMap;
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
         this.blockApp = true;
+
+        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
+        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
+        const animationLength = cubesMove.cubesToMove[0].moving.steps.length;
 
         // пошаговый запуск анимации
         this.moveMap.animate({
             startCubes,
             cubesMask: this.cubes.cubesMask,
             animationsScript: this.moveMap.animationsScript,
+            animationLength,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
@@ -388,7 +396,7 @@ export class TenOnTen {
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes
         this.cubes._mergeMoveMap({
-            movingCubes: this.moveMap.movingCubes,
+            movingCubes: cubesMove.cubesToMove.map(({ moving }) => moving),
             startCubes,
             toSideActions: this.moveMap.toSideActions,
         });

@@ -6,7 +6,7 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
-import { generateMoveStep } from '../utils/generateMoveStep';
+import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 
 import { Cube } from './Cube';
@@ -163,11 +163,10 @@ export class MoveMap {
         });
 
         const movingCubes = cubesToMove.map(({ moving }) => moving);
-        console.log(movingCubes);
+
         this.movingCubes = movingCubes;
 
-        // ❗️ rename
-        generateMoveStep(movingCubes);
+        generateMoveSteps(movingCubes);
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали

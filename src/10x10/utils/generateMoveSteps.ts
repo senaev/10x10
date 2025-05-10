@@ -6,15 +6,14 @@ import { searchAdjacentCubes } from './searchAdjacentCubes';
 /**
  * Один ход для всех кубиков на доске
  */
-export function generateMoveStep(movingCubes: MovingCube[]) {
+export function generateMoveSteps(movingCubes: MovingCube[]) {
     // Индикатор конца движений, если что-то происходит во время шага анимации -
     // Индикатор конца движений, если что-то происходит во время шага анимации -
     // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
     // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
     let somethingHappened = false;
-    // ❗️ use @typescript-eslint/no-for-in-array or noImplicitAny
-    for (const key in movingCubes) {
-        const oneStep = makeOneStepForOneCube(movingCubes[key], movingCubes);
+    for (const movingCube of movingCubes) {
+        const oneStep = makeOneStepForOneCube(movingCube, movingCubes);
         if (oneStep.do !== null) {
             somethingHappened = true;
         }
@@ -22,7 +21,7 @@ export function generateMoveStep(movingCubes: MovingCube[]) {
 
     // Проверяем, произошло что-то или нет в конце каждого хода
     if (somethingHappened) {
-        generateMoveStep(movingCubes);
+        generateMoveSteps(movingCubes);
         return;
     }
 
@@ -52,5 +51,5 @@ export function generateMoveStep(movingCubes: MovingCube[]) {
     });
 
     // продолжаем ход
-    generateMoveStep(movingCubes);
+    generateMoveSteps(movingCubes);
 }

@@ -18,7 +18,7 @@ if (!container) {
     throw new Error('Container not found');
 }
 
-const STORAGE_KEY = 's_t_';
+const STORAGE_KEY = 's_t_y';
 
 function showBanner(bridge: PlayGamaBridge) {
 
@@ -60,6 +60,9 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
     const playGamaBridge = await initPlayGamaBridge();
 
     const state = await playGamaBridge.storage.get(STORAGE_KEY);
+
+    // eslint-disable-next-line no-console
+    console.log('initialState', state);
 
     const tenOnTen = new TenOnTen({
         container,

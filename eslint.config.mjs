@@ -5,7 +5,7 @@ export default exlintConfig.map((config) => {
     return {
         ...config,
         ignores: [
-            'dist/**/*',
+            'public/dist/**/*',
             'public/libs/**/*',
         ],
     };

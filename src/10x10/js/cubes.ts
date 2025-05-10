@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Field, FIELDS } from '../const/FIELDS';
+import { Direction } from '../types/Direction';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getCubeByAddress } from '../utils/getCubeByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
@@ -78,7 +79,7 @@ export class Cubes {
     }
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
-    public _sideEach(func: (cube: Cube, field: Field, x: number, y: number) => void) {
+    public _sideEach(func: (cube: Cube, field: Direction, x: number, y: number) => void) {
         FIELDS.forEach((field) => {
             if (field === 'main') {
                 return;

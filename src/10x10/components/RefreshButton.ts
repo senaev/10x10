@@ -10,7 +10,7 @@ export class RefreshButton {
         this.element = document.createElement('div');
         this.element.classList.add('undoButton');
         this.element.addEventListener('click', params.onClick);
-        this.element.innerHTML = I18N_DICTIONARY['refresh']['ru'];
+        this.element.innerHTML = I18N_DICTIONARY['refresh']['en'];
 
         params.container.appendChild(this.element);
     }

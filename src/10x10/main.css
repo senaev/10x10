@@ -49,8 +49,14 @@
     cursor: pointer;
 }
 
-.tenOnTenContainer>.panel.topRightPanel>.undoButton.blocked {
-    color: #cccccc;
+.topLeftPanel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    left: -96px;
+    top: -96px;
+    color: white;
+    cursor: pointer;
 }
 
 /*сам кубик*/

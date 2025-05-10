@@ -11,8 +11,8 @@ export interface PlayGamaBridgeStorageGetFunction {
 };
 
 export interface PlayGamaBridgeStorageSetFunction {
-    (keys: string[], values: string[], storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-    (key: string, value: string, storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
+    (keys: string[], values: unknown[], storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
+    (key: string, value: unknown, storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
 };
 
 export interface PlayGamaBridgeStorageDeleteFunction {

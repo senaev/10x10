@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
+import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
-import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
 import { RefreshButton } from '../components/RefreshButton';
@@ -30,17 +30,30 @@ import {
     UndoButton,
 } from './UndoButton';
 
+export type TenOnTenCallbacks = {
+    onAfterMove: () => void;
+    onAfterUndo: () => void;
+    onAfterNextLevel: () => void;
+};
+
 export type MaskFieldValue = {
     color: string;
     direction: Direction | null;
     toMineOrder: number | null;
 };
-export type CubesPositions = Record<Field, (MaskFieldValue | null)[][]>;
+export type CubesPositions = {
+    left: MaskFieldValue[][];
+    right: MaskFieldValue[][];
+    top: MaskFieldValue[][];
+    bottom: MaskFieldValue[][];
+    main: (MaskFieldValue | null)[][];
+};
 
 export type TenOnTenState = {
     level: PositiveInteger;
     previous: CubesPositions | null;
     current: CubesPositions;
+    isNewLevel: boolean;
 };
 
 export class TenOnTen {
@@ -61,7 +74,23 @@ export class TenOnTen {
     private blockApp: boolean;
     private previousStepMap: CubesPositions | null = null;
 
-    public constructor({ container }: { container: HTMLElement }) {
+    private isNewLevel: boolean = true;
+
+    private readonly callbacks: {
+        [key in keyof TenOnTenCallbacks]: TenOnTenCallbacks[key][];
+    } = {
+            onAfterMove: [],
+            onAfterUndo: [],
+            onAfterNextLevel: [],
+        };
+
+    public constructor({
+        container,
+        initialState,
+    }: {
+        container: HTMLElement;
+        initialState?: TenOnTenState;
+    }) {
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
         // которому эти кубики принадлежат
         this.cubes = new Cubes({ app: this });
@@ -82,7 +111,6 @@ export class TenOnTen {
 
         // Initialize container function
         (() => {
-            const topRightPanel = '<div class="panel topRightPanel"></div>'; //
             let background = '<div class="backgroundField">';
             for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
                 background += '<div class="dCube"></div>';
@@ -105,29 +133,23 @@ export class TenOnTen {
                     position: 'relative',
                 })
                 .addClass('tenOnTenContainer')
-                .append(backgroundField)
-                .append(topRightPanel);
+                .append(backgroundField);
         })();
 
-        // запускаем инициализацию приложения
-        // генерируем кубики в боковых панелях
-        this.cubes._sideEach((_cube, field, x, y) => {
-            this.createCube({
-                x,
-                y,
-                field,
-                color: getRandomColorForCubeLevel(this.level),
-                appearWithAnimation: false,
-                direction: null,
-                toMineOrder: null,
-            });
-        });
-
-        this.generateMainCubes();
-
-        const topRightPanelElement = this.container[0].querySelector('.panel.topRightPanel');
-        assertObject(topRightPanelElement);
+        const topRightPanelElement = document.createElement('div');
+        topRightPanelElement.classList.add('topRightPanel');
+        topRightPanelElement.classList.add('panel');
+        this.container[0].appendChild(topRightPanelElement);
         this.topRightPanelElement = topRightPanelElement;
+
+        // const topLeftPanelElement = document.createElement('div');
+        // topLeftPanelElement.classList.add('topLeftPanel');
+        // topLeftPanelElement.classList.add('panel');
+        // this.container[0].appendChild(topLeftPanelElement);
+        // topLeftPanelElement.innerText = 'Start from the beginning';
+        // topLeftPanelElement.addEventListener('click', () => {
+        //     //
+        // });
 
         const levelElement = document.createElement('div');
         levelElement.classList.add('level');
@@ -139,12 +161,37 @@ export class TenOnTen {
             onClick: this.undo,
             container: topRightPanelElement,
         });
-        this.undoButton.setState('hidden');
+        this.undoButton.setVisible(initialState?.previous ? true : false);
 
         this.refreshButton = new RefreshButton({
             onClick: this.refresh,
             container: topRightPanelElement,
         });
+        this.refreshButton.setVisible(initialState?.previous === null);
+
+        // запускаем инициализацию приложения
+        // генерируем кубики в боковых панелях
+        this.cubes._sideEach((_cube, field, x, y) => {
+            this.createCube({
+                x,
+                y,
+                field,
+                color: initialState
+                    ? initialState.current[field as Direction][x][y].color
+                    : getRandomColorForCubeLevel(this.level),
+                appearWithAnimation: false,
+                direction: null,
+                toMineOrder: null,
+            });
+        });
+
+        if (initialState) {
+            this.isNewLevel = initialState.isNewLevel;
+            this.setState(initialState);
+        } else {
+            this.generateMainCubes();
+        }
+
     }
 
     public getState(): TenOnTenState {
@@ -152,11 +199,16 @@ export class TenOnTen {
             level: this.level,
             previous: this.previousStepMap,
             current: this.generateMask(),
+            isNewLevel: this.isNewLevel,
         };
     }
 
     public setState(state: TenOnTenState) {
         this.setLevel(state.level);
+
+        this.isNewLevel = state.isNewLevel;
+        this.refreshButton.setVisible(state.isNewLevel);
+
         this.previousStepMap = state.previous;
         this.applyCubesState(state.current);
     }
@@ -206,6 +258,9 @@ export class TenOnTen {
         this.generateMainCubes();
 
         this.previousStepMap = null;
+        this.isNewLevel = true;
+
+        callFunctions(this.callbacks.onAfterNextLevel);
     }
 
     // Возвращаем слово в необходимом переводе
@@ -220,11 +275,13 @@ export class TenOnTen {
         setTimeout(
             () => {
                 this.blockApp = false;
+
+                callFunctions(this.callbacks.onAfterUndo);
             },
             ANIMATION_TIME * 4
         );
 
-        this.undoButton.setState('inactive');
+        this.undoButton.setVisible(false);
 
         // пробегаем в массиве по каждому кубику предыдущего массива
         const previousStepMap = this.previousStepMap!;
@@ -235,6 +292,7 @@ export class TenOnTen {
     };
 
     public async run(startCubes: Cube[]) {
+        this.isNewLevel = false;
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
@@ -272,10 +330,10 @@ export class TenOnTen {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
             if (this.end === 'next_level') {
-                this.undoButton.setState('hidden');
+                this.undoButton.setVisible(false);
                 this.refreshButton.setVisible(true);
             } else {
-                this.undoButton.setState('active');
+                this.undoButton.setVisible(true);
                 this.refreshButton.setVisible(false);
             }
 
@@ -305,6 +363,12 @@ export class TenOnTen {
         });
 
         this.checkStepEnd();
+
+        callFunctions(this.callbacks.onAfterMove);
+    }
+
+    public on(event: keyof TenOnTenCallbacks, callback: TenOnTenCallbacks[keyof TenOnTenCallbacks]) {
+        this.callbacks[event].push(callback);
     }
 
     // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
@@ -703,7 +767,7 @@ export class TenOnTen {
 
         for (const field of FIELDS) {
             const fieldValue: (MaskFieldValue | null)[][] = [];
-            mask[field] = fieldValue;
+            mask[field] = fieldValue as MaskFieldValue[][];
             for (let x = 0; x < BOARD_SIZE; x++) {
                 fieldValue[x] = [];
                 for (let y = 0; y < BOARD_SIZE; y++) {

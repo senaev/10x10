@@ -34,15 +34,11 @@ export type PlayGamaBridge = {
 
 declare const bridge: PlayGamaBridge;
 
-export function initPlayGamaBridge() {
-    bridge
-        .initialize()
-        .then(() => {
-            // eslint-disable-next-line no-console
-            console.log('PlayGamaBridge initialized', bridge);
-        })
-        .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error('PlayGamaBridge initialization failed', error);
-        });
+export async function initPlayGamaBridge(): Promise<PlayGamaBridge> {
+    await bridge.initialize();
+
+    // eslint-disable-next-line no-console
+    console.log('PlayGamaBridge initialized', bridge);
+
+    return bridge;
 }

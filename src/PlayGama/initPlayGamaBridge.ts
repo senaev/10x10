@@ -33,6 +33,18 @@ export type PlayGamaBridge = {
     advertisement: {
         isBannerSupported: boolean;
         showBanner: (options: unknown) => void;
+        checkAdBlock: () => boolean;
+    };
+    device: {
+        type: 'mobile' | 'tablet' | 'desktop' | 'tv';
+    };
+    player: {
+        isAuthorizationSupported: boolean;
+        isAuthorized: boolean;
+        id: string | null;
+        name: string | null;
+        photos: unknown[];
+        authorize: () => Promise<void>;
     };
 };
 

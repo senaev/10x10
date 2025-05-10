@@ -6,7 +6,7 @@ export default () => ({
     mode: 'development',
     entry: './src/10x10/index.ts',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public/dist'),
         filename: 'main.js',
     },
     module: {

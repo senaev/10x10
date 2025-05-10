@@ -1,4 +1,5 @@
 import 'jquery.transit';
+import { isPositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
 
 import { initPlayGamaBridge, PlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
@@ -51,6 +52,10 @@ function showBanner(bridge: PlayGamaBridge) {
     bridge.advertisement.showBanner(options);
 }
 
+function isValidTenOnTenState(state: unknown): state is TenOnTenState {
+    return isObject(state) && isPositiveInteger(state.level) && isObject(state.current);
+}
+
 (async () => {
     const playGamaBridge = await initPlayGamaBridge();
 
@@ -58,7 +63,7 @@ function showBanner(bridge: PlayGamaBridge) {
 
     const tenOnTen = new TenOnTen({
         container,
-        initialState: isObject(state) ? state as TenOnTenState : undefined,
+        initialState: isValidTenOnTenState(state) ? state : undefined,
     });
     // eslint-disable-next-line no-console
     console.log('App is ready', tenOnTen);

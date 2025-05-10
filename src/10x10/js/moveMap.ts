@@ -125,6 +125,10 @@ export class MoveMap {
             });
         });
 
+        const allCubes = [
+            ...startCubes,
+            ...mainFieldCubesSorted,
+        ];
         const allMovingCubes = [
             ...startMovingCubes,
             ...movingCubesInMainField,
@@ -143,8 +147,9 @@ export class MoveMap {
 
         // проходимся в цикле по всем кубикам
         for (const key in allMovingCubes) {
-            const mCube = allMovingCubes[key];
-            const steps = mCube.steps;
+            const cube = allCubes[key];
+            const movingCube = allMovingCubes[key];
+            const steps = movingCube.steps;
 
             // массив с действиями одного кубика
             const actions: CubeAnimation[] = [
@@ -172,9 +177,9 @@ export class MoveMap {
                         lastAction.animation = 'toSide';
                         lastAction.duration++;
                         // для сортировки попаданий в боковое поле
-                        mCube.toSideTime = key1;
+                        movingCube.toSideTime = key1;
                         // заносим м-кубик в массив попадания в боковое поле
-                        this.toSideActions.push(mCube);
+                        this.toSideActions.push(movingCube);
                         break;
                     case null:
                         if ([
@@ -221,9 +226,10 @@ export class MoveMap {
                         nullToDelayActions.push(action);
                     }
                 }
+
                 this.animationsScript.push({
                     animations: nullToDelayActions,
-                    cube: allMovingCubes[key].cube,
+                    cube,
                 });
             }
         }

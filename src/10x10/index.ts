@@ -20,8 +20,6 @@ if (!container) {
 const STORAGE_KEY = 's_t_';
 
 function showBanner(bridge: PlayGamaBridge) {
-    // eslint-disable-next-line no-console
-    console.log('showBanner');
 
     let options = { };
 
@@ -78,6 +76,8 @@ function showBanner(bridge: PlayGamaBridge) {
     tenOnTen.on('onAfterNextLevel', () => {
         saveState();
 
+        // eslint-disable-next-line no-console
+        console.log('showBanner');
         if (!playGamaBridge.advertisement.isBannerSupported) {
             return;
         }

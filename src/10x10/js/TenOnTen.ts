@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
+import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 
@@ -28,12 +29,19 @@ import { MoveMap } from './MoveMap';
 import {
     UndoButton,
 } from './UndoButton';
+
 export type MaskFieldValue = {
     color: string;
     direction: Direction | null;
-    toMineOrder?: number | null;
+    toMineOrder: number | null;
 };
 export type CubesPositions = Record<Field, (MaskFieldValue | null)[][]>;
+
+export type TenOnTenState = {
+    level: PositiveInteger;
+    previous: CubesPositions | null;
+    current: CubesPositions;
+};
 
 export class TenOnTen {
     public readonly container: JQuery<HTMLElement>;
@@ -47,10 +55,11 @@ export class TenOnTen {
 
     private readonly undoButton: UndoButton;
     private readonly refreshButton: RefreshButton;
+    private readonly levelElement: HTMLElement;
 
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
     private blockApp: boolean;
-    private previousStepMap: CubesPositions | undefined;
+    private previousStepMap: CubesPositions | null = null;
 
     public constructor({ container }: { container: HTMLElement }) {
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
@@ -120,6 +129,12 @@ export class TenOnTen {
         assertObject(topRightPanelElement);
         this.topRightPanelElement = topRightPanelElement;
 
+        const levelElement = document.createElement('div');
+        levelElement.classList.add('level');
+        levelElement.textContent = String(this.level);
+        this.levelElement = levelElement;
+        topRightPanelElement.appendChild(levelElement);
+
         this.undoButton = new UndoButton({
             onClick: this.undo,
             container: topRightPanelElement,
@@ -130,6 +145,20 @@ export class TenOnTen {
             onClick: this.refresh,
             container: topRightPanelElement,
         });
+    }
+
+    public getState(): TenOnTenState {
+        return {
+            level: this.level,
+            previous: this.previousStepMap,
+            current: this.generateMask(),
+        };
+    }
+
+    public setState(state: TenOnTenState) {
+        this.setLevel(state.level);
+        this.previousStepMap = state.previous;
+        this.applyCubesState(state.current);
     }
 
     // даем возможность пользователю при переходе на новый уровень выбрать из случайных
@@ -168,11 +197,15 @@ export class TenOnTen {
     // переводим игру на следующий уровень
     public nextLevel() {
         const colorsCount = getLevelColorsCount(this.level);
-        this.level++;
+
+        this.setLevel(this.level + 1);
+
         if (getLevelColorsCount(this.level) > colorsCount) {
             this.plusColor();
         }
         this.generateMainCubes();
+
+        this.previousStepMap = null;
     }
 
     // Возвращаем слово в необходимом переводе
@@ -182,18 +215,139 @@ export class TenOnTen {
 
     // делаем возврат хода
     public readonly undo = () => {
-    // блокируем приложение до тех пор, пока не закончим анимацию
+        // блокируем приложение до тех пор, пока не закончим анимацию
         this.blockApp = true;
         setTimeout(
-            function (app) {
-                app.blockApp = false;
+            () => {
+                this.blockApp = false;
             },
-            ANIMATION_TIME * 4,
-            this
+            ANIMATION_TIME * 4
         );
 
         this.undoButton.setState('inactive');
 
+        // пробегаем в массиве по каждому кубику предыдущего массива
+        const previousStepMap = this.previousStepMap!;
+
+        this.applyCubesState(previousStepMap);
+
+        this.previousStepMap = null;
+    };
+
+    public async run(startCubes: Cube[]) {
+        // создаем маску для возможности возврата хода
+        this.previousStepMap = this.generateMask();
+
+        // создаем массив из всех кубиков, которые есть на доске
+        const mainFieldCubes: Cube[] = [];
+        this.cubes._mainEach((cube) => {
+            mainFieldCubes.push(cube);
+        });
+
+        const moveMap = new MoveMap({
+            startCubes,
+            mainFieldCubes,
+            app: this,
+        });
+        this.moveMap = moveMap;
+
+        const { cubesMove } = moveMap;
+
+        // блокируем приложение от начала до конца анимации
+        // минус один - потому, что в последний такт обычно анимация чисто символическая
+        this.blockApp = true;
+
+        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
+        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
+        const animationLength = cubesMove.cubesToMove[0].moving.steps.length;
+
+        // пошаговый запуск анимации
+        this.moveMap.animate({
+            startCubes,
+            cubesMask: this.cubes.cubesMask,
+            animationsScript: this.moveMap.animationsScript,
+            animationLength,
+            beyondTheSide: this.moveMap.beyondTheSide,
+        }).then(() => {
+            // разблокируем кнопку назад, если не случился переход на новый уровень
+            // иначе - блокируем
+            if (this.end === 'next_level') {
+                this.undoButton.setState('hidden');
+                this.refreshButton.setVisible(true);
+            } else {
+                this.undoButton.setState('active');
+                this.refreshButton.setVisible(false);
+            }
+
+            if (this.end !== null) {
+                switch (this.end) {
+                case 'next_level':
+                    this.nextLevel();
+                    break;
+                case 'game_over':
+
+                    alert('game over');
+                    break;
+                default:
+                    throw new Error(`Неверное значение в app.end: ${this.end}`);
+                }
+            }
+
+            this.blockApp = false;
+        });
+
+        // подытоживание - внесение изменений, произошедших в абстрактном moveMap
+        // в реальную коллекцию cubes
+        this.cubes._mergeMoveMap({
+            movingCubes: cubesMove.cubesToMove.map(({ moving }) => moving),
+            startCubes,
+            toSideActions: this.moveMap.toSideActions,
+        });
+
+        this.checkStepEnd();
+    }
+
+    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+    public cutCubesFromLineAndFillByNewOnes(startCubes: Cube[]) {
+        // получаем линию
+        const line = getCubeAddressInSideFieldInOrderFromMain({
+            x: startCubes[0].x,
+            y: startCubes[0].y,
+            field: startCubes[0].field,
+        });
+
+        // пробегаемся, меняем значения в коллекции
+        for (let key = line.length - 1; key >= startCubes.length; key--) {
+            const prevCube = this.cubes._get(line[key - startCubes.length])!;
+            this.cubes._set(line[key], prevCube);
+            prevCube.x = line[key].x;
+            prevCube.y = line[key].y;
+        }
+        // генерируем кубики для крайних значений в линии
+        for (let key = 0; key < startCubes.length; key++) {
+            this.cubes._set(
+                line[key],
+                this.createCube({
+                    x: line[key].x,
+                    y: line[key].y,
+                    field: line[key].field,
+                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
+                    color: getRandomColorForCubeLevel(this.level),
+                    appearWithAnimation: false,
+                    direction: null,
+                })
+            );
+        }
+
+        /**
+         * при отладке может возникать забавная ошибка, когда почему-то
+         * случайно добавляются не последние значения линии, а предыдущие из них
+         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
+         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
+         */
+    }
+
+    private applyCubesState(previousStepMap: CubesPositions) {
         // массив, в котором описаны все различия между текущим и предыдущим состоянием
         const changed: {
             field: Field;
@@ -203,9 +357,6 @@ export class TenOnTen {
             cube: Cube | null;
             action: string;
         }[] = [];
-
-        // пробегаем в массиве по каждому кубику предыдущего массива
-        const previousStepMap = this.previousStepMap!;
         if (previousStepMap) {
             for (const fieldName in previousStepMap) {
                 for (const x in previousStepMap[fieldName as Field]) {
@@ -330,119 +481,11 @@ export class TenOnTen {
                 }
             }
         }
-    };
-
-    public async run(startCubes: Cube[]) {
-        // создаем маску для возможности возврата хода
-        this.previousStepMap = this.generateMask();
-
-        // создаем массив из всех кубиков, которые есть на доске
-        const mainFieldCubes: Cube[] = [];
-        this.cubes._mainEach((cube) => {
-            mainFieldCubes.push(cube);
-        });
-
-        const moveMap = new MoveMap({
-            startCubes,
-            mainFieldCubes,
-            app: this,
-        });
-        this.moveMap = moveMap;
-
-        const { cubesMove } = moveMap;
-
-        // блокируем приложение от начала до конца анимации
-        // минус один - потому, что в последний такт обычно анимация чисто символическая
-        this.blockApp = true;
-
-        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
-        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        const animationLength = cubesMove.cubesToMove[0].moving.steps.length;
-
-        // пошаговый запуск анимации
-        this.moveMap.animate({
-            startCubes,
-            cubesMask: this.cubes.cubesMask,
-            animationsScript: this.moveMap.animationsScript,
-            animationLength,
-            beyondTheSide: this.moveMap.beyondTheSide,
-        }).then(() => {
-            // разблокируем кнопку назад, если не случился переход на новый уровень
-            // иначе - блокируем
-            if (this.end === 'next_level') {
-                this.undoButton.setState('hidden');
-                this.refreshButton.setVisible(true);
-            } else {
-                this.undoButton.setState('active');
-                this.refreshButton.setVisible(false);
-            }
-
-            if (this.end !== null) {
-                switch (this.end) {
-                case 'next_level':
-                    this.nextLevel();
-                    break;
-                case 'game_over':
-
-                    alert('game over');
-                    break;
-                default:
-                    throw new Error(`Неверное значение в app.end: ${this.end}`);
-                }
-            }
-
-            this.blockApp = false;
-        });
-
-        // подытоживание - внесение изменений, произошедших в абстрактном moveMap
-        // в реальную коллекцию cubes
-        this.cubes._mergeMoveMap({
-            movingCubes: cubesMove.cubesToMove.map(({ moving }) => moving),
-            startCubes,
-            toSideActions: this.moveMap.toSideActions,
-        });
-
-        this.checkStepEnd();
     }
 
-    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-    public cutCubesFromLineAndFillByNewOnes(startCubes: Cube[]) {
-        // получаем линию
-        const line = getCubeAddressInSideFieldInOrderFromMain({
-            x: startCubes[0].x,
-            y: startCubes[0].y,
-            field: startCubes[0].field,
-        });
-
-        // пробегаемся, меняем значения в коллекции
-        for (let key = line.length - 1; key >= startCubes.length; key--) {
-            const prevCube = this.cubes._get(line[key - startCubes.length])!;
-            this.cubes._set(line[key], prevCube);
-            prevCube.x = line[key].x;
-            prevCube.y = line[key].y;
-        }
-        // генерируем кубики для крайних значений в линии
-        for (let key = 0; key < startCubes.length; key++) {
-            this.cubes._set(
-                line[key],
-                this.createCube({
-                    x: line[key].x,
-                    y: line[key].y,
-                    field: line[key].field,
-                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
-                    color: getRandomColorForCubeLevel(this.level),
-                    appearWithAnimation: false,
-                    direction: null,
-                })
-            );
-        }
-
-        /**
-         * при отладке может возникать забавная ошибка, когда почему-то
-         * случайно добавляются не последние значения линии, а предыдущие из них
-         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
-         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
-         */
+    private setLevel(level: number) {
+        this.level = level;
+        this.levelElement.textContent = String(level);
     }
 
     private readonly handleCubeClick = (address: CubeAddress) => {

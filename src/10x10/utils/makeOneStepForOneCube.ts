@@ -4,20 +4,20 @@ import { AnimationStep, MovingCube } from '../js/MovingCube';
 import { directionToAnimation } from './directionToAnimation';
 
 /**
- * Один шаг для м-кубика, возвращает информацию о шаге для анимации
+ * Один шаг для кубика, возвращает информацию о шаге для анимации
  */
 export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): AnimationStep {
-    // если м-кубик взорван, он стоит на месте
+    // если кубик взорван, он стоит на месте
     if (cube.x === -1 && cube.y === -1) {
         return null;
     }
 
-    // если м-кубик не имеет направления - он стоит на месте
+    // если кубик не имеет направления - он стоит на месте
     if (cube.direction === null) {
         return null;
     }
 
-    // если у м-кубика имеется направление, подсчитываем, где он может оказаться
+    // если у кубика имеется направление, подсчитываем, где он может оказаться
     const nextPos = {
         x: cube.x,
         y: cube.y,
@@ -45,14 +45,14 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
 
         return { do: 'toSide' };
     }
-    const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
 
     // если следующая клетка занята - кубик стоит на месте
+    const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
     if (cubeInNextPosition) {
         return null;
     }
 
-    // если нет, идет обращение к коллекции м-кубиков, чтобы узнать, свободна ли следующая клетка
+    // если нет, идет обращение к коллекции кубиков, чтобы узнать, свободна ли следующая клетка
     const animation = directionToAnimation(cube.direction);
     // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
     cube.x = nextPos.x;

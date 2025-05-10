@@ -161,3 +161,8 @@
     background-color: #ffb121;
     border-color: #ffbb3f;
 }
+
+.level {
+    font-size: 3em;
+    color: white;
+}

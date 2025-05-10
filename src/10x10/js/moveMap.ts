@@ -1,11 +1,16 @@
+import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
+import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
+import { directionToAnimation } from '../utils/directionToAnimation';
+import { generateMoveStep } from '../utils/generateMoveStep';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 
 import { Cube } from './Cube';
 import { Cubes, CubesMask } from './Cubes';
-import { generateMainFieldMoves } from './MainMask';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
@@ -28,24 +33,105 @@ export type CubeAnimationStep = {
  * для основного приложения.
  */
 export class MoveMap {
-    public readonly movingCubes: MovingCube[];
     public readonly beyondTheSide: Cube[] = [];
     public readonly startCubes: Cube[];
     public readonly toSideActions: MovingCube[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
 
+    private readonly movingCubes: MovingCube[];
     private readonly cubes: Cubes;
     private readonly animationLength: number;
 
     public constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
         this.cubes = params.cubes;
-        this.startCubes = params.startCubes;
 
-        // создаем класс маски
-        this.movingCubes = generateMainFieldMoves({
-            startCubes: this.startCubes,
-            cubes: this.cubes,
+        const startCubes = params.startCubes;
+        this.startCubes = startCubes;
+
+        // создаем массив из всех кубиков, которые есть на доске
+        const mainFieldCubes: Cube[] = [];
+        this.cubes._mainEach((cube) => {
+            mainFieldCubes.push(cube);
         });
+
+        const mainFieldCubesSorted = [...mainFieldCubes]
+            .sort((a, b) => a.toMineOrder! - b.toMineOrder!);
+
+        // Основной массив со значениями
+        // Сюда будут попадать м-кубики, участвующие в анимации
+        const movingCubesInMainField: MovingCube[] = [];
+
+        // создаем массив из всех кубиков, которые есть на доске
+        mainFieldCubesSorted.forEach((cube) => {
+            movingCubesInMainField.push(new MovingCube({
+                x: cube.x,
+                y: cube.y,
+                color: cube.color,
+                direction: cube.direction,
+                movingCubes: movingCubesInMainField,
+                cube,
+            }));
+        });
+
+        // добавляем в маску кубик, с которого начинаем анимацию
+        // кубики сразу добавляем на главное поле для расчетов движения
+        const startMovingCubes: MovingCube[] = [];
+        startCubes.forEach((startCube, i) => {
+            startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
+
+            let startMovingCubeX;
+            let startMovingCubeY;
+            if (startCube.field === 'top' || startCube.field === 'bottom') {
+                startMovingCubeX = startCube.x;
+                if (startCube.field === 'top') {
+                    startMovingCubeY = startCubes.length - i - 1;
+                } else {
+                    startMovingCubeY = BOARD_SIZE - startCubes.length + i;
+                }
+            } else {
+                if (startCube.field === 'left') {
+                    startMovingCubeX = startCubes.length - i - 1;
+                } else {
+                    startMovingCubeX = BOARD_SIZE - startCubes.length + i;
+                }
+                startMovingCubeY = startCube.y;
+            }
+
+            const startMCube = new MovingCube({
+                x: startMovingCubeX,
+                y: startMovingCubeY,
+                color: startCube.color,
+                direction: startCube.direction,
+                movingCubes: movingCubesInMainField,
+                cube: startCube,
+            });
+            startMovingCubes.push(startMCube);
+        });
+
+        // добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
+        callTimes(startMovingCubes.length, () => {
+            movingCubesInMainField.forEach((movingCube) => {
+                movingCube.steps.push({ do: null });
+            });
+
+            startMovingCubes.forEach((movingCube) => {
+                const { direction } = movingCube;
+
+                assertNonEmptyString(direction);
+
+                movingCube.steps.push({
+                    do: directionToAnimation(direction),
+                });
+            });
+        });
+
+        const allMovingCubes = [
+            ...startMovingCubes,
+            ...movingCubesInMainField,
+        ];
+        generateMoveStep(allMovingCubes);
+
+        this.movingCubes = allMovingCubes;
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
@@ -53,13 +139,11 @@ export class MoveMap {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        this.animationLength = this.movingCubes[0].steps.length;
-
-        // console.log("////inMainActions:", this.mainMask.arr);
+        this.animationLength = allMovingCubes[0].steps.length;
 
         // проходимся в цикле по всем кубикам
-        for (const key in this.movingCubes) {
-            const mCube = this.movingCubes[key];
+        for (const key in allMovingCubes) {
+            const mCube = allMovingCubes[key];
             const steps = mCube.steps;
 
             // массив с действиями одного кубика
@@ -139,7 +223,7 @@ export class MoveMap {
                 }
                 this.animationsScript.push({
                     animations: nullToDelayActions,
-                    cube: this.movingCubes[key].cube,
+                    cube: allMovingCubes[key].cube,
                 });
             }
         }

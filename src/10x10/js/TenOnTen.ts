@@ -381,7 +381,11 @@ export class TenOnTen {
 
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes
-        this.cubes._mergeMoveMap(this.moveMap);
+        this.cubes._mergeMoveMap({
+            movingCubes: this.moveMap.movingCubes,
+            startCubes,
+            toSideActions: this.moveMap.toSideActions,
+        });
 
         this.checkStepEnd();
     }

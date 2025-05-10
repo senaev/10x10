@@ -19,9 +19,10 @@ export class MovingCube {
     public y: number;
     public color: string;
     public direction: Direction | null;
-    public cube: Cube;
     public steps: AnimationStep[];
     public toSideTime: number | undefined;
+
+    private cube: Cube;
 
     public constructor(o: {
         x: number;

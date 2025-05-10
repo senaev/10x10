@@ -30,6 +30,10 @@ export type PlayGamaBridge = {
     EVENT_NAME: Record<string, PlayGamaBridgeEventName>;
     STORAGE_TYPE: Record<string, PlayGamaBridgeStorageType>;
     storage: PlayGamaBridgeStorage;
+    advertisement: {
+        isBannerSupported: boolean;
+        showBanner: (options: unknown) => void;
+    };
 };
 
 declare const bridge: PlayGamaBridge;

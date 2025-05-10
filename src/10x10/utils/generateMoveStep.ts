@@ -12,6 +12,7 @@ export function generateMoveStep(movingCubes: MovingCube[]) {
     // вызываем следующий шаг, если нет, то либо заканчиваем ход если нету смежных одинаковых кубиков,
     // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
     let somethingHappened = false;
+    // ❗️ use @typescript-eslint/no-for-in-array or noImplicitAny
     for (const key in movingCubes) {
         const oneStep = makeOneStepForOneCube(movingCubes[key], movingCubes);
         if (oneStep.do !== null) {

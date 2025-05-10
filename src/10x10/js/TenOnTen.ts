@@ -336,7 +336,6 @@ export class TenOnTen {
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
-
         // создаем массив из всех кубиков, которые есть на доске
         const mainFieldCubes: Cube[] = [];
         this.cubes._mainEach((cube) => {

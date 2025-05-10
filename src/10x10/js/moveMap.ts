@@ -25,20 +25,98 @@ export type CubeAnimationStep = {
     cube: Cube;
 };
 
-// export type CubesMove = {
-//     cubesToMove: {
-//         original: Cube;
-//         moving: MovingCube;
-//     }[];
-// };
+export type CubeToMove = {
+    isFromSide: boolean;
+    original: Cube;
+    moving: MovingCube;
+};
 
-// function createMovingCubes(cubesMove: { startCubes: Cube[]; cubes: Cubes; }): CubesMove {
-//     const { cubesToMove } = cubesMove;
+export type CubesMove = {
+    cubesToMove: CubeToMove[];
+};
 
-//     return {
+function createMovingCubes({
+    startCubes,
+    mainFieldCubes,
+}: {
+    startCubes: Cube[];
+    mainFieldCubes: Cube[];
+}): CubesMove {
+    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
 
-//     };
-// }
+    // Основной массив со значениями
+    // Сюда будут попадать м-кубики, участвующие в анимации
+    const movingCubesInMainField: CubeToMove[] = [];
+
+    // ❗️ remove
+    const movingCubes: MovingCube[] = [];
+
+    // создаем массив из всех кубиков, которые есть на доске
+    mainFieldCubesSorted.forEach((cube) => {
+        const movingCube = new MovingCube({
+            x: cube.x,
+            y: cube.y,
+            color: cube.color,
+            direction: cube.direction,
+            movingCubes,
+            cube,
+        });
+
+        movingCubes.push(movingCube);
+        movingCubesInMainField.push({
+            moving: movingCube,
+            original: cube,
+            isFromSide: false,
+        });
+    });
+
+    // добавляем в маску кубик, с которого начинаем анимацию
+    // кубики сразу добавляем на главное поле для расчетов движения
+    const startMovingCubes: CubeToMove[] = [];
+    startCubes.forEach((cube, i) => {
+        cube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
+
+        let startMovingCubeX;
+        let startMovingCubeY;
+        if (cube.field === 'top' || cube.field === 'bottom') {
+            startMovingCubeX = cube.x;
+            if (cube.field === 'top') {
+                startMovingCubeY = startCubes.length - i - 1;
+            } else {
+                startMovingCubeY = BOARD_SIZE - startCubes.length + i;
+            }
+        } else {
+            if (cube.field === 'left') {
+                startMovingCubeX = startCubes.length - i - 1;
+            } else {
+                startMovingCubeX = BOARD_SIZE - startCubes.length + i;
+            }
+            startMovingCubeY = cube.y;
+        }
+
+        const movingCube = new MovingCube({
+            x: startMovingCubeX,
+            y: startMovingCubeY,
+            color: cube.color,
+            direction: cube.direction,
+            movingCubes,
+            cube,
+        });
+        movingCubes.push(movingCube);
+        startMovingCubes.push({
+            moving: movingCube,
+            original: cube,
+            isFromSide: true,
+        });
+    });
+
+    return {
+        cubesToMove: [
+            ...startMovingCubes,
+            ...movingCubesInMainField,
+        ],
+    };
+}
 
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
@@ -62,88 +140,34 @@ export class MoveMap {
         const startCubes = params.startCubes;
         this.startCubes = startCubes;
 
-        const mainFieldCubesSorted = [...mainFieldCubes]
-            .sort((a, b) => a.toMineOrder! - b.toMineOrder!);
-
-        // Основной массив со значениями
-        // Сюда будут попадать м-кубики, участвующие в анимации
-        const movingCubesInMainField: MovingCube[] = [];
-
-        // создаем массив из всех кубиков, которые есть на доске
-        mainFieldCubesSorted.forEach((cube) => {
-            movingCubesInMainField.push(new MovingCube({
-                x: cube.x,
-                y: cube.y,
-                color: cube.color,
-                direction: cube.direction,
-                movingCubes: movingCubesInMainField,
-                cube,
-            }));
-        });
-
-        // добавляем в маску кубик, с которого начинаем анимацию
-        // кубики сразу добавляем на главное поле для расчетов движения
-        const startMovingCubes: MovingCube[] = [];
-        startCubes.forEach((startCube, i) => {
-            startCube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
-
-            let startMovingCubeX;
-            let startMovingCubeY;
-            if (startCube.field === 'top' || startCube.field === 'bottom') {
-                startMovingCubeX = startCube.x;
-                if (startCube.field === 'top') {
-                    startMovingCubeY = startCubes.length - i - 1;
-                } else {
-                    startMovingCubeY = BOARD_SIZE - startCubes.length + i;
-                }
-            } else {
-                if (startCube.field === 'left') {
-                    startMovingCubeX = startCubes.length - i - 1;
-                } else {
-                    startMovingCubeX = BOARD_SIZE - startCubes.length + i;
-                }
-                startMovingCubeY = startCube.y;
-            }
-
-            const startMCube = new MovingCube({
-                x: startMovingCubeX,
-                y: startMovingCubeY,
-                color: startCube.color,
-                direction: startCube.direction,
-                movingCubes: movingCubesInMainField,
-                cube: startCube,
-            });
-            startMovingCubes.push(startMCube);
+        const { cubesToMove } = createMovingCubes({
+            startCubes,
+            mainFieldCubes,
         });
 
         // добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
-        callTimes(startMovingCubes.length, () => {
-            movingCubesInMainField.forEach((movingCube) => {
-                movingCube.steps.push({ do: null });
-            });
+        callTimes(startCubes.length, () => {
+            cubesToMove.forEach(({ isFromSide, moving }) => {
+                if (isFromSide) {
+                    const { direction } = moving;
 
-            startMovingCubes.forEach((movingCube) => {
-                const { direction } = movingCube;
+                    assertNonEmptyString(direction);
 
-                assertNonEmptyString(direction);
-
-                movingCube.steps.push({
-                    do: directionToAnimation(direction),
-                });
+                    moving.steps.push({
+                        do: directionToAnimation(direction),
+                    });
+                } else {
+                    moving.steps.push({ do: null });
+                }
             });
         });
 
-        const allCubes = [
-            ...startCubes,
-            ...mainFieldCubesSorted,
-        ];
-        const allMovingCubes = [
-            ...startMovingCubes,
-            ...movingCubesInMainField,
-        ];
-        generateMoveStep(allMovingCubes);
+        const movingCubes = cubesToMove.map(({ moving }) => moving);
+        console.log(movingCubes);
+        this.movingCubes = movingCubes;
 
-        this.movingCubes = allMovingCubes;
+        // ❗️ rename
+        generateMoveStep(movingCubes);
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
@@ -151,13 +175,11 @@ export class MoveMap {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        this.animationLength = allMovingCubes[0].steps.length;
+        this.animationLength = cubesToMove[0].moving.steps.length;
 
         // проходимся в цикле по всем кубикам
-        for (const key in allMovingCubes) {
-            const cube = allCubes[key];
-            const movingCube = allMovingCubes[key];
-            const steps = movingCube.steps;
+        for (const { original, moving } of cubesToMove) {
+            const steps = moving.steps;
 
             // массив с действиями одного кубика
             const actions: CubeAnimation[] = [
@@ -185,9 +207,9 @@ export class MoveMap {
                         lastAction.animation = 'toSide';
                         lastAction.duration++;
                         // для сортировки попаданий в боковое поле
-                        movingCube.toSideTime = key1;
+                        moving.toSideTime = key1;
                         // заносим м-кубик в массив попадания в боковое поле
-                        this.toSideActions.push(movingCube);
+                        this.toSideActions.push(moving);
                         break;
                     case null:
                         if ([
@@ -237,7 +259,7 @@ export class MoveMap {
 
                 this.animationsScript.push({
                     animations: nullToDelayActions,
-                    cube,
+                    cube: original,
                 });
             }
         }

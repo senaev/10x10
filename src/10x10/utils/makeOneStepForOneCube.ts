@@ -5,10 +5,10 @@ import { directionToAnimation } from './directionToAnimation';
 
 // один шаг для м-кубика, возвращает информацию о шаге для анимации
 export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): AnimationStep {
-    const step: AnimationStep = { do: null };
+    let step: AnimationStep = null;
     // если м-кубик взорван, он стоит на месте
     if (cube.x === -1 && cube.y === -1) {
-        step.do = null;
+        step = null;
     } else {
         // если м-кубик не имеет направления - он стоит на месте
         if (cube.direction !== null) {
@@ -37,7 +37,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
                 cube.x = nextPos.x;
                 cube.y = nextPos.y;
                 cube.direction = null;
-                step.do = 'toSide';
+                step = { do: 'toSide' };
             } else {
                 const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
 
@@ -47,18 +47,17 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
                     // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
                     cube.x = nextPos.x;
                     cube.y = nextPos.y;
-                    step.do = animation;
+                    step = { do: animation };
                 } else {
                     // если клетка занята - кубик стоит на месте
-                    step.do = null;
+                    step = null;
                 }
             }
         } else {
             // если не имеет - стоит на мется
-            step.do = null;
+            step = null;
         }
     }
-    cube.steps.push(step);
 
     // возвращаем значение объекту mainMask, чтобы он знал, что что-то произошло
     return step;

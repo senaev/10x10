@@ -365,6 +365,7 @@ export class TenOnTen {
             cubesMask: this.cubes.cubesMask,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
+            beyondTheSide: this.moveMap.beyondTheSide,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем

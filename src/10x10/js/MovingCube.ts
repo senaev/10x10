@@ -5,8 +5,8 @@ import { Cube } from './Cube';
 export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
 
 export type AnimationStep = {
-    do: 'toSide' | MoveAnimation | 'boom' | null;
-};
+    do: 'toSide' | MoveAnimation | 'boom';
+} | null;
 
 /**
  * класс для удобной работы с м-кубиком
@@ -22,14 +22,13 @@ export class MovingCube {
     public steps: AnimationStep[];
     public toSideTime: number | undefined;
 
-    private cube: Cube;
+    public cube: Cube;
 
     public constructor(o: {
         x: number;
         y: number;
         color: string;
         direction: Direction | null;
-        movingCubes: MovingCube[];
         cube: Cube;
     }) {
         this.x = o.x;

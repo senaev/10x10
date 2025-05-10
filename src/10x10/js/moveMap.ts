@@ -4,11 +4,10 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
-import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
-import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
+import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 
 import { Cube } from './Cube';
 import { CubesMask } from './Cubes';
@@ -36,89 +35,6 @@ export type CubesMove = {
     cubesToMove: CubeToMove[];
 };
 
-function createMovingCubes({
-    startCubes,
-    mainFieldCubes,
-}: {
-    startCubes: Cube[];
-    mainFieldCubes: Cube[];
-}): CubesMove {
-    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
-
-    // Основной массив со значениями
-    // Сюда будут попадать м-кубики, участвующие в анимации
-    const movingCubesInMainField: CubeToMove[] = [];
-
-    // ❗️ remove
-    const movingCubes: MovingCube[] = [];
-
-    // создаем массив из всех кубиков, которые есть на доске
-    mainFieldCubesSorted.forEach((cube) => {
-        const movingCube = new MovingCube({
-            x: cube.x,
-            y: cube.y,
-            color: cube.color,
-            direction: cube.direction,
-            movingCubes,
-            cube,
-        });
-
-        movingCubes.push(movingCube);
-        movingCubesInMainField.push({
-            moving: movingCube,
-            original: cube,
-            isFromSide: false,
-        });
-    });
-
-    // добавляем в маску кубик, с которого начинаем анимацию
-    // кубики сразу добавляем на главное поле для расчетов движения
-    const startMovingCubes: CubeToMove[] = [];
-    startCubes.forEach((cube, i) => {
-        cube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
-
-        let startMovingCubeX;
-        let startMovingCubeY;
-        if (cube.field === 'top' || cube.field === 'bottom') {
-            startMovingCubeX = cube.x;
-            if (cube.field === 'top') {
-                startMovingCubeY = startCubes.length - i - 1;
-            } else {
-                startMovingCubeY = BOARD_SIZE - startCubes.length + i;
-            }
-        } else {
-            if (cube.field === 'left') {
-                startMovingCubeX = startCubes.length - i - 1;
-            } else {
-                startMovingCubeX = BOARD_SIZE - startCubes.length + i;
-            }
-            startMovingCubeY = cube.y;
-        }
-
-        const movingCube = new MovingCube({
-            x: startMovingCubeX,
-            y: startMovingCubeY,
-            color: cube.color,
-            direction: cube.direction,
-            movingCubes,
-            cube,
-        });
-        movingCubes.push(movingCube);
-        startMovingCubes.push({
-            moving: movingCube,
-            original: cube,
-            isFromSide: true,
-        });
-    });
-
-    return {
-        cubesToMove: [
-            ...startMovingCubes,
-            ...movingCubesInMainField,
-        ],
-    };
-}
-
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
  * Абстрагирует функции, связанные с анимацией от этого класса.
@@ -140,7 +56,7 @@ export class MoveMap {
         const startCubes = params.startCubes;
         this.startCubes = startCubes;
 
-        this.cubesMove = createMovingCubes({
+        this.cubesMove = prepareMovingCubes({
             startCubes,
             mainFieldCubes,
         });
@@ -159,12 +75,12 @@ export class MoveMap {
                         do: directionToAnimation(direction),
                     });
                 } else {
-                    moving.steps.push({ do: null });
+                    moving.steps.push(null);
                 }
             });
         });
 
-        generateMoveSteps(this.cubesMove.cubesToMove.map(({ moving }) => moving));
+        generateMoveSteps(cubesToMove.map(({ moving }) => moving));
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
@@ -183,51 +99,55 @@ export class MoveMap {
             ];
 
             // пробегаемся по массиву шагов анимации
-            for (let key1 = 0; key1 < steps.length; key1++) {
+            for (let key = 0; key < steps.length; key++) {
                 // один шаг анимации
-                const step = steps[key1];
+                const step = steps[key];
                 // последний шаг анимации, к которому добавляем продолжительность
                 // в случае совпадения со следующим шагом
                 const lastAction = actions[actions.length - 1];
-                // если это такой же шаг, как и предыдущий
-                if (step.do === lastAction.animation) {
-                    // иначе просто увеличиваем продолжительность предыдущего
-                    lastAction.duration++;
-                } else {
-                    // для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
-                    switch (step.do) {
-                    case 'toSide':
-                        lastAction.animation = 'toSide';
+
+                if (step === null) {
+                    if ([
+                        'st',
+                        'sr',
+                        'sl',
+                        'sb',
+                    ].indexOf(lastAction.animation!) > -1) {
+                        lastAction.animation = `${lastAction.animation}Bump`;
                         lastAction.duration++;
-                        // для сортировки попаданий в боковое поле
-                        moving.toSideTime = key1;
-                        // заносим м-кубик в массив попадания в боковое поле
-                        this.toSideActions.push(moving);
-                        break;
-                    case null:
-                        if ([
-                            'st',
-                            'sr',
-                            'sl',
-                            'sb',
-                        ].indexOf(lastAction.animation!) > -1) {
-                            lastAction.animation = `${lastAction.animation}Bump`;
+                    } else {
+                        actions.push({
+                            animation: null,
+                            duration: 1,
+                        });
+                    }
+                } else {
+
+                    // если это такой же шаг, как и предыдущий
+                    if (step.do === lastAction.animation) {
+                    // иначе просто увеличиваем продолжительность предыдущего
+                        lastAction.duration++;
+                    } else {
+                    // для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
+                        switch (step.do) {
+                        case 'toSide':
+                            lastAction.animation = 'toSide';
                             lastAction.duration++;
-                        } else {
+                            // для сортировки попаданий в боковое поле
+                            moving.toSideTime = key;
+                            // заносим м-кубик в массив попадания в боковое поле
+                            this.toSideActions.push(moving);
+                            break;
+                        default:
                             actions.push({
                                 animation: step.do,
                                 duration: 1,
                             });
+                            break;
                         }
-                        break;
-                    default:
-                        actions.push({
-                            animation: step.do,
-                            duration: 1,
-                        });
-                        break;
                     }
                 }
+
             }
             if (actions.length === 1 && actions[0].animation === null) {
                 actions.shift();
@@ -268,11 +188,13 @@ export class MoveMap {
         cubesMask,
         animationsScript,
         animationLength,
+        beyondTheSide,
     }: {
         startCubes: Cube[];
         cubesMask: CubesMask;
         animationsScript: CubeAnimationStep[];
         animationLength: UnsignedInteger;
+        beyondTheSide: Cube[];
     }): Promise<void> {
         animateCubesFromSideToMainField(startCubes, cubesMask);
 
@@ -293,9 +215,8 @@ export class MoveMap {
         await promiseTimeout(animationLength * ANIMATION_TIME - 1);
 
         // удаляем ненужные html-элементы
-        for (const cube of this.beyondTheSide) {
+        for (const cube of beyondTheSide) {
             cube.remove();
         }
-
     }
 }

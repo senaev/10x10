@@ -13,8 +13,11 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
     // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
     let somethingHappened = false;
     for (const movingCube of movingCubes) {
-        const oneStep = makeOneStepForOneCube(movingCube, movingCubes);
-        if (oneStep.do !== null) {
+        const step = makeOneStepForOneCube(movingCube, movingCubes);
+
+        movingCube.steps.push(step);
+
+        if (step !== null) {
             somethingHappened = true;
         }
     }
@@ -39,7 +42,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
     adjacentCubes.forEach((group) => {
         movingCubes.forEach((mCube) => {
             if (group.indexOf(mCube) === -1) {
-                mCube.steps.push({ do: null });
+                mCube.steps.push(null);
             } else {
                 mCube.steps.push({ do: 'boom' });
                 // взорвавшимся м-кубикам присваиваем координаты -1 -1,

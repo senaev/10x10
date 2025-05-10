@@ -10,7 +10,7 @@ import { generateMoveStep } from '../utils/generateMoveStep';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 
 import { Cube } from './Cube';
-import { Cubes, CubesMask } from './Cubes';
+import { CubesMask } from './Cubes';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
@@ -24,6 +24,21 @@ export type CubeAnimationStep = {
     animations: CubeAnimation[];
     cube: Cube;
 };
+
+// export type CubesMove = {
+//     cubesToMove: {
+//         original: Cube;
+//         moving: MovingCube;
+//     }[];
+// };
+
+// function createMovingCubes(cubesMove: { startCubes: Cube[]; cubes: Cubes; }): CubesMove {
+//     const { cubesToMove } = cubesMove;
+
+//     return {
+
+//     };
+// }
 
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
@@ -39,20 +54,13 @@ export class MoveMap {
     public readonly animationsScript: CubeAnimationStep[] = [];
 
     private readonly movingCubes: MovingCube[];
-    private readonly cubes: Cubes;
     private readonly animationLength: number;
 
-    public constructor(params: { startCubes: Cube[]; cubes: Cubes; app: TenOnTen }) {
-        this.cubes = params.cubes;
+    public constructor(params: { startCubes: Cube[]; mainFieldCubes: Cube[]; app: TenOnTen }) {
+        const mainFieldCubes = params.mainFieldCubes;
 
         const startCubes = params.startCubes;
         this.startCubes = startCubes;
-
-        // создаем массив из всех кубиков, которые есть на доске
-        const mainFieldCubes: Cube[] = [];
-        this.cubes._mainEach((cube) => {
-            mainFieldCubes.push(cube);
-        });
 
         const mainFieldCubesSorted = [...mainFieldCubes]
             .sort((a, b) => a.toMineOrder! - b.toMineOrder!);

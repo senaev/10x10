@@ -1,6 +1,10 @@
 import $ from 'jquery';
+import { Integer } from 'senaev-utils/src/utils/Number/Integer';
+import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
+import { forceRepaint } from '../../utils/forceRepaint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
@@ -15,9 +19,84 @@ import { CubeAddress } from './Cubes';
 import { CubeAnimation } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 
+export async function animateCubeMovement({
+    isVertical,
+    distance,
+    element,
+}: {
+    isVertical: boolean;
+    distance: Integer;
+    element: HTMLElement;
+}) {
+    const duration = ANIMATION_TIME * Math.abs(distance);
+
+    const prop = isVertical ? 'top' : 'left';
+    element.style.transition = `${prop} ${duration}ms cubic-bezier(.42, 0, 1, 1)`;
+    forceRepaint(element);
+
+    const currentLeft = parseFloat(element.style[prop]);
+    const newLeft = currentLeft + distance;
+    element.style[prop] = `${newLeft}em`;
+
+    await promiseTimeout(duration);
+
+    element.style.transition = '';
+}
+
+export async function animateCubeBump({
+    isVertical,
+    element,
+}: {
+    isVertical: boolean;
+    element: HTMLElement;
+}) {
+    const scale: [number, number] = isVertical
+        ? [
+            1.1,
+            0.9,
+        ]
+        : [
+            0.9,
+            1.1,
+        ];
+    const halfDuration = ANIMATION_TIME / 2;
+
+    element.style.transition = `transform ${halfDuration}ms ease`;
+    forceRepaint(element);
+
+    element.style.transform = `scale(${scale[0]},${scale[1]})`;
+    await promiseTimeout(halfDuration);
+
+    element.style.transform = '';
+    await promiseTimeout(halfDuration);
+
+    element.style.transition = '';
+}
+
+async function animateCubeMovementWithBump ({
+    element,
+    isVertical,
+    distance,
+}: {
+    element: HTMLElement;
+    isVertical: boolean;
+    distance: PositiveInteger;
+}) {
+    await animateCubeMovement({
+        isVertical,
+        element,
+        distance,
+    });
+
+    await animateCubeBump({
+        isVertical,
+        element,
+    });
+};
+
 export type CubeAnimateAction = {
     action: string;
-    duration: number;
+    steps: number;
 };
 
 export type Transition = Partial<{
@@ -231,7 +310,7 @@ export class Cube {
             () => {
                 this.animate({
                     action: action!,
-                    duration,
+                    steps: duration,
                 });
             },
             (delay ?? 0) * ANIMATION_TIME
@@ -245,40 +324,8 @@ export class Cube {
 
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
-    public animate({ action, duration }: CubeAnimateAction) {
-        let dur;
-
+    public animate({ action, steps }: CubeAnimateAction) {
         const field = this.field;
-
-        const slideWithBump = (prop: 'left' | 'top', sign: '+' | '-') => {
-            dur = duration - 1;
-            const scale: [number, number] = prop === 'left'
-                ? [
-                    0.9,
-                    1.1,
-                ]
-                : [
-                    1.1,
-                    0.9,
-                ];
-
-            const trans0: Transition = {
-                duration: ANIMATION_TIME * dur,
-                easing: `cubic-bezier(.${bezier(dur)}, 0, 1, 1)`,
-            };
-            trans0[prop] = `${sign}=${dur * CUBE_WIDTH}`;
-            const trans1: Transition = {
-                scale,
-                duration: ANIMATION_TIME / 2,
-            };
-            trans1[prop] = `${sign === '+' ? '+' : '-'}=4`;
-            const trans2: Transition = {
-                scale: 1,
-                duration: ANIMATION_TIME / 2,
-            };
-            trans2[prop] = `${sign === '+' ? '-' : '+'}=4`;
-            $(this.element).transition(trans0).transition(trans1).transition(trans2);
-        };
 
         /*
         * движение в боковую панель без разрывов анимации,
@@ -286,7 +333,7 @@ export class Cube {
         * одним перемещением по возможности
         */
         const slideToSide = (prop: 'left' | 'top', sign: '+' | '-') => {
-            dur = duration;
+            const dur = steps;
             // задаем нужный изинг
             const easing = `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
             const trans: Transition = {
@@ -335,7 +382,7 @@ export class Cube {
                     sign = '+';
                 }
             }
-            trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
+            trans[prop] = `${sign}=${steps * CUBE_WIDTH}`;
             $(this.element).transition(trans);
         };
 
@@ -355,7 +402,7 @@ export class Cube {
                     sign = '-';
                 }
             }
-            trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
+            trans[prop] = `${sign}=${steps * CUBE_WIDTH}`;
             $(this.element).transition(trans);
         };
 
@@ -390,8 +437,8 @@ export class Cube {
                 .transition({
                     scale: 1,
                     opacity: 1,
-                    duration: duration * ANIMATION_TIME,
-                    delay: duration * ANIMATION_TIME,
+                    duration: steps * ANIMATION_TIME,
+                    delay: steps * ANIMATION_TIME,
                     easing: 'out',
                 });
         };
@@ -400,7 +447,7 @@ export class Cube {
             $(this.element).transition({
                 scale: 0,
                 opacity: 0,
-                duration: duration * ANIMATION_TIME,
+                duration: steps * ANIMATION_TIME,
                 easing: 'out',
             });
             setTimeout(
@@ -412,7 +459,7 @@ export class Cube {
                         })
                         .addClass('cubeHidden');
                 },
-                duration * ANIMATION_TIME,
+                steps * ANIMATION_TIME,
                 this
             );
         };
@@ -435,19 +482,35 @@ export class Cube {
         switch (action) {
         // движение вправо со столкновением
         case 'srBump':
-            slideWithBump('left', '+');
+            animateCubeMovementWithBump({
+                element: this.element,
+                isVertical: false,
+                distance: steps - 1,
+            });
             break;
             // движение вправо со столкновением
         case 'sbBump':
-            slideWithBump('top', '+');
+            animateCubeMovementWithBump({
+                element: this.element,
+                isVertical: true,
+                distance: steps - 1,
+            });
             break;
             // движение вправо со столкновением
         case 'slBump':
-            slideWithBump('left', '-');
+            animateCubeMovementWithBump({
+                element: this.element,
+                isVertical: false,
+                distance: 1 - steps,
+            });
             break;
             // движение вправо со столкновением
         case 'stBump':
-            slideWithBump('top', '-');
+            animateCubeMovementWithBump({
+                element: this.element,
+                isVertical: true,
+                distance: 1 - steps,
+            });
             break;
             // движение с последующим вливанием в поле
         case 'toSide':
@@ -494,7 +557,7 @@ export class Cube {
                     {
                         scale: 0,
                         opacity: 0,
-                        duration: duration * ANIMATION_TIME,
+                        duration: steps * ANIMATION_TIME,
                         easing: 'out',
                     },
                     () => {

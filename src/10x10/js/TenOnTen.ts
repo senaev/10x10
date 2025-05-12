@@ -241,7 +241,7 @@ export class TenOnTen {
             }, null);
             cube.animate({
                 action: 'remove',
-                duration: 4,
+                steps: 4,
             });
         });
         setTimeout(
@@ -530,7 +530,7 @@ export class TenOnTen {
                 );
                 cube!.animate({
                     action: 'remove',
-                    duration: 4,
+                    steps: 4,
                 });
                 break;
             case 'change':

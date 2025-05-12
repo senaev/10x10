@@ -92,16 +92,16 @@ export function animateMovingCubesFromMainFieldToSide({
     // третий кубик пропадает
     cr.animate({
         action: 'disappearanceInSide',
-        duration: 1,
+        steps: 1,
     });
 
     // остальные два сдвигаются ближе к линии
     c2.animate({
         action: 'forth',
-        duration: 1,
+        steps: 1,
     });
     c1.animate({
         action: 'forth',
-        duration: 1,
+        steps: 1,
     });
 }

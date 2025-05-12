@@ -38,8 +38,8 @@ export class Cube {
     public direction: Direction | null;
     public color: string;
     public toMineOrder: number | null;
-    public readonly $el: JQuery<HTMLElement>;
-    private readonly container: JQuery<HTMLElement>;
+    public readonly element: HTMLElement;
+    private readonly container: HTMLElement;
 
     private readonly app: TenOnTen;
     private appearWithAnimation: boolean;
@@ -53,12 +53,10 @@ export class Cube {
         app: TenOnTen;
         direction: Direction| null;
         color: string;
-        container: JQuery<HTMLElement>;
+        container: HTMLElement;
         onClick: (address: CubeAddress) => void;
         onHover: (address: CubeAddress, isHovered: boolean) => void;
     }) {
-        let visibleModeClasses;
-
         this.x = params.x;
         this.y = params.y;
         this.container = params.container;
@@ -92,57 +90,47 @@ export class Cube {
 
         this.color = params.color;
 
+        // указатель на DOM-элемент кубика с прослушиванием событий
+        this.element = document.createElement('div');
         // проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
         if (this.field !== 'main') {
-            if (this._inFieldIsVisible()) {
-                visibleModeClasses = ' ';
-            } else {
-                visibleModeClasses = ' cubeHidden';
+            if (!this._inFieldIsVisible()) {
+                this.element.classList.add('cubeHidden');
             }
-        } else {
-            visibleModeClasses = ' ';
         }
 
-        let directionClass = '';
         if (this.field === 'main' && this.direction !== null) {
-            directionClass = `d${this.direction}`;
+            this.element.classList.add(`d${this.direction}`);
         }
 
-        // указатель на DOM-элемент кубика с прослушиванием событий
-        this.$el = $('<div class="cube"></div>')
-            .addClass(`${this.color} f${this.field}${visibleModeClasses}${directionClass}`)
-            .hover(
-                (e) => {
-                    e.preventDefault();
+        this.element.classList.add('cube');
+        this.element.classList.add(this.color);
+        this.element.classList.add(`f${this.field}`);
+        this.element.addEventListener('mouseover', (e) => {
+            e.preventDefault();
 
-                    params.onHover({
-                        field: this.field,
-                        x: this.x,
-                        y: this.y,
-                    }, true);
-                },
-                (e) => {
-                    e.preventDefault();
+            params.onHover({
+                field: this.field,
+                x: this.x,
+                y: this.y,
+            }, true);
+        });
 
-                    params.onHover({
-                        field: this.field,
-                        x: this.x,
-                        y: this.y,
-                    }, false);
-                }
-            )
-            .click((e) => {
-                // не даем продолжить выполнение событий
-                e.preventDefault();
-                // и снимаем курсор с элемента
-                this.$el.trigger('mouseout');
+        this.element.addEventListener('mouseout', () => {
+            params.onHover({
+                field: this.field,
+                x: this.x,
+                y: this.y,
+            }, false);
+        });
 
-                params.onClick({
-                    field: this.field,
-                    x: this.x,
-                    y: this.y,
-                });
+        this.element.addEventListener('click', () => {
+            params.onClick({
+                field: this.field,
+                x: this.x,
+                y: this.y,
             });
+        });
 
         // время попадания в поле майн
         if (this.field === 'main') {
@@ -152,7 +140,7 @@ export class Cube {
         this.toState();
 
         if (this.appearWithAnimation) {
-            this.$el
+            $(this.element)
                 .css({ scale: 0 })
                 .appendTo(this.container)
                 .transition({
@@ -161,15 +149,15 @@ export class Cube {
                 });
             this.appearWithAnimation = false;
         } else {
-            this.$el.appendTo(this.container);
+            this.container.appendChild(this.element);
         }
     }
 
     public setRowVisibility(isVisible: boolean) {
         if (isVisible) {
-            this.$el.addClass('firstInHoverLine');
+            this.element.classList.add('firstInHoverLine');
         } else {
-            this.$el.removeClass('firstInHoverLine');
+            this.element.classList.remove('firstInHoverLine');
         }
     }
 
@@ -186,26 +174,26 @@ export class Cube {
             x = position.x;
             y = position.y;
         }
-        let left = x * CUBE_WIDTH;
-        let top = y * CUBE_WIDTH;
+        let left = x;
+        let top = y;
         switch (this.field) {
         case 'top':
-            top -= CUBE_WIDTH * 10;
+            top -= 10;
             break;
         case 'right':
-            left += CUBE_WIDTH * 10;
+            left += 10;
             break;
         case 'bottom':
-            top += CUBE_WIDTH * 10;
+            top += 10;
             break;
         case 'left':
-            left -= CUBE_WIDTH * 10;
+            left -= 10;
             break;
         }
-        this.$el.css({
-            left,
-            top,
-        });
+        this.element.style.left = `${left + 3.5}em`;
+        this.element.style.top = `${top + 3.5}em`;
+        this.element.setAttribute('data-top', String(top));
+        this.element.setAttribute('data-left', String(left));
     }
 
     public performIHavePawsAnimation() {
@@ -219,7 +207,7 @@ export class Cube {
                 0.8,
             ];
 
-        this.$el
+        $(this.element)
             .transition({
                 scale,
                 duration: ANIMATION_TIME,
@@ -252,7 +240,7 @@ export class Cube {
 
     // Добавляем объект анимации на обработку через время, полученное в атрибутах
     public remove() {
-        this.$el.remove();
+        this.element.remove();
     }
 
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
@@ -289,7 +277,7 @@ export class Cube {
                 duration: ANIMATION_TIME / 2,
             };
             trans2[prop] = `${sign === '+' ? '-' : '+'}=4`;
-            this.$el.transition(trans0).transition(trans1).transition(trans2);
+            $(this.element).transition(trans0).transition(trans1).transition(trans2);
         };
 
         /*
@@ -322,9 +310,10 @@ export class Cube {
             );
 
             // анимируем движение, в конце - убираем стрелку, меняем классы
-            this.$el.transition(trans, () => {
+            $(this.element).transition(trans, () => {
                 const dir = reverseDirection(this.field);
-                this.$el
+
+                $(this.element)
                     .removeClass(`d${this.field} f${dir}`)
                     .addClass(`f${this.field}`);
             });
@@ -347,7 +336,7 @@ export class Cube {
                 }
             }
             trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
-            this.$el.transition(trans);
+            $(this.element).transition(trans);
         };
 
         const forth = () => {
@@ -367,7 +356,7 @@ export class Cube {
                 }
             }
             trans[prop] = `${sign}=${duration * CUBE_WIDTH}`;
-            this.$el.transition(trans);
+            $(this.element).transition(trans);
         };
 
         const appearance = () => {
@@ -392,7 +381,7 @@ export class Cube {
             }
 
             this.toState(pos);
-            this.$el
+            $(this.element)
                 .removeClass('cubeHidden')
                 .css({
                     scale: 0,
@@ -408,7 +397,7 @@ export class Cube {
         };
 
         const disappearance = () => {
-            this.$el.transition({
+            $(this.element).transition({
                 scale: 0,
                 opacity: 0,
                 duration: duration * ANIMATION_TIME,
@@ -416,7 +405,7 @@ export class Cube {
             });
             setTimeout(
                 function (cube) {
-                    cube.$el
+                    $(cube.element)
                         .css({
                             scale: 1,
                             opacity: 1,
@@ -430,7 +419,7 @@ export class Cube {
 
         const boom = () => {
             // console.log("boom:",cube.color, cube.x, cube.y);
-            this.$el.transition(
+            $(this.element).transition(
                 {
                     scale: 1.5,
                     opacity: 0,
@@ -500,17 +489,18 @@ export class Cube {
             break;
             // уменьшаем и в конце удаляем
         case 'remove':
-            this.$el.transition(
-                {
-                    scale: 0,
-                    opacity: 0,
-                    duration: duration * ANIMATION_TIME,
-                    easing: 'out',
-                },
-                () => {
-                    this.remove();
-                }
-            );
+            $(this.element)
+                .transition(
+                    {
+                        scale: 0,
+                        opacity: 0,
+                        duration: duration * ANIMATION_TIME,
+                        easing: 'out',
+                    },
+                    () => {
+                        this.remove();
+                    }
+                );
             break;
         default:
             // eslint-disable-next-line no-console
@@ -541,7 +531,7 @@ export class Cube {
             if (o.color !== undefined && o.color !== this.color) {
                 const prevColor = this.color;
                 this.color = o.color;
-                this.$el.removeClass(prevColor).addClass(this.color);
+                $(this.element).removeClass(prevColor).addClass(this.color);
             }
             // если меняем направление и это не то же направление, что сейчас
             if (o.direction !== undefined && o.direction !== this.direction) {
@@ -551,9 +541,9 @@ export class Cube {
                 // стили следует менять только у кубиков на главном поле, так как
                 // слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
                 if (this.field === 'main') {
-                    this.$el.removeClass(`d${prevDirection}`);
+                    $(this.element).removeClass(`d${prevDirection}`);
                     if (this.direction !== null) {
-                        this.$el.addClass(`d${this.direction}`);
+                        $(this.element).addClass(`d${this.direction}`);
                     }
                 }
             }
@@ -581,7 +571,7 @@ export class Cube {
                 transition2[prop] = String(0);
             }
             // сама анимация с изменением состояния по ходу
-            this.$el
+            $(this.element)
                 .transition(transition1, function () {
                     changeParams();
                 })

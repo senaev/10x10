@@ -30,6 +30,8 @@ body {
     width: 10em;
     height: 10em;
     pointer-events: none;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .backgroundCube {
@@ -38,7 +40,6 @@ body {
     background: #a0a0a0;
     border-radius: 0.3em;
     margin: 0.025em;
-    float: left;
 }
 
 .topRightPanel {
@@ -65,20 +66,12 @@ body {
     background-color: #ff000055;
 }
 
-/*сам кубик*/
-
 .cube {
     position: absolute;
-    height: 30px;
-    width: 30px;
-    border-radius: 10px;
-    border-width: 0px;
-    border-style: solid;
-    /*background: grey;*/
-    margin-top: 1px;
-    margin-right: 1px;
-    margin-bottom: 1px;
-    margin-left: 1px;
+    height: 0.95em;
+    width: 0.95em;
+    border-radius: 0.3em;
+    margin: 0.025em;
 }
 
 .cubeHidden {
@@ -113,7 +106,6 @@ body {
     background-position: -97px -1px;
 }
 
-/*расцветка кубиков*/
 .cube.blue {
     background-color: #4e7cff;
     border-color: #7a9cff;

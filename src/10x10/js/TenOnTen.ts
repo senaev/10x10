@@ -140,20 +140,17 @@ export class TenOnTen {
         // датчик конца хода
         this.end = null;
 
-        // Initialize container function
-        (() => {
-            const background = document.createElement('div');
-            background.classList.add('backgroundField');
+        const background = document.createElement('div');
+        background.classList.add('backgroundField');
 
-            for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
-                const backgroundCube = document.createElement('div');
-                backgroundCube.classList.add('backgroundCube');
-                background.appendChild(backgroundCube);
-            }
+        for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
+            const backgroundCube = document.createElement('div');
+            backgroundCube.classList.add('backgroundCube');
+            background.appendChild(backgroundCube);
+        }
 
-            this.container.classList.add('tenOnTenContainer');
-            this.container.appendChild(background);
-        })();
+        this.container.classList.add('tenOnTenContainer');
+        this.container.appendChild(background);
 
         const topRightPanelElement = document.createElement('div');
         topRightPanelElement.classList.add('topRightPanel');

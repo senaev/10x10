@@ -59,14 +59,14 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 (async () => {
     const playGamaBridge = await initPlayGamaBridge();
 
-    const state = await playGamaBridge.storage.get(STORAGE_KEY);
+    const userStateInTenOnTenGame = await playGamaBridge.storage.get(STORAGE_KEY);
 
     // eslint-disable-next-line no-console
-    console.log('initialState', state);
+    console.log('initialState', userStateInTenOnTenGame);
 
     const tenOnTen = new TenOnTen({
         container,
-        initialState: isValidTenOnTenState(state) ? state : undefined,
+        initialState: isValidTenOnTenState(userStateInTenOnTenGame) ? userStateInTenOnTenGame : undefined,
     });
     // eslint-disable-next-line no-console
     console.log('App is ready', tenOnTen);
@@ -91,6 +91,13 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
         }
 
         showBanner(playGamaBridge);
+    });
+
+    playGamaBridge.platform.sendMessage('game_ready');
+
+    playGamaBridge.game.on(playGamaBridge.EVENT_NAME.VISIBILITY_STATE_CHANGED, (nextState) => {
+        // eslint-disable-next-line no-console
+        console.log('Visibility state:', nextState);
     });
 })()
     .catch((error) => {

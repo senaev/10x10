@@ -27,7 +27,9 @@ export type PlayGamaBridge = {
         visibilityState: 'visible' | 'hidden';
         on: <T extends PlayGamaBridgeEventName>(event: T, callback: (state: PlayGamaBridgeEventNames[T]) => void) => void;
     };
-    EVENT_NAME: Record<string, PlayGamaBridgeEventName>;
+    EVENT_NAME: {
+        VISIBILITY_STATE_CHANGED: 'visibility_state_changed';
+    };
     STORAGE_TYPE: Record<string, PlayGamaBridgeStorageType>;
     storage: PlayGamaBridgeStorage;
     advertisement: {

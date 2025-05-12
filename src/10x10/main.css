@@ -27,8 +27,6 @@ body {
 
     text-align: center;
     color: white;
-
-    background-color: #ff000055;
 }
 
 .backgroundField {
@@ -56,7 +54,6 @@ body {
     top: 0.5em;
     height: 3em;
     width: 3em;
-    background-color: #ff000055;
 }
 
 .undoButton {
@@ -71,7 +68,6 @@ body {
 .topLeftPanel {
     height: 96px;
     width: 96px;
-    background-color: #ff000055;
 }
 
 .cube {
@@ -80,6 +76,7 @@ body {
     width: 0.95em;
     border-radius: 0.3em;
     margin: 0.025em;
+    background-size: cover;
 }
 
 .cubeHidden {
@@ -97,21 +94,21 @@ body {
 .cube.dbottom {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -33px -1px;
+    background-position: 33.3%;
 }
 
 .cube.firstInHoverLine.fright,
 .cube.dleft {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -65px -1px;
+    background-position: 66.6%;
 }
 
 .cube.firstInHoverLine.fbottom,
 .cube.dtop {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
-    background-position: -97px -1px;
+    background-position: 100%;
 }
 
 .cube.blue {

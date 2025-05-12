@@ -7,7 +7,6 @@ import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/pro
 import { forceRepaint } from '../../utils/forceRepaint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field } from '../const/FIELDS';
 import { Direction } from '../types/Direction';
 import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
@@ -34,8 +33,8 @@ export async function animateCubeMovement({
     element.style.transition = `${prop} ${duration}ms cubic-bezier(.42, 0, 1, 1)`;
     forceRepaint(element);
 
-    const currentLeft = parseFloat(element.style[prop]);
-    const newLeft = currentLeft + distance;
+    const currentPropValue = parseFloat(element.style[prop]);
+    const newLeft = currentPropValue + distance;
     element.style[prop] = `${newLeft}em`;
 
     await promiseTimeout(duration);
@@ -69,6 +68,23 @@ export async function animateCubeBump({
 
     element.style.transform = '';
     await promiseTimeout(halfDuration);
+
+    element.style.transition = '';
+}
+
+async function appearCubeFromZeroSizePoint({
+    element,
+}: {
+    element: HTMLElement;
+}) {
+    element.style.transform = 'scale(0,0)';
+    element.style.opacity = '0.4';
+    element.style.transition = `transform ${ANIMATION_TIME}ms ease-out, opacity ${ANIMATION_TIME}ms ease-out`;
+    forceRepaint(element);
+
+    element.style.transform = 'scale(1,1)';
+    element.style.opacity = '1';
+    await promiseTimeout(ANIMATION_TIME);
 
     element.style.transition = '';
 }
@@ -332,82 +348,52 @@ export class Cube {
         * чтобы сохранить максимальную плавность анимации, делать
         * одним перемещением по возможности
         */
-        const slideToSide = (prop: 'left' | 'top', sign: '+' | '-') => {
+        const slideToSide = async (prop: 'left' | 'top', sign: '+' | '-') => {
             const dur = steps;
-            // задаем нужный изинг
-            const easing = `cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
-            const trans: Transition = {
-                duration: ANIMATION_TIME * dur,
-                easing,
-            };
-            trans[prop] = `${sign}=${dur * CUBE_WIDTH}`;
 
-            // отправляем в коллекцию команду вставки кубика в линию,
-            // чтобы остальные кубики в этой линии пододвинулись
-            setTimeout(
-                () => {
-                    animateMovingCubesFromMainFieldToSide({
-                        cube: this,
-                        toSideActions: this.app.moveMap!.toSideActions,
-                        beyondTheSide: this.app.moveMap!.beyondTheSide,
-                        cubesMask: this.app.cubes.cubesMask,
-                    });
-                },
-                ANIMATION_TIME * (dur - 1)
-            );
+            const slideDuration = ANIMATION_TIME * dur;
+            this.element.style.transition = `${prop} ${slideDuration}ms cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
+            forceRepaint(this.element);
 
-            // анимируем движение, в конце - убираем стрелку, меняем классы
-            $(this.element).transition(trans, () => {
-                const dir = reverseDirection(this.field);
+            const currentPropValue = parseFloat(this.element.style[prop]);
+            const nextPropValue = sign === '+'
+                ? currentPropValue + dur
+                : currentPropValue - dur;
+            this.element.style[prop] = `${nextPropValue}em`;
 
-                $(this.element)
-                    .removeClass(`d${this.field} f${dir}`)
-                    .addClass(`f${this.field}`);
+            const delayDuration = ANIMATION_TIME * (dur - 1);
+            await promiseTimeout(delayDuration);
+
+            const dir = reverseDirection(this.field);
+            this.element.classList.remove(`d${this.field}`);
+            this.element.classList.remove(`f${dir}`);
+            this.element.classList.add(`f${this.field}`);
+
+            animateMovingCubesFromMainFieldToSide({
+                cube: this,
+                toSideActions: this.app.moveMap!.toSideActions,
+                beyondTheSide: this.app.moveMap!.beyondTheSide,
+                cubesMask: this.app.cubes.cubesMask,
             });
         };
 
-        const nearer = () => {
-            let prop: 'top' | 'left' = 'left';
-            let sign: '+' | '-' = '-';
-            const trans: Transition = { duration: ANIMATION_TIME };
-
-            if (this.field === 'top' || this.field === 'bottom') {
-                prop = 'top';
-                if (this.field === 'top') {
-                    sign = '+';
-                }
-            } else {
-                prop = 'left';
-                if (this.field === 'left') {
-                    sign = '+';
-                }
-            }
-            trans[prop] = `${sign}=${steps * CUBE_WIDTH}`;
-            $(this.element).transition(trans);
+        const nearer = async () => {
+            await animateCubeMovement({
+                element: this.element,
+                isVertical: field === 'top' || field === 'bottom',
+                distance: (field === 'top' || field === 'left') ? 1 : -1,
+            });
         };
 
-        const forth = () => {
-            let prop: 'top' | 'left' = 'left';
-            let sign: '+' | '-' = '+';
-            const trans: Transition = { duration: ANIMATION_TIME };
-
-            if (this.field === 'top' || this.field === 'bottom') {
-                prop = 'top';
-                if (this.field === 'top') {
-                    sign = '-';
-                }
-            } else {
-                prop = 'left';
-                if (this.field === 'left') {
-                    sign = '-';
-                }
-            }
-            trans[prop] = `${sign}=${steps * CUBE_WIDTH}`;
-            $(this.element).transition(trans);
+        const further = async () => {
+            await animateCubeMovement({
+                element: this.element,
+                isVertical: field === 'top' || field === 'bottom',
+                distance: (field === 'top' || field === 'left') ? -1 : 1,
+            });
         };
 
-        const appearance = () => {
-
+        const appearanceInSide = async () => {
             const pos = {
                 x: this.x,
                 y: this.y,
@@ -428,40 +414,31 @@ export class Cube {
             }
 
             this.toState(pos);
-            $(this.element)
-                .removeClass('cubeHidden')
-                .css({
-                    scale: 0,
-                    opacity: 0.4,
-                })
-                .transition({
-                    scale: 1,
-                    opacity: 1,
-                    duration: steps * ANIMATION_TIME,
-                    delay: steps * ANIMATION_TIME,
-                    easing: 'out',
-                });
+
+            await promiseTimeout(steps * ANIMATION_TIME);
+
+            this.element.classList.remove('cubeHidden');
+            await appearCubeFromZeroSizePoint({
+                element: this.element,
+            });
         };
 
-        const disappearance = () => {
-            $(this.element).transition({
-                scale: 0,
-                opacity: 0,
-                duration: steps * ANIMATION_TIME,
-                easing: 'out',
-            });
-            setTimeout(
-                function (cube) {
-                    $(cube.element)
-                        .css({
-                            scale: 1,
-                            opacity: 1,
-                        })
-                        .addClass('cubeHidden');
-                },
-                steps * ANIMATION_TIME,
-                this
-            );
+        const disappearanceInSide = async () => {
+            const animationDuration = steps * ANIMATION_TIME;
+            this.element.style.transform = 'scale(1,1)';
+            this.element.style.opacity = '1';
+            this.element.style.transition = `transform ${animationDuration}ms ease-out, opacity ${animationDuration}ms ease-out`;
+            forceRepaint(this.element);
+
+            this.element.style.transform = 'scale(0,0)';
+            this.element.style.opacity = '0';
+            await promiseTimeout(animationDuration);
+
+            this.element.style.transition = '';
+            this.element.style.transform = '';
+            this.element.style.opacity = '';
+
+            this.element.classList.add('cubeHidden');
         };
 
         const boom = () => {
@@ -536,15 +513,15 @@ export class Cube {
             break;
             // кубик появляется третим в боковом поле
         case 'appearanceInSide':
-            appearance();
+            appearanceInSide();
             break;
             // третий кубик в боковой линии пропадает
         case 'disappearanceInSide':
-            disappearance();
+            disappearanceInSide();
             break;
             // передвигаем кубик в боковой панели дальше от mainField
-        case 'forth':
-            forth();
+        case 'further':
+            further();
             break;
             // передвигаем кубик в боковой панели дальше от mainField
         case 'boom':

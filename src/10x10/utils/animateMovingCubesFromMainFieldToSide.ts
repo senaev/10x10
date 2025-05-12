@@ -97,11 +97,11 @@ export function animateMovingCubesFromMainFieldToSide({
 
     // остальные два сдвигаются ближе к линии
     c2.animate({
-        action: 'forth',
+        action: 'further',
         steps: 1,
     });
     c1.animate({
-        action: 'forth',
+        action: 'further',
         steps: 1,
     });
 }

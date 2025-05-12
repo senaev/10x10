@@ -1,67 +1,73 @@
-/*temporary*/
+html,
+body {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    background-color: #999;
+}
 
 .app-container {
     display: block;
-    text-align: center;
+    font-size: 160px;
 }
 
-/*game*/
-/*основной контейнер, класс присваивается элементу, передаваемому в приложение,
-он же срановится корневым для всех элементов игры*/
 .tenOnTenContainer {
     display: inline-block;
     font-family: sans-serif;
+
+    text-align: center;
+    color: white;
+
+    background-color: #ff000055;
 }
 
-/* само главное поле бэкграунда*/
-.tenOnTenContainer>.backgroundField {
+.backgroundField {
     position: absolute;
-    background-color: #999;
-    border-radius: 3px;
+    left: 3.5em;
+    top: 3.5em;
+    width: 10em;
+    height: 10em;
+    pointer-events: none;
 }
 
-/*кубики бэкграунда на главном поле*/
-.tenOnTenContainer>.backgroundField>.dCube {
-    height: 30px;
-    width: 30px;
-    margin: 1px;
+.backgroundCube {
+    height: 0.95em;
+    width: 0.95em;
     background: #a0a0a0;
-    border-radius: 10px;
+    border-radius: 0.3em;
+    margin: 0.025em;
     float: left;
 }
 
-/*панели с информацией и кнопками*/
-.tenOnTenContainer>.panel {
-    height: 96px;
-    width: 96px;
+.topRightPanel {
     position: absolute;
+    right: 0.5em;
+    top: 0.5em;
+    height: 3em;
+    width: 3em;
+    background-color: #ff000055;
 }
 
-.tenOnTenContainer>.panel.topRightPanel {
-    right: -96px;
-    top: -96px;
-}
-
-.tenOnTenContainer>.panel.topRightPanel>.undoButton {
-    font-weight: bold;
-    margin-top: 7px;
-    color: white;
+.undoButton {
     cursor: pointer;
 }
+
+.refreshButton {
+    cursor: pointer;
+}
+
 
 .topLeftPanel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    left: -96px;
-    top: -96px;
-    color: white;
-    cursor: pointer;
+    height: 96px;
+    width: 96px;
+    background-color: #ff000055;
 }
 
 /*сам кубик*/
 
-.tenOnTenContainer>.cube {
+.cube {
     position: absolute;
     height: 30px;
     width: 30px;
@@ -75,100 +81,95 @@
     margin-left: 1px;
 }
 
-
-
-/*
-для скрытия кубиков в боковых панелях
-*/
-.tenOnTenContainer>.cube.cubeHidden {
+.cubeHidden {
     display: none;
 }
 
-
-
-
-/*классы стрелок - могут быть у первого кубика под наведенной строкой в боковом меню,
-либо у кубика на главном поле, имеющего направление*/
-.tenOnTenContainer>.cube.firstInHoverLine,
-.tenOnTenContainer>.cube.dright {
+.cube.firstInHoverLine,
+.cube.dright {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: -1px;
 }
 
-.tenOnTenContainer>.cube.firstInHoverLine.ftop,
-.tenOnTenContainer>.cube.dbottom {
+.cube.firstInHoverLine.ftop,
+.cube.dbottom {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: -33px -1px;
 }
 
-.tenOnTenContainer>.cube.firstInHoverLine.fright,
-.tenOnTenContainer>.cube.dleft {
+.cube.firstInHoverLine.fright,
+.cube.dleft {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: -65px -1px;
 }
 
-.tenOnTenContainer>.cube.firstInHoverLine.fbottom,
-.tenOnTenContainer>.cube.dtop {
+.cube.firstInHoverLine.fbottom,
+.cube.dtop {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: -97px -1px;
 }
 
 /*расцветка кубиков*/
-.tenOnTenContainer>.cube.blue {
+.cube.blue {
     background-color: #4e7cff;
     border-color: #7a9cff;
 }
 
-.tenOnTenContainer>.cube.green {
+.cube.green {
     background-color: #0e9f0e;
     border-color: #12b012;
 }
 
-.tenOnTenContainer>.cube.yellow {
+.cube.yellow {
     background-color: #e7df00;
     border-color: #fff600;
 }
 
-.tenOnTenContainer>.cube.red {
+.cube.red {
     background-color: #ff4949;
     border-color: #ff6f6f;
 }
 
-.tenOnTenContainer>.cube.brown {
+.cube.brown {
     background-color: #df690a;
     border-color: #ee710b;
 }
 
-.tenOnTenContainer>.cube.pink {
+.cube.pink {
     background-color: #ffc0cb;
     border-color: #fed6dd;
 }
 
-.tenOnTenContainer>.cube.white {
+.cube.white {
     background-color: #ddd;
     border-color: #e0e0e0;
 }
 
-.tenOnTenContainer>.cube.purple {
+.cube.purple {
     background-color: #ff46ff;
     border-color: #fc69fc;
 }
 
-.tenOnTenContainer>.cube.lightblue {
+.cube.lightblue {
     background-color: #9bcada;
     border-color: #add8e6;
 }
 
-.tenOnTenContainer>.cube.orange {
+.cube.orange {
     background-color: #ffb121;
     border-color: #ffbb3f;
 }
 
 .level {
-    font-size: 3em;
-    color: white;
+    font-size: 1.7em;
+}
+
+.undoButton,
+.refreshButton {
+    font-weight: bold;
+    font-size: 0.5em;
 }

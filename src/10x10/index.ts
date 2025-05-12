@@ -20,36 +20,8 @@ if (!container) {
 
 const STORAGE_KEY = 's_t_y';
 
-function showBanner(bridge: PlayGamaBridge) {
-
-    let options = { };
-
-    switch (bridge.platform.id) {
-    case 'vk':
-        options = {
-            position: 'top', // optional parameter, default = bottom
-            layoutType: 'resize', // optional parameter
-            canClose: false, // optional parameter
-        };
-        break;
-    case 'crazy_games':
-        options = {
-            position: 'top', // optional parameter, default = bottom
-        };
-        break;
-    case 'game_distribution':
-        options = {
-            position: 'top', // optional parameter, default = bottom
-        };
-        break;
-    case 'msn':
-        options = {
-            position: 'top:728x90', // optional parameter, default = 'top:728x90'
-        };
-        break;
-    }
-
-    bridge.advertisement.showBanner(options);
+function showAdAfterLevelComplete(bridge: PlayGamaBridge) {
+    bridge.advertisement.showInterstitial();
 }
 
 function isValidTenOnTenState(state: unknown): state is TenOnTenState {
@@ -68,8 +40,6 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
         container,
         initialState: isValidTenOnTenState(userStateInTenOnTenGame) ? userStateInTenOnTenGame : undefined,
     });
-    // eslint-disable-next-line no-console
-    console.log('App is ready', tenOnTen);
 
     (window as GlobalThis & {
         tenOnTen: TenOnTen;
@@ -85,20 +55,28 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
         saveState();
 
         // eslint-disable-next-line no-console
-        console.log('showBanner');
-        if (!playGamaBridge.advertisement.isBannerSupported) {
-            return;
-        }
+        console.log('showAdAfterLevelComplete');
 
-        showBanner(playGamaBridge);
+        showAdAfterLevelComplete(playGamaBridge);
     });
-
-    playGamaBridge.platform.sendMessage('game_ready');
 
     playGamaBridge.game.on(playGamaBridge.EVENT_NAME.VISIBILITY_STATE_CHANGED, (nextState) => {
         // eslint-disable-next-line no-console
         console.log('Visibility state:', nextState);
     });
+
+    // To track interstitial ad state changes, subscribe to the event
+    playGamaBridge.advertisement.on(
+        playGamaBridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED,
+        (state) => {
+            // eslint-disable-next-line no-console
+            console.log('Interstitial state: ', state);
+        }
+    );
+
+    // eslint-disable-next-line no-console
+    console.log('App is ready', tenOnTen);
+    playGamaBridge.platform.sendMessage('game_ready');
 })()
     .catch((error) => {
         // eslint-disable-next-line no-console

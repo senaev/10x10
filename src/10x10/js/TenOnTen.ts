@@ -1,14 +1,15 @@
-import $ from 'jquery';
+import { PixelSize } from 'senaev-utils/src/types/PixelSize';
 import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
+import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
+import { Signal } from 'senaev-utils/src/utils/Signal';
 
 import { RefreshButton } from '../components/RefreshButton';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
-import { CUBE_WIDTH } from '../const/CUBE_WIDTH';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { Direction } from '../types/Direction';
@@ -36,6 +37,9 @@ export type TenOnTenCallbacks = {
     onAfterNextLevel: () => void;
 };
 
+// ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
+const APP_WIDTH_IN_CUBES = 17;
+
 export type MaskFieldValue = {
     color: string;
     direction: Direction | null;
@@ -57,7 +61,7 @@ export type TenOnTenState = {
 };
 
 export class TenOnTen {
-    public readonly container: JQuery<HTMLElement>;
+    public readonly container: HTMLElement;
     public readonly topRightPanelElement: Element;
 
     public level: number;
@@ -76,6 +80,8 @@ export class TenOnTen {
 
     private isNewLevel: boolean = true;
 
+    private readonly bodySizeValue: Signal<PixelSize>;
+
     private readonly callbacks: {
         [key in keyof TenOnTenCallbacks]: TenOnTenCallbacks[key][];
     } = {
@@ -91,6 +97,33 @@ export class TenOnTen {
         container: HTMLElement;
         initialState?: TenOnTenState;
     }) {
+        this.container = container;
+
+        const window = container.ownerDocument.defaultView!;
+        const body = container.ownerDocument.body;
+
+        const setContainerFontSize = () => {
+            const { width, height } = this.bodySizeValue.value();
+            const bodyMinSize = Math.min(width, height);
+
+            this.container.style.fontSize = `${bodyMinSize / APP_WIDTH_IN_CUBES}px`;
+            this.container.style.width = `${bodyMinSize}px`;
+            this.container.style.height = `${bodyMinSize}px`;
+        };
+
+        this.bodySizeValue = new Signal<PixelSize>({
+            width: body.clientWidth,
+            height: body.clientHeight,
+        }, deepEqual);
+        window.addEventListener('resize', () => {
+            this.bodySizeValue.next({
+                width: body.clientWidth,
+                height: body.clientHeight,
+            });
+            setContainerFontSize();
+        });
+        setContainerFontSize();
+
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
         // которому эти кубики принадлежат
         this.cubes = new Cubes({ app: this });
@@ -107,44 +140,28 @@ export class TenOnTen {
         // датчик конца хода
         this.end = null;
 
-        this.container = $(container);
-
         // Initialize container function
         (() => {
-            let background = '<div class="backgroundField">';
+            const background = document.createElement('div');
+            background.classList.add('backgroundField');
+
             for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
-                background += '<div class="dCube"></div>';
+                const backgroundCube = document.createElement('div');
+                backgroundCube.classList.add('backgroundCube');
+                background.appendChild(backgroundCube);
             }
-            background += '</div>';
 
-            const backgroundField = $(background).css({
-                height: CUBE_WIDTH * BOARD_SIZE,
-                width: CUBE_WIDTH * BOARD_SIZE,
-                padding: CUBE_WIDTH * 3 + 3,
-                left: CUBE_WIDTH * -3 - 3,
-                top: CUBE_WIDTH * -3 - 3,
-            });
-
-            this.container
-                .css({
-                    height: CUBE_WIDTH * BOARD_SIZE,
-                    width: CUBE_WIDTH * BOARD_SIZE,
-                    margin: CUBE_WIDTH * 3,
-                    position: 'relative',
-                })
-                .addClass('tenOnTenContainer')
-                .append(backgroundField);
+            this.container.classList.add('tenOnTenContainer');
+            this.container.appendChild(background);
         })();
 
         const topRightPanelElement = document.createElement('div');
         topRightPanelElement.classList.add('topRightPanel');
-        topRightPanelElement.classList.add('panel');
-        this.container[0].appendChild(topRightPanelElement);
+        this.container.appendChild(topRightPanelElement);
         this.topRightPanelElement = topRightPanelElement;
 
         // const topLeftPanelElement = document.createElement('div');
         // topLeftPanelElement.classList.add('topLeftPanel');
-        // topLeftPanelElement.classList.add('panel');
         // this.container[0].appendChild(topLeftPanelElement);
         // topLeftPanelElement.innerText = 'Start from the beginning';
         // topLeftPanelElement.addEventListener('click', () => {

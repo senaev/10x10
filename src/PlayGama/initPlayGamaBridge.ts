@@ -1,3 +1,4 @@
+import { Seconds } from 'senaev-utils/src/types/Time/Seconds';
 import { UnixTimeMs } from 'senaev-utils/src/types/Time/UnixTimeMs';
 
 import { PlayGamaBridgeEventName, PlayGamaBridgeEventNames } from './types/PlayGamaBridgeEventNames';
@@ -29,13 +30,22 @@ export type PlayGamaBridge = {
     };
     EVENT_NAME: {
         VISIBILITY_STATE_CHANGED: 'visibility_state_changed';
+        INTERSTITIAL_STATE_CHANGED: 'interstitial_state_changed';
     };
     STORAGE_TYPE: Record<string, PlayGamaBridgeStorageType>;
     storage: PlayGamaBridgeStorage;
     advertisement: {
+        checkAdBlock: () => boolean;
+
+        on: <T extends PlayGamaBridgeEventName>(event: T, callback: (state: PlayGamaBridgeEventNames[T]) => void) => void;
+
         isBannerSupported: boolean;
         showBanner: (options: unknown) => void;
-        checkAdBlock: () => boolean;
+
+        interstitialState: 'loading' | 'opened' | 'closed' | 'failed';
+        showInterstitial: () => void;
+        minimumDelayBetweenInterstitial: Seconds;
+        setMinimumDelayBetweenInterstitial: (delay: Seconds) => void;
     };
     device: {
         type: 'mobile' | 'tablet' | 'desktop' | 'tv';

@@ -142,8 +142,6 @@ export class TenOnTen {
             if (!isZKey) {
                 return;
             }
-
-            console.log('undo');
         });
 
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,

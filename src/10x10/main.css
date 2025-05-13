@@ -70,6 +70,11 @@ body {
     cursor: pointer;
 }
 
+.refreshButton img {
+    width: 2em;
+    height: 2em;
+}
+
 
 .cube {
     position: absolute;

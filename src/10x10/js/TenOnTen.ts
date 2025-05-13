@@ -29,12 +29,13 @@ import {
 import { MoveMap } from './MoveMap';
 import {
     UndoButton,
-} from './UndoButton';
+} from '../components/UndoButton';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;
     onAfterUndo: () => void;
     onAfterNextLevel: () => void;
+    onAfterNextLevelRefresh: () => void;
 };
 
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
@@ -88,6 +89,7 @@ export class TenOnTen {
             onAfterMove: [],
             onAfterUndo: [],
             onAfterNextLevel: [],
+            onAfterNextLevelRefresh: [],
         };
 
     public constructor({
@@ -248,18 +250,17 @@ export class TenOnTen {
             });
         });
         setTimeout(
-            function (app) {
-                app.generateMainCubes();
+            () => {
+                this.generateMainCubes();
                 setTimeout(
-                    function (appLocal) {
-                        appLocal.blockApp = false;
+                    () => {
+                        this.blockApp = false;
+                        callFunctions(this.callbacks.onAfterNextLevelRefresh);
                     },
-                    ANIMATION_TIME * 8,
-                    app
+                    ANIMATION_TIME * 8
                 );
             },
-            ANIMATION_TIME,
-            this
+            ANIMATION_TIME
         );
     };
 

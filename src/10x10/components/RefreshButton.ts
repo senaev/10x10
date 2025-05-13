@@ -1,4 +1,5 @@
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
+import refreshIcon from '../img/refresh.svg';
 
 export class RefreshButton {
     private readonly element: HTMLElement;
@@ -7,10 +8,17 @@ export class RefreshButton {
         onClick: () => void;
         container: Element;
     }) {
+        const img = document.createElement('img');
+        img.src = refreshIcon;
+
+        const text = document.createElement('div');
+        text.textContent = I18N_DICTIONARY['refresh']['en'];
+
         this.element = document.createElement('div');
-        this.element.classList.add('undoButton');
+        this.element.classList.add('refreshButton');
         this.element.addEventListener('click', params.onClick);
-        this.element.innerHTML = I18N_DICTIONARY['refresh']['en'];
+        this.element.appendChild(img);
+        this.element.appendChild(text);
 
         params.container.appendChild(this.element);
     }

@@ -11,7 +11,7 @@ export class UndoButton {
         const img = document.createElement('img');
         img.src = undoIcon;
 
-        const text = document.createElement('span');
+        const text = document.createElement('div');
         text.textContent = I18N_DICTIONARY['undo']['en'];
 
         this.element = document.createElement('div');

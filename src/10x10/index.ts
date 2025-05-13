@@ -51,6 +51,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 
     tenOnTen.on('onAfterMove', saveState);
     tenOnTen.on('onAfterUndo', saveState);
+    tenOnTen.on('onAfterNextLevelRefresh', saveState);
     tenOnTen.on('onAfterNextLevel', () => {
         saveState();
 

@@ -28,7 +28,7 @@ export function prepareMovingCubes({
             x: cube.x,
             y: cube.y,
             color: cube.color,
-            direction: cube.direction,
+            direction: cube.direction.value(),
             cube,
         });
 
@@ -47,15 +47,15 @@ export function prepareMovingCubes({
 
         let startMovingCubeX;
         let startMovingCubeY;
-        if (cube.field === 'top' || cube.field === 'bottom') {
+        if (cube.field.value() === 'top' || cube.field.value() === 'bottom') {
             startMovingCubeX = cube.x;
-            if (cube.field === 'top') {
+            if (cube.field.value() === 'top') {
                 startMovingCubeY = startCubes.length - i - 1;
             } else {
                 startMovingCubeY = BOARD_SIZE - startCubes.length + i;
             }
         } else {
-            if (cube.field === 'left') {
+            if (cube.field.value() === 'left') {
                 startMovingCubeX = startCubes.length - i - 1;
             } else {
                 startMovingCubeX = BOARD_SIZE - startCubes.length + i;
@@ -67,7 +67,7 @@ export function prepareMovingCubes({
             x: startMovingCubeX,
             y: startMovingCubeY,
             color: cube.color,
-            direction: cube.direction,
+            direction: cube.direction.value(),
             cube,
         });
         startMovingCubes.push({

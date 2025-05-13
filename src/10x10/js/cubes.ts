@@ -1,13 +1,13 @@
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
+import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
-import { getSideCubeByAddress } from '../utils/getSideCubeByAddress';
+import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { CubeView } from '../components/CubeView';
 import { __findCubeInMainMask } from './MainMask';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
@@ -23,6 +23,10 @@ export type CubeCoordinates = {
 
 export type SideCubeAddress = CubeCoordinates & {
     field: Direction;
+};
+
+export type CubeAddress = CubeCoordinates & {
+    field: Field;
 };
 
 export type SideCubesMask = {
@@ -83,7 +87,7 @@ export class Cubes {
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public _addSideCube(cube: CubeView) {
-        const field = cube.field;
+        const field = cube.field.value();
 
         if (field === 'main') {
             throw new Error('main field is not allowed');
@@ -94,7 +98,7 @@ export class Cubes {
 
     // берем значение клетки из коллекции по полю, иксу, игреку
     public _getSideCube(address: SideCubeAddress): CubeView {
-        return getSideCubeByAddress(this.sideCubes, address)!;
+        return getSideCubeViewByAddress(this.sideCubes, address)!;
     }
 
     public _getMainCube(o: CubeCoordinates): CubeView | null {
@@ -148,19 +152,19 @@ export class Cubes {
 
     // добавляем в линию кубик, по кубику мы должны определить, в какую линию
     public _pushInLine(cube: CubeView) {
-        const direction = cube.direction;
+        const direction = cube.direction.value();
 
         assertNonEmptyString(direction);
 
         // меняем значения кубика
-        cube.field = direction;
-        cube.direction = reverseDirection(direction);
+        cube.field.next(direction);
+        cube.direction.next(reverseDirection(direction));
 
         // получаем линию, в которую вставим кубик
         const line = getCubeAddressInSideFieldInOrderFromMain({
             x: cube.x,
             y: cube.y,
-            field: cube.field,
+            field: direction,
         });
 
         // присваиваем значения координат в поле кубику
@@ -207,7 +211,7 @@ export class Cubes {
 
         // меняем значение field
         for (const key in startCubes) {
-            startCubes[key].field = 'main';
+            startCubes[key].field.next('main');
         }
 
         // пробегаемся по массиву м-кубиков и если м-кубик вошел в боковое поле,

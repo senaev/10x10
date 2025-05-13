@@ -4,7 +4,7 @@ import { SideCubesMask } from '../js/Cubes';
 import { MovingCube } from '../js/MovingCube';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
-import { getSideCubeByAddress } from './getSideCubeByAddress';
+import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 
 /**
 * Массовая анимация для кубиков, вспомогательная
@@ -21,7 +21,7 @@ export function animateMovingCubesFromMainFieldToSide({
     beyondTheSide: CubeView[];
     cubesMask: SideCubesMask;
 }) {
-    const { field } = cube;
+    const field = cube.field.value();
 
     if (field === 'main') {
         throw new Error('animateMovingCubesFromMainFieldToSide: cube.field === "main"');
@@ -41,7 +41,7 @@ export function animateMovingCubesFromMainFieldToSide({
 
     // для идентификации линии
     let prop: 'x' | 'y' = 'y';
-    if (cube.field === 'top' || cube.field === 'bottom') {
+    if (cube.field.value() === 'top' || cube.field.value() === 'bottom') {
         prop = 'x';
     }
     // позиция кубика среди тех, которые во время данного хода
@@ -49,7 +49,7 @@ export function animateMovingCubesFromMainFieldToSide({
     let posInSide;
     for (const key in toSideActions) {
         const c = toSideActions[key].cube;
-        if (c.field === cube.field && c[prop] === cube[prop]) {
+        if (c.field.value() === cube.field.value() && c[prop] === cube[prop]) {
             if (c === cube) {
                 posInSide = allCubesToSideInThisLine.length;
             }
@@ -62,7 +62,7 @@ export function animateMovingCubesFromMainFieldToSide({
     const removeBS = [];
     for (const key in beyondTheSide) {
         const c = beyondTheSide[key];
-        if (c.field === cube.field && c[prop] === cube[prop]) {
+        if (c.field.value() === cube.field.value() && c[prop] === cube[prop]) {
             removeBS.push(c);
         }
     }
@@ -78,19 +78,19 @@ export function animateMovingCubesFromMainFieldToSide({
     // он уже удален из линии, но его нужно анимировать, мы берем его
     // из массива удаленных кубиков этой линии
     if (pos - 2 > -1) {
-        cr = getSideCubeByAddress(cubesMask, line[pos - 2])!;
+        cr = getSideCubeViewByAddress(cubesMask, line[pos - 2])!;
     } else {
         cr = removeBS[removeBS.length + (pos - 2)];
     }
 
     if (pos > -1) {
-        c1 = getSideCubeByAddress(cubesMask, line[pos])!;
+        c1 = getSideCubeViewByAddress(cubesMask, line[pos])!;
     } else {
         c1 = removeBS[removeBS.length + pos];
     }
 
     if (pos - 1 > -1) {
-        c2 = getSideCubeByAddress(cubesMask, line[pos - 1])!;
+        c2 = getSideCubeViewByAddress(cubesMask, line[pos - 1])!;
     } else {
         c2 = removeBS[removeBS.length + (pos - 1)];
     }

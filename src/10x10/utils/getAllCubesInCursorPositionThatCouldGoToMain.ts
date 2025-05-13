@@ -7,7 +7,7 @@ import {
     SideCubesMask,
 } from '../js/Cubes';
 
-import { getSideCubeByAddress } from './getSideCubeByAddress';
+import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { isTheSameAddress } from './isTheSameAddress';
 
 // находим все кубики от этого до ближнего к майн в линии относительно этого
@@ -90,7 +90,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
     const arr: CubeView[] = [];
     for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
         address[dynamicProp] = cellsSide[key];
-        arr.push(getSideCubeByAddress(sideCubesMask, address)!);
+        arr.push(getSideCubeViewByAddress(sideCubesMask, address)!);
 
         // если доходим до кубика, над которым курсор - заканчиваем маневр
         if (isTheSameAddress(originCubeAddress, address)) {

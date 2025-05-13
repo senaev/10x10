@@ -200,7 +200,7 @@ export class MoveMap {
 
         // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
         for (const key in startCubes) {
-            startCubes[key].element.classList.add(`d${startCubes[key].direction}`);
+            startCubes[key].element.classList.add(`d${startCubes[key].direction.value()}`);
         }
 
         // перебираем карту анимации и передаем каждому кубику объект действия,

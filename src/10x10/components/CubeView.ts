@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { Signal } from 'senaev-utils/src/utils/Signal';
+import { combineSignalsIntoNewOne } from 'senaev-utils/src/utils/Signal/combineSignalsIntoNewOne/combineSignalsIntoNewOne';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { forceRepaint } from '../../utils/forceRepaint';
@@ -10,7 +12,7 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
-import { CubeCoordinates } from '../js/Cubes';
+import { CubeAddress } from '../js/Cubes';
 import { CubeAnimation } from '../js/MoveMap';
 import { TenOnTen } from '../js/TenOnTen';
 import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
@@ -35,13 +37,14 @@ export type Transition = Partial<{
 }>;
 
 export class CubeView {
-    public field: Field;
+    public readonly direction = new Signal<Direction | null>(null);
+    public readonly element: HTMLElement;
+    public readonly visualCubeElement: HTMLElement;
+    public readonly field: Signal<Field>;
     public x: number;
     public y: number;
-    public direction: Direction | null;
     public color: string;
     public toMineOrder: number | null;
-    public readonly element: HTMLElement;
     private readonly container: HTMLElement;
 
     private readonly app: TenOnTen;
@@ -57,86 +60,102 @@ export class CubeView {
         direction: Direction| null;
         color: string;
         container: HTMLElement;
-        onClick: (address: CubeCoordinates & { field: Field }) => void;
-        onHover: (address: CubeCoordinates & { field: Field }, isHovered: boolean) => void;
+        onClick: (address: CubeAddress) => void;
+        onHover: (address: CubeAddress, isHovered: boolean) => void;
     }) {
         this.x = params.x;
         this.y = params.y;
         this.container = params.container;
         this.appearWithAnimation = params.appearWithAnimation;
 
-        // время попадания в главное поле
+        // Время попадания в главное поле
         this.toMineOrder = params.toMineOrder;
 
-        this.field = params.field;
-        // указатель на игру, к которой кубик привязан
+        this.field = new Signal<Field>(params.field);
+        // Указатель на игру, к которой кубик привязан
         this.app = params.app;
 
-        // направление движения
-        if (!params.direction) {
-            this.direction = (function (field) {
-                if (field === 'top') {
-                    return 'bottom';
-                } else if (field === 'bottom') {
-                    return 'top';
-                } else if (field === 'left') {
-                    return 'right';
-                } else if (field === 'right') {
-                    return 'left';
-                } else {
-                    return null;
-                }
-            })(this.field);
+        // Указатель на DOM-элемент кубика с прослушиванием событий
+        this.element = document.createElement('div');
+
+        const visualCubeElement = document.createElement('div');
+        this.visualCubeElement = visualCubeElement;
+        visualCubeElement.classList.add('visualCube');
+
+        const { signal: cubeVisualDirection } = combineSignalsIntoNewOne([
+            this.direction,
+            this.field,
+        ], (direction, field) => {
+            if (field !== 'main') {
+                return null;
+            }
+
+            return direction;
+        });
+
+        cubeVisualDirection.subscribe((direction) => {
+            console.log('direction', direction);
+            if (direction) {
+                this.visualCubeElement.classList.add(`direction_${direction}`);
+            } else {
+                this.visualCubeElement.classList.remove('direction_top');
+                this.visualCubeElement.classList.remove('direction_right');
+                this.visualCubeElement.classList.remove('direction_bottom');
+                this.visualCubeElement.classList.remove('direction_left');
+            }
+        });
+
+        // Направление движения
+        if (params.direction) {
+            this.direction.next(params.direction);
         } else {
-            this.direction = params.direction;
+            this.direction.next(reverseDirection(this.field.value()));
         }
 
         this.color = params.color;
 
-        // указатель на DOM-элемент кубика с прослушиванием событий
-        this.element = document.createElement('div');
-        // проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
-        if (this.field !== 'main') {
+        // Проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
+        if (this.field.value() !== 'main') {
             if (!this._inFieldIsVisible()) {
                 this.element.classList.add('cubeHidden');
             }
         }
 
-        if (this.field === 'main' && this.direction !== null) {
-            this.element.classList.add(`d${this.direction}`);
+        if (this.field.value() === 'main' && this.direction.value() !== null) {
+            this.element.classList.add(`d${this.direction.value()}`);
         }
 
         this.element.classList.add('cube');
         this.element.classList.add(this.color);
-        this.element.classList.add(`f${this.field}`);
-        this.element.addEventListener('mouseover', (e) => {
-            e.preventDefault();
+        this.element.classList.add(`f${this.field.value()}`);
 
+        this.element.appendChild(visualCubeElement);
+
+        this.element.addEventListener('mouseover', () => {
             params.onHover({
-                field: this.field,
+                field: this.field.value(),
                 x: this.x,
                 y: this.y,
             }, true);
         });
-
         this.element.addEventListener('mouseout', () => {
             params.onHover({
-                field: this.field,
+                field: this.field.value(),
                 x: this.x,
                 y: this.y,
             }, false);
         });
 
-        this.element.addEventListener('click', () => {
+        this.element.addEventListener('mousedown', () => {
             params.onClick({
-                field: this.field,
+                field: this.field.value(),
                 x: this.x,
                 y: this.y,
             });
         });
 
-        // время попадания в поле майн
-        if (this.field === 'main') {
+        // Время попадания в поле майн
+        if (this.field.value() === 'main') {
             this.toMineOrder = getIncrementalIntegerForMainFieldOrder();
         }
 
@@ -158,9 +177,9 @@ export class CubeView {
 
     public setRowVisibility(isVisible: boolean) {
         if (isVisible) {
-            this.element.classList.add('firstInHoverLine');
+            this.element.classList.add('readyToMove');
         } else {
-            this.element.classList.remove('firstInHoverLine');
+            this.element.classList.remove('readyToMove');
         }
     }
 
@@ -179,7 +198,7 @@ export class CubeView {
         }
         let left = x;
         let top = y;
-        switch (this.field) {
+        switch (this.field.value()) {
         case 'top':
             top -= 10;
             break;
@@ -200,7 +219,7 @@ export class CubeView {
     }
 
     public performIHavePawsAnimation() {
-        const scale = this.field === 'left' || this.field === 'right'
+        const scale = this.field.value() === 'left' || this.field.value() === 'right'
             ? [
                 0.8,
                 1.2,
@@ -249,7 +268,7 @@ export class CubeView {
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
     public animate({ action, steps }: CubeAnimateAction) {
-        const field = this.field;
+        const field = this.field.value();
 
         /*
         * движение в боковую панель без разрывов анимации,
@@ -272,10 +291,10 @@ export class CubeView {
             const delayDuration = ANIMATION_TIME * (dur - 1);
             await promiseTimeout(delayDuration);
 
-            const dir = reverseDirection(this.field);
-            this.element.classList.remove(`d${this.field}`);
+            const dir = reverseDirection(this.field.value());
+            this.element.classList.remove(`d${this.field.value()}`);
             this.element.classList.remove(`f${dir}`);
-            this.element.classList.add(`f${this.field}`);
+            this.element.classList.add(`f${this.field.value()}`);
 
             animateMovingCubesFromMainFieldToSide({
                 cube: this,
@@ -306,7 +325,7 @@ export class CubeView {
                 x: this.x,
                 y: this.y,
             };
-            switch (this.field) {
+            switch (this.field.value()) {
             case 'top':
                 pos.y = BOARD_SIZE - 3;
                 break;
@@ -365,7 +384,7 @@ export class CubeView {
         };
 
         switch (action) {
-        // движение вправо со столкновением
+        // Движение вправо со столкновением
         case 'srBump':
             animateCubeMovementWithBump({
                 element: this.element,
@@ -373,7 +392,7 @@ export class CubeView {
                 distance: steps - 1,
             });
             break;
-            // движение вправо со столкновением
+            // Движение вниз со столкновением
         case 'sbBump':
             animateCubeMovementWithBump({
                 element: this.element,
@@ -381,7 +400,7 @@ export class CubeView {
                 distance: steps - 1,
             });
             break;
-            // движение вправо со столкновением
+            // Движение влево со столкновением
         case 'slBump':
             animateCubeMovementWithBump({
                 element: this.element,
@@ -389,7 +408,7 @@ export class CubeView {
                 distance: 1 - steps,
             });
             break;
-            // движение вправо со столкновением
+            // Движение вверх со столкновением
         case 'stBump':
             animateCubeMovementWithBump({
                 element: this.element,
@@ -397,7 +416,7 @@ export class CubeView {
                 distance: 1 - steps,
             });
             break;
-            // движение с последующим вливанием в поле
+            // Движение с последующим вливанием в поле
         case 'toSide':
             (() => {
                 let sign: '+' | '-' = '-';
@@ -415,27 +434,27 @@ export class CubeView {
                 slideToSide(prop, sign);
             })();
             break;
-            // передвигаем кубик в боковом поле ближе к mainField
+            // Передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':
             nearer();
             break;
-            // кубик появляется третим в боковом поле
+            // Кубик появляется третьим в боковом поле
         case 'appearanceInSide':
             appearanceInSide();
             break;
-            // третий кубик в боковой линии пропадает
+            // Третий кубик в боковой линии пропадает
         case 'disappearanceInSide':
             disappearanceInSide();
             break;
-            // передвигаем кубик в боковой панели дальше от mainField
+            // Передвигаем кубик в боковой панели дальше от mainField
         case 'further':
             further();
             break;
-            // передвигаем кубик в боковой панели дальше от mainField
+            // Передвигаем кубик в боковой панели дальше от mainField
         case 'boom':
             boom();
             break;
-            // уменьшаем и в конце удаляем
+            // Уменьшаем и в конце удаляем
         case 'remove':
             $(this.element)
                 .transition(
@@ -457,41 +476,41 @@ export class CubeView {
         }
     }
 
-    // проверка, показывать кубик или нет в поле
+    // Проверка, показывать кубик или нет в поле
     public _inFieldIsVisible() {
         let pos;
-        if (this.field === 'main') {
+        if (this.field.value() === 'main') {
             return true;
         }
-        if (this.field === 'top' || this.field === 'bottom') {
+        if (this.field.value() === 'top' || this.field.value() === 'bottom') {
             pos = this['y'];
-            return this.field === 'top' ? pos > 6 : pos < 3;
+            return this.field.value() === 'top' ? pos > 6 : pos < 3;
         } else {
             pos = this['x'];
-            return this.field === 'left' ? pos > 6 : pos < 3;
+            return this.field.value() === 'left' ? pos > 6 : pos < 3;
         }
     }
 
     // Меняем параметры кубика, при этом его анимируем
     public change(o: { color?: string; direction?: Direction }) {
         const changeParams = () => {
-            // если меняем цвет и это не тот же цвет, что сейчас
+            // Если меняем цвет и это не тот же цвет, что сейчас
             if (o.color !== undefined && o.color !== this.color) {
                 const prevColor = this.color;
                 this.color = o.color;
                 $(this.element).removeClass(prevColor).addClass(this.color);
             }
-            // если меняем направление и это не то же направление, что сейчас
-            if (o.direction !== undefined && o.direction !== this.direction) {
-                const prevDirection = this.direction;
-                this.direction = o.direction;
+            // Если меняем направление и это не то же направление, что сейчас
+            if (o.direction !== undefined && o.direction !== this.direction.value()) {
+                const prevDirection = this.direction.value();
+                this.direction.next(o.direction);
 
-                // стили следует менять только у кубиков на главном поле, так как
+                // Стили следует менять только у кубиков на главном поле, так как
                 // слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
-                if (this.field === 'main') {
+                if (this.field.value() === 'main') {
                     $(this.element).removeClass(`d${prevDirection}`);
-                    if (this.direction !== null) {
-                        $(this.element).addClass(`d${this.direction}`);
+                    if (this.direction.value() !== null) {
+                        $(this.element).addClass(`d${this.direction.value()}`);
                     }
                 }
             }
@@ -499,10 +518,10 @@ export class CubeView {
 
         if (this._inFieldIsVisible()) {
             let prop: keyof Transition;
-            // для красотенюшки задаем разную анимацию для разных полей
-            if (this.field === 'main') {
+            // Для красотенюшки задаем разную анимацию для разных полей
+            if (this.field.value() === 'main') {
                 prop = 'rotate3d';
-            } else if (this.field === 'top' || this.field === 'bottom') {
+            } else if (this.field.value() === 'top' || this.field.value() === 'bottom') {
                 prop = 'rotateX';
             } else {
                 prop = 'rotateY';
@@ -511,7 +530,7 @@ export class CubeView {
             // анимация скрытия/открытия
             const transition1: Transition = { duration: ANIMATION_TIME * 2 };
             const transition2: Transition = { duration: ANIMATION_TIME * 2 };
-            if (this.field === 'main') {
+            if (this.field.value() === 'main') {
                 transition1[prop] = '1,1,0,90deg';
                 transition2[prop] = '1,1,0,0deg';
             } else {

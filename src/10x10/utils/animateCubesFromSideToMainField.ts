@@ -4,10 +4,10 @@ import { CubeView } from '../components/CubeView';
 import { SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
-import { getSideCubeByAddress } from './getSideCubeByAddress';
+import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 
 export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: SideCubesMask): void {
-    const { field } = startCubes[0];
+    const field = startCubes[0].field.value();
 
     if (field === 'main') {
         throw new Error('animateCubesFromSideToMainField: startCubes[0].field === "main"');
@@ -71,7 +71,7 @@ export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: Si
     animationArr.forEach((animation, animationIndex) => {
         for (const num in animation) {
             const address = line[animation[num]];
-            const cube = getSideCubeByAddress(mask, address);
+            const cube = getSideCubeViewByAddress(mask, address);
 
             assertObject(cube);
 

@@ -5,25 +5,10 @@ export type PlayGamaBridgeStorageTypes = {
 
 export type PlayGamaBridgeStorageType = keyof PlayGamaBridgeStorageTypes;
 
-export interface PlayGamaBridgeStorageGetFunction {
-    (keys: string[], storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-    (key: string, storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-};
-
-export interface PlayGamaBridgeStorageSetFunction {
-    (keys: string[], values: unknown[], storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-    (key: string, value: unknown, storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-};
-
-export interface PlayGamaBridgeStorageDeleteFunction {
-    (keys: string[], storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-    (key: string, storageType?: PlayGamaBridgeStorageType): Promise<unknown>;
-};
-
 export type PlayGamaBridgeStorage = {
-    readonly set: PlayGamaBridgeStorageSetFunction;
-    readonly get: PlayGamaBridgeStorageGetFunction;
-    readonly delete: PlayGamaBridgeStorageDeleteFunction;
+    readonly set: (keys: string[], values: unknown[], storageType?: PlayGamaBridgeStorageType) => Promise<unknown[]>;
+    readonly get: (keys: string[], storageType?: PlayGamaBridgeStorageType) => Promise<unknown[]>;
+    readonly delete: (keys: string[], storageType?: PlayGamaBridgeStorageType) => Promise<void>;
     readonly defaultType: PlayGamaBridgeStorageType;
     /**
      * Verify if the specified storage type is supported on the platform to ensure compatibility.

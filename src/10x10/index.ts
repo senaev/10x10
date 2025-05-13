@@ -48,7 +48,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 
     const isMockEnv = playGamaBridge.platform.id === 'mock';
 
-    const encryptedState = await playGamaBridge.storage.get(STORAGE_KEY);
+    const [encryptedState] = await playGamaBridge.storage.get([STORAGE_KEY]);
     let initialState: TenOnTenState | undefined;
     if (isNonEmptyString(encryptedState)) {
         const decryptedState = await decryptState(encryptedState);
@@ -76,7 +76,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 
     const saveState = async () => {
         const encryptedStateNext: string = await encryptState(tenOnTen.getState());
-        playGamaBridge.storage.set(STORAGE_KEY, encryptedStateNext);
+        playGamaBridge.storage.set([STORAGE_KEY], [encryptedStateNext]);
     };
 
     tenOnTen.on('onAfterMove', saveState);

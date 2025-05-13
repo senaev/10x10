@@ -1,9 +1,10 @@
 import 'jquery.transit';
-import { MILLISECONDS_IN_MINUTE } from 'senaev-utils/src/types/Time/const';
+import { MILLISECONDS_IN_MINUTE, MILLISECONDS_IN_SECOND } from 'senaev-utils/src/types/Time/const';
 import { isPositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
 import { isNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 import { decryptString, encryptString } from 'senaev-utils/src/utils/encryptDecryptString/encryptDecryptString';
+import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { initPlayGamaBridge, PlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
 import { GlobalThis } from '../types/GlobalThis';
@@ -36,7 +37,19 @@ const decryptState = async (string: string): Promise<string> => decryptString({
     secret: SESSION_ENCRYPTION_SECRET,
 });
 
+let lastShownInterstitialTime = 0;
+const MIN_TIME_BETWEEN_ADS = MILLISECONDS_IN_MINUTE;
 function showInterstitial(playGamaBridge: PlayGamaBridge) {
+    const now = Date.now();
+    const timeSinceAd = now - lastShownInterstitialTime;
+    if (timeSinceAd < MIN_TIME_BETWEEN_ADS) {
+        // eslint-disable-next-line no-console
+        console.log(`Do not show interstitial because of timeSinceAd=[${timeSinceAd}] < MIN_TIME_BETWEEN_ADS=[${MIN_TIME_BETWEEN_ADS}]`);
+        return;
+    }
+
+    lastShownInterstitialTime = now;
+
     const isMockEnv = playGamaBridge.platform.id === 'mock';
     if (isMockEnv) {
         alert('showInterstitial');
@@ -87,37 +100,29 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 
     };
 
-    let lastShowInterstitialTime = 0;
-    const MIN_TIME_BETWEEN_ADS = 5 * MILLISECONDS_IN_MINUTE;
-    const MIN_MOVES_BEFORE_AD = 20;
-    let movesSinceLastAd = 0;
-    tenOnTen.on('onAfterMove', () => {
-        saveState();
-
-        movesSinceLastAd++;
-        if (movesSinceLastAd < MIN_MOVES_BEFORE_AD) {
-            return;
-        }
-
-        const now = Date.now();
-        const timeSinceAd = now - lastShowInterstitialTime;
-        if (timeSinceAd < MIN_TIME_BETWEEN_ADS) {
-            return;
-        }
-
-        lastShowInterstitialTime = now;
-        movesSinceLastAd = 0;
-        showInterstitial(playGamaBridge);
-    });
+    tenOnTen.on('onAfterMove', saveState);
     tenOnTen.on('onAfterUndo', saveState);
     tenOnTen.on('onAfterNextLevelRefresh', saveState);
-    tenOnTen.on('onAfterNewGameStarted', saveState);
-    tenOnTen.on('onAfterNextLevel', () => {
+    tenOnTen.on('onAfterNewGameStarted', async () => {
         saveState();
 
         // eslint-disable-next-line no-console
-        console.log('showAdAfterLevelComplete');
+        console.log('show ad onAfterNewGameStarted');
+        await promiseTimeout(MILLISECONDS_IN_SECOND);
+        showInterstitial(playGamaBridge);
+    });
+    tenOnTen.on('onAfterOpenMenu', async () => {
+        // eslint-disable-next-line no-console
+        console.log('show ad onAfterOpenMenu');
+        await promiseTimeout(MILLISECONDS_IN_SECOND);
+        showInterstitial(playGamaBridge);
+    });
+    tenOnTen.on('onAfterNextLevel', async () => {
+        saveState();
 
+        // eslint-disable-next-line no-console
+        console.log('show ad onAfterNextLevel');
+        await promiseTimeout(MILLISECONDS_IN_SECOND);
         showInterstitial(playGamaBridge);
     });
 

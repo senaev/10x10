@@ -40,6 +40,7 @@ export type TenOnTenCallbacks = {
     onAfterNextLevel: () => void;
     onAfterNextLevelRefresh: () => void;
     onAfterNewGameStarted: () => void;
+    onAfterOpenMenu: () => void;
 };
 
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
@@ -97,6 +98,7 @@ export class TenOnTen {
             onAfterNextLevel: [],
             onAfterNextLevelRefresh: [],
             onAfterNewGameStarted: [],
+            onAfterOpenMenu: [],
         };
 
     public constructor({
@@ -106,6 +108,7 @@ export class TenOnTen {
         container: HTMLElement;
         initialState?: TenOnTenState;
     }) {
+
         this.container = container;
         // this.container.tabIndex = 0;
 
@@ -268,6 +271,12 @@ export class TenOnTen {
         } else {
             this.generateMainCubes();
         }
+
+        this.mainMenuOpen.subscribe((isOpen) => {
+            if (isOpen) {
+                callFunctions(this.callbacks.onAfterOpenMenu);
+            }
+        });
     }
 
     public getState(): TenOnTenState {

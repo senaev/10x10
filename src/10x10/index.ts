@@ -1,4 +1,5 @@
 import 'jquery.transit';
+import { MILLISECONDS_IN_MINUTE } from 'senaev-utils/src/types/Time/const';
 import { isPositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
 import { isNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
@@ -35,8 +36,14 @@ const decryptState = async (string: string): Promise<string> => decryptString({
     secret: SESSION_ENCRYPTION_SECRET,
 });
 
-function showAdAfterLevelComplete(bridge: PlayGamaBridge) {
-    bridge.advertisement.showInterstitial();
+function showInterstitial(playGamaBridge: PlayGamaBridge) {
+    const isMockEnv = playGamaBridge.platform.id === 'mock';
+    if (isMockEnv) {
+        alert('showInterstitial');
+        return;
+    }
+
+    playGamaBridge.advertisement.showInterstitial();
 }
 
 function isValidTenOnTenState(state: unknown): state is TenOnTenState {
@@ -77,9 +84,31 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
     const saveState = async () => {
         const encryptedStateNext: string = await encryptState(tenOnTen.getState());
         playGamaBridge.storage.set([STORAGE_KEY], [encryptedStateNext]);
+
     };
 
-    tenOnTen.on('onAfterMove', saveState);
+    let lastShowInterstitialTime = 0;
+    const MIN_TIME_BETWEEN_ADS = 5 * MILLISECONDS_IN_MINUTE;
+    const MIN_MOVES_BEFORE_AD = 20;
+    let movesSinceLastAd = 0;
+    tenOnTen.on('onAfterMove', () => {
+        saveState();
+
+        movesSinceLastAd++;
+        if (movesSinceLastAd < MIN_MOVES_BEFORE_AD) {
+            return;
+        }
+
+        const now = Date.now();
+        const timeSinceAd = now - lastShowInterstitialTime;
+        if (timeSinceAd < MIN_TIME_BETWEEN_ADS) {
+            return;
+        }
+
+        lastShowInterstitialTime = now;
+        movesSinceLastAd = 0;
+        showInterstitial(playGamaBridge);
+    });
     tenOnTen.on('onAfterUndo', saveState);
     tenOnTen.on('onAfterNextLevelRefresh', saveState);
     tenOnTen.on('onAfterNewGameStarted', saveState);
@@ -89,7 +118,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
         // eslint-disable-next-line no-console
         console.log('showAdAfterLevelComplete');
 
-        showAdAfterLevelComplete(playGamaBridge);
+        showInterstitial(playGamaBridge);
     });
 
     if (!isMockEnv) {

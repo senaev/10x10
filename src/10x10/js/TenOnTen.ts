@@ -7,6 +7,9 @@ import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRando
 import { Signal } from 'senaev-utils/src/utils/Signal';
 
 import { RefreshButton } from '../components/RefreshButton';
+import {
+    UndoButton,
+} from '../components/UndoButton';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS } from '../const/CUBE_COLORS';
@@ -27,9 +30,6 @@ import {
     CubeAddress, Cubes,
 } from './Cubes';
 import { MoveMap } from './MoveMap';
-import {
-    UndoButton,
-} from '../components/UndoButton';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;

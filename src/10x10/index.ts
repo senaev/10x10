@@ -46,6 +46,8 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
 (async () => {
     const playGamaBridge = await initPlayGamaBridge();
 
+    const isMockEnv = playGamaBridge.platform.id === 'mock';
+
     const encryptedState = await playGamaBridge.storage.get(STORAGE_KEY);
     let initialState: TenOnTenState | undefined;
     if (isNonEmptyString(encryptedState)) {
@@ -61,7 +63,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
     }
 
     // eslint-disable-next-line no-console
-    console.log('initialState', initialState);
+    console.log('initialState', isMockEnv ? initialState : Boolean(initialState));
 
     const tenOnTen = new TenOnTen({
         container,
@@ -80,6 +82,7 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
     tenOnTen.on('onAfterMove', saveState);
     tenOnTen.on('onAfterUndo', saveState);
     tenOnTen.on('onAfterNextLevelRefresh', saveState);
+    tenOnTen.on('onAfterNewGameStarted', saveState);
     tenOnTen.on('onAfterNextLevel', () => {
         saveState();
 
@@ -89,19 +92,21 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
         showAdAfterLevelComplete(playGamaBridge);
     });
 
-    // playGamaBridge.game.on(playGamaBridge.EVENT_NAME.VISIBILITY_STATE_CHANGED, (nextState) => {
-    //     // eslint-disable-next-line no-console
-    //     console.log('Visibility state:', nextState);
-    // });
+    if (!isMockEnv) {
+        playGamaBridge.game.on(playGamaBridge.EVENT_NAME.VISIBILITY_STATE_CHANGED, (nextState) => {
+            // eslint-disable-next-line no-console
+            console.log('Visibility state:', nextState);
+        });
 
-    // // To track interstitial ad state changes, subscribe to the event
-    // playGamaBridge.advertisement.on(
-    //     playGamaBridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED,
-    //     (state) => {
-    //         // eslint-disable-next-line no-console
-    //         console.log('Interstitial state: ', state);
-    //     }
-    // );
+        // To track interstitial ad state changes, subscribe to the event
+        playGamaBridge.advertisement.on(
+            playGamaBridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED,
+            (state) => {
+                // eslint-disable-next-line no-console
+                console.log('Interstitial state: ', state);
+            }
+        );
+    }
 
     // eslint-disable-next-line no-console
     console.log('App is ready', tenOnTen);

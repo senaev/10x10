@@ -28,33 +28,36 @@ export type CubesMask = {
     readonly left: CubesFieldRequired;
 };
 
+export function createCubesMaskWithNullValues(): CubesMask {
+    const cubesLocal: Partial<CubesFields> = {};
+
+    for (const key in FIELDS) {
+        const field: CubesFieldOptional = {};
+        cubesLocal[FIELDS[key]] = field;
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            field[x] = {};
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                field[x][y] = null;
+            }
+        }
+    }
+
+    return {
+        main: cubesLocal.main!,
+        top: cubesLocal.top as CubesFieldRequired,
+        right: cubesLocal.right as CubesFieldRequired,
+        bottom: cubesLocal.bottom as CubesFieldRequired,
+        left: cubesLocal.left as CubesFieldRequired,
+    };
+}
+
 export class Cubes {
     public readonly _app: TenOnTen;
     public cubesMask: CubesMask;
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
-
-        const cubesLocal: Partial<CubesFields> = {};
-
-        for (const key in FIELDS) {
-            const field: CubesFieldOptional = {};
-            cubesLocal[FIELDS[key]] = field;
-            for (let x = 0; x < BOARD_SIZE; x++) {
-                field[x] = {};
-                for (let y = 0; y < BOARD_SIZE; y++) {
-                    field[x][y] = null;
-                }
-            }
-        }
-
-        this.cubesMask = {
-            main: cubesLocal.main!,
-            top: cubesLocal.top as CubesFieldRequired,
-            right: cubesLocal.right as CubesFieldRequired,
-            bottom: cubesLocal.bottom as CubesFieldRequired,
-            left: cubesLocal.left as CubesFieldRequired,
-        };
+        this.cubesMask = createCubesMaskWithNullValues();
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)

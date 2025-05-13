@@ -1,6 +1,7 @@
 import { PixelSize } from 'senaev-utils/src/types/PixelSize';
 import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
+import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
@@ -28,6 +29,7 @@ import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel'
 
 import { Cube } from './Cube';
 import {
+    createCubesMaskWithNullValues,
     CubeAddress, Cubes,
 } from './Cubes';
 import { MoveMap } from './MoveMap';
@@ -37,6 +39,7 @@ export type TenOnTenCallbacks = {
     onAfterUndo: () => void;
     onAfterNextLevel: () => void;
     onAfterNextLevelRefresh: () => void;
+    onAfterNewGameStarted: () => void;
 };
 
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
@@ -80,11 +83,11 @@ export class TenOnTen {
     private blockApp: boolean;
     private previousStepMap: CubesPositions | null = null;
 
-    private isNewLevel: boolean = true;
+    private isNewLevel: Signal<boolean> = new Signal(false);
 
     private readonly bodySizeValue: Signal<PixelSize>;
     private readonly canUndo: Signal<boolean> = new Signal(false);
-    private readonly canRefresh: Signal<boolean> = new Signal(false);
+    private readonly mainMenuOpen: Signal<boolean> = new Signal(false);
 
     private readonly callbacks: {
         [key in keyof TenOnTenCallbacks]: TenOnTenCallbacks[key][];
@@ -93,6 +96,7 @@ export class TenOnTen {
             onAfterUndo: [],
             onAfterNextLevel: [],
             onAfterNextLevelRefresh: [],
+            onAfterNewGameStarted: [],
         };
 
     public constructor({
@@ -198,6 +202,7 @@ export class TenOnTen {
             container: actionButtons,
         });
         this.canUndo.subscribe((canUndo) => {
+            console.warn('canUndo', canUndo);
             this.undoButton.setVisible(canUndo);
         });
         this.canUndo.next(initialState?.previous ? true : false);
@@ -206,40 +211,60 @@ export class TenOnTen {
             onClick: this.refresh,
             container: actionButtons,
         });
-        this.canRefresh.subscribe((canRefresh) => {
-            this.refreshButton.setVisible(canRefresh);
+        this.isNewLevel.subscribe((isNewLevel) => {
+            this.refreshButton.setVisible(isNewLevel);
         });
-        this.canRefresh.next(initialState?.isNewLevel === true);
+        if (initialState?.isNewLevel) {
+            this.isNewLevel.next(true);
+        }
 
         const mainMenuPanel = document.createElement('div');
         mainMenuPanel.classList.add('mainMenuPanel');
         this.container.appendChild(mainMenuPanel);
 
+        const mainMenuElement = document.createElement('div');
+        mainMenuElement.style.display = 'none';
+        this.mainMenuOpen.subscribe((isOpen) => {
+            mainMenuElement.style.display = isOpen ? 'flex' : 'none';
+        });
+        mainMenuElement.classList.add('mainMenu');
+        const mainMenuItemsElement = document.createElement('div');
+        mainMenuItemsElement.classList.add('mainMenuItems');
+        mainMenuElement.appendChild(mainMenuItemsElement);
+        const MAIN_MENU_ITEMS = [
+            {
+                label: I18N_DICTIONARY.newGame[this.lang],
+                onClick: () => {
+                    this.startNewGame();
+                },
+            },
+            {
+                label: I18N_DICTIONARY.close[this.lang],
+                onClick: noop,
+            },
+        ];
+        MAIN_MENU_ITEMS.forEach(({ label, onClick }) => {
+            const mainMenuItemElement = document.createElement('div');
+            mainMenuItemElement.classList.add('mainMenuItem');
+            mainMenuItemElement.textContent = label;
+            mainMenuItemElement.addEventListener('click', () => {
+                onClick();
+                this.mainMenuOpen.next(false);
+            });
+            mainMenuItemsElement.appendChild(mainMenuItemElement);
+        });
+        this.container.appendChild(mainMenuElement);
+
         new MenuButton({
             onClick: () => {
-                //
+                this.mainMenuOpen.next(true);
             },
             container: mainMenuPanel,
         });
 
-        // запускаем инициализацию приложения
-        // генерируем кубики в боковых панелях
-        this.cubes._sideEach((_cube, field, x, y) => {
-            this.createCube({
-                x,
-                y,
-                field,
-                color: initialState
-                    ? initialState.current[field as Direction][x][y].color
-                    : getRandomColorForCubeLevel(this.level),
-                appearWithAnimation: false,
-                direction: null,
-                toMineOrder: null,
-            });
-        });
+        this.createSideCubes(initialState);
 
         if (initialState) {
-            this.isNewLevel = initialState.isNewLevel;
             this.setState(initialState);
         } else {
             this.generateMainCubes();
@@ -251,15 +276,14 @@ export class TenOnTen {
             level: this.level,
             previous: this.previousStepMap,
             current: this.generateMask(),
-            isNewLevel: this.isNewLevel,
+            isNewLevel: this.isNewLevel.value(),
         };
     }
 
     public setState(state: TenOnTenState) {
         this.setLevel(state.level);
 
-        this.isNewLevel = state.isNewLevel;
-        this.canRefresh.next(state.isNewLevel);
+        this.isNewLevel.next(state.isNewLevel);
 
         this.previousStepMap = state.previous;
         this.applyCubesState(state.current);
@@ -309,7 +333,8 @@ export class TenOnTen {
         this.generateMainCubes();
 
         this.previousStepMap = null;
-        this.isNewLevel = true;
+        this.isNewLevel.next(true);
+        this.canUndo.next(false);
 
         callFunctions(this.callbacks.onAfterNextLevel);
     }
@@ -343,7 +368,7 @@ export class TenOnTen {
     };
 
     public async run(startCubes: Cube[]) {
-        this.isNewLevel = false;
+        this.isNewLevel.next(false);
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
@@ -381,7 +406,6 @@ export class TenOnTen {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
             this.canUndo.next(this.end !== 'next_level');
-            this.canRefresh.next(this.end === 'next_level');
 
             if (this.end !== null) {
                 switch (this.end) {
@@ -593,6 +617,28 @@ export class TenOnTen {
         }
     }
 
+    private createSideCubes(initialState?: TenOnTenState) {
+        // запускаем инициализацию приложения
+        // генерируем кубики в боковых панелях
+        this.cubes._sideEach((cube, field, x, y) => {
+            if (cube) {
+                cube.remove();
+            }
+
+            this.createCube({
+                x,
+                y,
+                field,
+                color: initialState
+                    ? initialState.current[field as Direction][x][y].color
+                    : getRandomColorForCubeLevel(this.level),
+                appearWithAnimation: false,
+                direction: null,
+                toMineOrder: null,
+            });
+        });
+    }
+
     private setLevel(level: number) {
         this.level = level;
         this.levelElement.textContent = String(level);
@@ -639,6 +685,27 @@ export class TenOnTen {
             cube.setRowVisibility(isHovered);
         }
     };
+
+    private startNewGame() {
+        this.clearMainField();
+        this.cubes.cubesMask = createCubesMaskWithNullValues();
+
+        this.createSideCubes();
+
+        this.setLevel(1);
+        this.generateMainCubes();
+
+        this.previousStepMap = null;
+        this.isNewLevel.next(true);
+        this.canUndo.next(false);
+        callFunctions(this.callbacks.onAfterNewGameStarted);
+    }
+
+    private clearMainField() {
+        this.cubes._mainEach((cube) => {
+            cube.remove();
+        });
+    }
 
     // генерируем кубики на главном поле
     private generateMainCubes() {

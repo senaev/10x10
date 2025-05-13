@@ -15,4 +15,12 @@ export const I18N_DICTIONARY = {
         en: 'menu',
         ru: 'меню',
     },
+    newGame: {
+        en: 'New Game',
+        ru: 'Новая игра',
+    },
+    close: {
+        en: 'Close',
+        ru: 'Закрыть',
+    },
 } as const;

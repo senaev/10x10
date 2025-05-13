@@ -159,14 +159,6 @@ export class TenOnTen {
         this.container.appendChild(levelInfoPanel);
         this.levelInfoPanel = levelInfoPanel;
 
-        // const topLeftPanelElement = document.createElement('div');
-        // topLeftPanelElement.classList.add('topLeftPanel');
-        // this.container[0].appendChild(topLeftPanelElement);
-        // topLeftPanelElement.innerText = 'Start from the beginning';
-        // topLeftPanelElement.addEventListener('click', () => {
-        //     //
-        // });
-
         const levelElement = document.createElement('div');
         levelElement.classList.add('level');
         levelElement.textContent = String(this.level);
@@ -178,15 +170,19 @@ export class TenOnTen {
         levelLabel.textContent = I18N_DICTIONARY.level[this.lang];
         levelInfoPanel.appendChild(levelLabel);
 
+        const actionButtons = document.createElement('div');
+        actionButtons.classList.add('actionButtons');
+        this.container.appendChild(actionButtons);
+
         this.undoButton = new UndoButton({
             onClick: this.undo,
-            container: levelInfoPanel,
+            container: actionButtons,
         });
         this.undoButton.setVisible(initialState?.previous ? true : false);
 
         this.refreshButton = new RefreshButton({
             onClick: this.refresh,
-            container: levelInfoPanel,
+            container: actionButtons,
         });
         this.refreshButton.setVisible(initialState?.previous === null);
 

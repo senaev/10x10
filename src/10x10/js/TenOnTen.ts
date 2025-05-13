@@ -62,7 +62,7 @@ export type TenOnTenState = {
 
 export class TenOnTen {
     public readonly container: HTMLElement;
-    public readonly topRightPanelElement: Element;
+    public readonly levelInfoPanel: Element;
 
     public level: number;
     public readonly cubes: Cubes;
@@ -101,25 +101,27 @@ export class TenOnTen {
 
         const window = container.ownerDocument.defaultView!;
         const body = container.ownerDocument.body;
+        function getBodySizeValue(): PixelSize {
+            return {
+                width: body.clientWidth,
+                height: body.clientHeight,
+            };
+        }
 
         const setContainerFontSize = () => {
             const { width, height } = this.bodySizeValue.value();
             const bodyMinSize = Math.min(width, height);
+            const MAX_CONTAINER_SIZE = 640;
+            const containerSize = Math.min(bodyMinSize, MAX_CONTAINER_SIZE);
 
-            this.container.style.fontSize = `${bodyMinSize / APP_WIDTH_IN_CUBES}px`;
-            this.container.style.width = `${bodyMinSize}px`;
-            this.container.style.height = `${bodyMinSize}px`;
+            this.container.style.fontSize = `${containerSize / APP_WIDTH_IN_CUBES}px`;
+            this.container.style.width = `${containerSize}px`;
+            this.container.style.height = `${containerSize}px`;
         };
 
-        this.bodySizeValue = new Signal<PixelSize>({
-            width: body.clientWidth,
-            height: body.clientHeight,
-        }, deepEqual);
+        this.bodySizeValue = new Signal<PixelSize>(getBodySizeValue(), deepEqual);
         window.addEventListener('resize', () => {
-            this.bodySizeValue.next({
-                width: body.clientWidth,
-                height: body.clientHeight,
-            });
+            this.bodySizeValue.next(getBodySizeValue());
             setContainerFontSize();
         });
         setContainerFontSize();
@@ -135,7 +137,7 @@ export class TenOnTen {
         this.level = 1;
 
         // язык
-        this.lang = 'ru';
+        this.lang = 'en';
 
         // датчик конца хода
         this.end = null;
@@ -152,10 +154,10 @@ export class TenOnTen {
         this.container.classList.add('tenOnTenContainer');
         this.container.appendChild(background);
 
-        const topRightPanelElement = document.createElement('div');
-        topRightPanelElement.classList.add('topRightPanel');
-        this.container.appendChild(topRightPanelElement);
-        this.topRightPanelElement = topRightPanelElement;
+        const levelInfoPanel = document.createElement('div');
+        levelInfoPanel.classList.add('levelInfoPanel');
+        this.container.appendChild(levelInfoPanel);
+        this.levelInfoPanel = levelInfoPanel;
 
         // const topLeftPanelElement = document.createElement('div');
         // topLeftPanelElement.classList.add('topLeftPanel');
@@ -169,17 +171,22 @@ export class TenOnTen {
         levelElement.classList.add('level');
         levelElement.textContent = String(this.level);
         this.levelElement = levelElement;
-        topRightPanelElement.appendChild(levelElement);
+        levelInfoPanel.appendChild(levelElement);
+
+        const levelLabel = document.createElement('div');
+        levelLabel.classList.add('levelLabel');
+        levelLabel.textContent = I18N_DICTIONARY.level[this.lang];
+        levelInfoPanel.appendChild(levelLabel);
 
         this.undoButton = new UndoButton({
             onClick: this.undo,
-            container: topRightPanelElement,
+            container: levelInfoPanel,
         });
         this.undoButton.setVisible(initialState?.previous ? true : false);
 
         this.refreshButton = new RefreshButton({
             onClick: this.refresh,
-            container: topRightPanelElement,
+            container: levelInfoPanel,
         });
         this.refreshButton.setVisible(initialState?.previous === null);
 

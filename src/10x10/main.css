@@ -48,13 +48,6 @@ body {
     margin: 0.025em;
 }
 
-.topRightPanel {
-    position: absolute;
-    right: 0.5em;
-    top: 0.5em;
-    height: 3em;
-    width: 3em;
-}
 
 .undoButton {
     cursor: pointer;
@@ -161,8 +154,21 @@ body {
     border-color: #ffbb3f;
 }
 
+
+.levelInfoPanel {
+    position: absolute;
+    left: 0.5em;
+    top: 0.5em;
+    height: 3em;
+    width: 3em;
+}
+
 .level {
     font-size: 1.7em;
+}
+
+.levelLabel {
+    font-size: 0.5em;
 }
 
 .undoButton,

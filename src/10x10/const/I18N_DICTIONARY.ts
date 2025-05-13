@@ -7,4 +7,8 @@ export const I18N_DICTIONARY = {
         en: 'refresh',
         ru: 'обновить',
     },
+    level: {
+        en: 'level',
+        ru: 'уровень',
+    },
 } as const;

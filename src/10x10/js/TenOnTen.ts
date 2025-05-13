@@ -202,7 +202,6 @@ export class TenOnTen {
             container: actionButtons,
         });
         this.canUndo.subscribe((canUndo) => {
-            console.warn('canUndo', canUndo);
             this.undoButton.setVisible(canUndo);
         });
         this.canUndo.next(initialState?.previous ? true : false);

@@ -7,13 +7,13 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getSideCubeByAddress } from '../utils/getSideCubeByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { Cube } from './Cube';
+import { CubeView } from '../components/CubeView';
 import { __findCubeInMainMask } from './MainMask';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
-export type CubesFieldOptional = Record<number, Record<number, Cube | null>>;
-export type CubesFieldRequired = Record<number, Record<number, Cube>>;
+export type CubesFieldOptional = Record<number, Record<number, CubeView | null>>;
+export type CubesFieldRequired = Record<number, Record<number, CubeView>>;
 export type CubesFields = Record<Field, CubesFieldOptional>;
 
 export type CubeCoordinates = {
@@ -77,12 +77,12 @@ export class Cubes {
         this.mainCubes = createMainCubesMaskWithNullValues();
     }
 
-    public _addMainCube(cube: Cube) {
+    public _addMainCube(cube: CubeView) {
         this.mainCubes[cube.x][cube.y] = cube;
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    public _addSideCube(cube: Cube) {
+    public _addSideCube(cube: CubeView) {
         const field = cube.field;
 
         if (field === 'main') {
@@ -93,41 +93,30 @@ export class Cubes {
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
-    public _getSideCube(address: SideCubeAddress): Cube {
-        if (address.field === 'main') {
-            throw new Error('main field is not allowed');
-        }
-
+    public _getSideCube(address: SideCubeAddress): CubeView {
         return getSideCubeByAddress(this.sideCubes, address)!;
     }
 
-    public _getMainCube(o: CubeCoordinates): Cube | null {
+    public _getMainCube(o: CubeCoordinates): CubeView | null {
         return this.mainCubes[o.x][o.y];
     }
 
-    public _setMainCube(o: CubeCoordinates, value: Cube | null) {
+    public _setMainCube(o: CubeCoordinates, value: CubeView | null) {
         this.mainCubes[o.x][o.y] = value;
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
-    public _setSideCube(o: SideCubeAddress, value: Cube) {
-        if (o === undefined || value === undefined) {
-            throw new Error(`cubes._set не получил параметры: o: ${o} value: ${value}`);
-        }
-
-        const field = o.field;
-
-        if (field === 'main') {
-            throw new Error('main field is not allowed');
-        }
-
-        this.sideCubes[field][o.x][o.y] = value;
-
-        return value;
+    public _setSideCube({
+        x,
+        y,
+        field,
+    }: SideCubeAddress, value: CubeView): void {
+        this.sideCubes[field][x][y] = value;
     }
+
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
-    public _sideEach(func: (cube: Cube, field: Direction, x: number, y: number) => void) {
+    public _sideEach(func: (cube: CubeView, field: Direction, x: number, y: number) => void) {
         FIELDS.forEach((field) => {
             if (field === 'main') {
                 return;
@@ -143,7 +132,7 @@ export class Cubes {
 
     // пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
     // не нулевым найденным кубиком
-    public _mainEach(func: (cube: Cube, x: number, y: number, i: number) => void) {
+    public _mainEach(func: (cube: CubeView, x: number, y: number, i: number) => void) {
         let i;
         i = 0;
         for (let x = 0; x < BOARD_SIZE; x++) {
@@ -158,7 +147,7 @@ export class Cubes {
     }
 
     // добавляем в линию кубик, по кубику мы должны определить, в какую линию
-    public _pushInLine(cube: Cube) {
+    public _pushInLine(cube: CubeView) {
         const direction = cube.direction;
 
         assertNonEmptyString(direction);
@@ -207,7 +196,7 @@ export class Cubes {
         toSideActions,
     }: {
         movingCubes: MovingCube[];
-        startCubes: Cube[];
+        startCubes: CubeView[];
         toSideActions: MovingCube[];
     }) {
 

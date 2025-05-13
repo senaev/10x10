@@ -1,6 +1,6 @@
 import { Direction } from '../const/DIRECTIONS';
 
-import { Cube } from './Cube';
+import { CubeView } from '../components/CubeView';
 
 export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
 
@@ -22,14 +22,14 @@ export class MovingCube {
     public steps: AnimationStep[];
     public toSideTime: number | undefined;
 
-    public cube: Cube;
+    public cube: CubeView;
 
     public constructor(o: {
         x: number;
         y: number;
         color: string;
         direction: Direction | null;
-        cube: Cube;
+        cube: CubeView;
     }) {
         this.x = o.x;
         this.y = o.y;

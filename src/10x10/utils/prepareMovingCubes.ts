@@ -1,5 +1,5 @@
+import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { Cube } from '../js/Cube';
 import { CubesMove, CubeToMove } from '../js/MoveMap';
 import { MovingCube } from '../js/MovingCube';
 
@@ -13,8 +13,8 @@ export function prepareMovingCubes({
     startCubes,
     mainFieldCubes,
 }: {
-    startCubes: Cube[];
-    mainFieldCubes: Cube[];
+    startCubes: CubeView[];
+    mainFieldCubes: CubeView[];
 }): CubesMove {
     const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
 

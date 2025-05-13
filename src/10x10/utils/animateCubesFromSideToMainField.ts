@@ -1,18 +1,24 @@
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 
-import { Cube } from '../js/Cube';
+import { CubeView } from '../components/CubeView';
 import { SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeByAddress } from './getSideCubeByAddress';
 
-export function animateCubesFromSideToMainField(startCubes: Cube[], mask: SideCubesMask): void {
+export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: SideCubesMask): void {
+    const { field } = startCubes[0];
+
+    if (field === 'main') {
+        throw new Error('animateCubesFromSideToMainField: startCubes[0].field === "main"');
+    }
+
     // получаем линию кубика
     // коллекция пока в начальном состоянии (до хода)
     const line = getCubeAddressInSideFieldInOrderFromMain({
         x: startCubes[0].x,
         y: startCubes[0].y,
-        field: startCubes[0].field,
+        field,
     });
 
     // массив из возможных комбинаций анимаций

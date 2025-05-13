@@ -1,5 +1,5 @@
+import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { Cube } from '../js/Cube';
 import {
     CubeCoordinates,
     CubesFieldOptional,
@@ -19,7 +19,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
     mainCubes: CubesFieldOptional;
     sideCubesMask: SideCubesMask;
     originCubeAddress: SideCubeAddress;
-}): Cube[] | 'empty' | 'block' {
+}): CubeView[] | 'empty' | 'block' {
     const isVertical = originCubeAddress.field === 'top' || originCubeAddress.field === 'bottom';
     const isLeftOrTop = originCubeAddress.field === 'left' || originCubeAddress.field === 'top';
     const statProp: 'x' | 'y' = isVertical ? 'x' : 'y';
@@ -87,7 +87,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
     };
     address[statProp] = originCubeAddress[statProp];
 
-    const arr: Cube[] = [];
+    const arr: CubeView[] = [];
     for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
         address[dynamicProp] = cellsSide[key];
         arr.push(getSideCubeByAddress(sideCubesMask, address)!);

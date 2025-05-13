@@ -9,7 +9,7 @@ import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 
-import { Cube } from './Cube';
+import { CubeView } from '../components/CubeView';
 import { SideCubesMask } from './Cubes';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
@@ -22,12 +22,12 @@ export type CubeAnimation = {
 
 export type CubeAnimationStep = {
     animations: CubeAnimation[];
-    cube: Cube;
+    cube: CubeView;
 };
 
 export type CubeToMove = {
     isFromSide: boolean;
-    original: Cube;
+    original: CubeView;
     moving: MovingCube;
 };
 
@@ -43,14 +43,14 @@ export type CubesMove = {
  * для основного приложения.
  */
 export class MoveMap {
-    public readonly beyondTheSide: Cube[] = [];
-    public readonly startCubes: Cube[];
+    public readonly beyondTheSide: CubeView[] = [];
+    public readonly startCubes: CubeView[];
     public readonly toSideActions: MovingCube[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
 
     public readonly cubesMove: CubesMove;
 
-    public constructor(params: { startCubes: Cube[]; mainFieldCubes: Cube[]; app: TenOnTen }) {
+    public constructor(params: { startCubes: CubeView[]; mainFieldCubes: CubeView[]; app: TenOnTen }) {
         const mainFieldCubes = params.mainFieldCubes;
 
         const startCubes = params.startCubes;
@@ -190,11 +190,11 @@ export class MoveMap {
         animationLength,
         beyondTheSide,
     }: {
-        startCubes: Cube[];
+        startCubes: CubeView[];
         cubesMask: SideCubesMask;
         animationsScript: CubeAnimationStep[];
         animationLength: UnsignedInteger;
-        beyondTheSide: Cube[];
+        beyondTheSide: CubeView[];
     }): Promise<void> {
         animateCubesFromSideToMainField(startCubes, cubesMask);
 

@@ -27,9 +27,10 @@ import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeByAddress } from '../utils/getSideCubeByAddress';
 
-import { Cube } from './Cube';
+import { CubeView } from '../components/CubeView';
 import {
     createSideCubesMaskWithNullValues,
+    CubeCoordinates,
     Cubes,
     SideCubeAddress,
 } from './Cubes';
@@ -375,14 +376,14 @@ export class TenOnTen {
         this.previousStepMap = null;
     };
 
-    public async run(startCubes: Cube[]) {
+    public async run(startCubes: CubeView[]) {
         this.isNewLevel.next(false);
 
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
         // создаем массив из всех кубиков, которые есть на доске
-        const mainFieldCubes: Cube[] = [];
+        const mainFieldCubes: CubeView[] = [];
         this.cubes._mainEach((cube) => {
             mainFieldCubes.push(cube);
         });
@@ -450,13 +451,21 @@ export class TenOnTen {
         this.callbacks[event].push(callback);
     }
 
-    // вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-    public cutCubesFromLineAndFillByNewOnes(startCubes: Cube[]) {
-        // получаем линию
+    /**
+     * Вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
+     */
+    public cutCubesFromLineAndFillByNewOnes(startCubes: CubeView[]) {
+        const { field } = startCubes[0];
+
+        if (field === 'main') {
+            throw new Error('cutCubesFromLineAndFillByNewOnes: startCubes[0].field === "main"');
+        }
+
+        // Получаем линию
         const line = getCubeAddressInSideFieldInOrderFromMain({
             x: startCubes[0].x,
             y: startCubes[0].y,
-            field: startCubes[0].field,
+            field,
         });
 
         // пробегаемся, меняем значения в коллекции
@@ -497,7 +506,7 @@ export class TenOnTen {
             x: number;
             y: number;
             pCube: MaskFieldValue | null;
-            cube: Cube | null;
+            cube: CubeView | null;
             action: string;
         }[] = [];
         if (previousStepMap) {
@@ -553,7 +562,7 @@ export class TenOnTen {
                                     // если какие-то параметры различаются,
                                     // меняем параметры кубика
                                     if (
-                                        cube[prop as keyof Cube] !== pCube[prop as keyof MaskFieldValue]
+                                        cube[prop as keyof CubeView] !== pCube[prop as keyof MaskFieldValue]
                                     ) {
                                         changed.push({
                                             field: fieldName as Field,
@@ -660,29 +669,40 @@ export class TenOnTen {
         this.levelElement.textContent = String(level);
     }
 
-    private readonly handleCubeClick = (address: SideCubeAddress) => {
-        // если стоит блокировка событий приложения - не даём пользователю ничего сделать
+    private readonly handleCubeClick = ({
+        x,
+        y,
+        field,
+    }: CubeCoordinates & {
+        field: Field;
+    }) => {
+        // Если стоит блокировка событий приложения - не даём пользователю ничего сделать
         if (this.blockApp) {
             return;
         }
 
-        // если щелчек произошол по  полю - ничего не делаем
-        if (address.field === 'main') {
+        // Если щелчок произошел по главному полю - ничего не делаем
+        if (field === 'main') {
             return;
         }
 
-        // если по боковому
-        // ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
+        const sideCubeAddress: SideCubeAddress = {
+            x,
+            y,
+            field,
+        };
+
+        // Если по боковому полю - ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
         const startCubes = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubes,
             sideCubesMask: this.cubes.sideCubes,
-            originCubeAddress: address,
+            originCubeAddress: sideCubeAddress,
         });
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
-            getSideCubeByAddress(this.cubes.sideCubes, address)!.performIHavePawsAnimation();
+            getSideCubeByAddress(this.cubes.sideCubes, sideCubeAddress)!.performIHavePawsAnimation();
             return;
         }
 
@@ -690,15 +710,25 @@ export class TenOnTen {
         this.run(startCubes);
     };
 
-    private readonly handleHover = (address: SideCubeAddress, isHovered: boolean) => {
-        if (address.field === 'main') {
+    private readonly handleHover = ({
+        x,
+        y,
+        field,
+    }: CubeCoordinates & {
+        field: Field;
+    }, isHovered: boolean) => {
+        if (field === 'main') {
             return;
         }
 
         const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubes,
             sideCubesMask: this.cubes.sideCubes,
-            originCubeAddress: address,
+            originCubeAddress: {
+                x,
+                y,
+                field,
+            },
         });
 
         if (typeof allToFirstInLine === 'string') {
@@ -791,19 +821,18 @@ export class TenOnTen {
             // цвета, которые есть в смежных кубиках
             const appearanceColors = [];
             for (let key = 0; key < 4; key++) {
-                const address: SideCubeAddress = {
+                const coordinates: CubeCoordinates = {
                     x: cell!.x,
                     y: cell!.y,
-                    field: 'main',
                 };
 
                 const prop: 'x' | 'y' = key % 2 == 0 ? 'x' : 'y';
-                address[prop] = key < 2 ? address[prop] + 1 : address[prop] - 1;
+                coordinates[prop] = key < 2 ? coordinates[prop] + 1 : coordinates[prop] - 1;
 
                 if (
-                    address.x > -1 && address.y > -1 && address.x < 10 && address.y < 10
+                    coordinates.x > -1 && coordinates.y > -1 && coordinates.x < 10 && coordinates.y < 10
                 ) {
-                    const c = this.cubes._getSideCube(address);
+                    const c = this.cubes._getMainCube(coordinates);
                     if (c !== null) {
                         appearanceColors.push(c.color);
                     }
@@ -936,7 +965,8 @@ export class TenOnTen {
         return mask as CubesPositions;
     }
 
-    private createCube(params: SideCubeAddress & {
+    private createCube(params: CubeCoordinates & {
+        field: Field;
         appearWithAnimation: boolean;
         color: string;
         direction: Direction | null;
@@ -944,7 +974,7 @@ export class TenOnTen {
     }) {
         const { field } = params;
 
-        const cube = new Cube({
+        const cube = new CubeView({
             ...params,
             app: this,
             container: this.container,

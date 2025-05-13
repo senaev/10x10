@@ -1,5 +1,5 @@
+import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { Cube } from '../js/Cube';
 import { SideCubesMask } from '../js/Cubes';
 import { MovingCube } from '../js/MovingCube';
 
@@ -16,16 +16,22 @@ export function animateMovingCubesFromMainFieldToSide({
     beyondTheSide,
     cubesMask,
 }: {
-    cube: Cube;
+    cube: CubeView;
     toSideActions: MovingCube[];
-    beyondTheSide: Cube[];
+    beyondTheSide: CubeView[];
     cubesMask: SideCubesMask;
 }) {
+    const { field } = cube;
+
+    if (field === 'main') {
+        throw new Error('animateMovingCubesFromMainFieldToSide: cube.field === "main"');
+    }
+
     // получаем линию кубика
     const line = getCubeAddressInSideFieldInOrderFromMain({
         x: cube.x,
         y: cube.y,
-        field: cube.field,
+        field,
     });
 
     // массив, в который по порядку попадут все кубики,
@@ -63,9 +69,9 @@ export function animateMovingCubesFromMainFieldToSide({
 
     // вычисляем, какие кубики будем двигать при вставке в линию
     const pos = BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
-    let c1: Cube;
-    let c2: Cube;
-    let cr: Cube;
+    let c1: CubeView;
+    let c2: CubeView;
+    let cr: CubeView;
 
     // смысл этих условий в том, что если кубик, который надо анимировать,
     // еще присутствует в линии, мы берем этот кубик оттуда, если же

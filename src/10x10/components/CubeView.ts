@@ -1,114 +1,22 @@
 import $ from 'jquery';
-import { Integer } from 'senaev-utils/src/utils/Number/Integer';
-import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { forceRepaint } from '../../utils/forceRepaint';
+import { animateCubeMovement } from '../animations/animateCubeMovement';
+import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWithBump';
+import { appearCubeFromZeroSizePoint } from '../animations/appearCubeFromZeroSizePoint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
+import { CubeCoordinates } from '../js/Cubes';
+import { CubeAnimation } from '../js/MoveMap';
+import { TenOnTen } from '../js/TenOnTen';
 import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
 import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
-
-import { SideCubeAddress } from './Cubes';
-import { CubeAnimation } from './MoveMap';
-import { TenOnTen } from './TenOnTen';
-
-export async function animateCubeMovement({
-    isVertical,
-    distance,
-    element,
-}: {
-    isVertical: boolean;
-    distance: Integer;
-    element: HTMLElement;
-}) {
-    const duration = ANIMATION_TIME * Math.abs(distance);
-
-    const prop = isVertical ? 'top' : 'left';
-    element.style.transition = `${prop} ${duration}ms cubic-bezier(.42, 0, 1, 1)`;
-    forceRepaint(element);
-
-    const currentPropValue = parseFloat(element.style[prop]);
-    const newLeft = currentPropValue + distance;
-    element.style[prop] = `${newLeft}em`;
-
-    await promiseTimeout(duration);
-
-    element.style.transition = '';
-}
-
-export async function animateCubeBump({
-    isVertical,
-    element,
-}: {
-    isVertical: boolean;
-    element: HTMLElement;
-}) {
-    const scale: [number, number] = isVertical
-        ? [
-            1.1,
-            0.9,
-        ]
-        : [
-            0.9,
-            1.1,
-        ];
-    const halfDuration = ANIMATION_TIME / 2;
-
-    element.style.transition = `transform ${halfDuration}ms ease`;
-    forceRepaint(element);
-
-    element.style.transform = `scale(${scale[0]},${scale[1]})`;
-    await promiseTimeout(halfDuration);
-
-    element.style.transform = '';
-    await promiseTimeout(halfDuration);
-
-    element.style.transition = '';
-}
-
-async function appearCubeFromZeroSizePoint({
-    element,
-}: {
-    element: HTMLElement;
-}) {
-    element.style.transform = 'scale(0,0)';
-    element.style.opacity = '0.4';
-    element.style.transition = `transform ${ANIMATION_TIME}ms ease-out, opacity ${ANIMATION_TIME}ms ease-out`;
-    forceRepaint(element);
-
-    element.style.transform = 'scale(1,1)';
-    element.style.opacity = '1';
-    await promiseTimeout(ANIMATION_TIME);
-
-    element.style.transition = '';
-}
-
-async function animateCubeMovementWithBump ({
-    element,
-    isVertical,
-    distance,
-}: {
-    element: HTMLElement;
-    isVertical: boolean;
-    distance: PositiveInteger;
-}) {
-    await animateCubeMovement({
-        isVertical,
-        element,
-        distance,
-    });
-
-    await animateCubeBump({
-        isVertical,
-        element,
-    });
-};
 
 export type CubeAnimateAction = {
     action: string;
@@ -126,7 +34,7 @@ export type Transition = Partial<{
     top: string;
 }>;
 
-export class Cube {
+export class CubeView {
     public field: Field;
     public x: number;
     public y: number;
@@ -149,8 +57,8 @@ export class Cube {
         direction: Direction| null;
         color: string;
         container: HTMLElement;
-        onClick: (address: SideCubeAddress) => void;
-        onHover: (address: SideCubeAddress, isHovered: boolean) => void;
+        onClick: (address: CubeCoordinates & { field: Field }) => void;
+        onHover: (address: CubeCoordinates & { field: Field }, isHovered: boolean) => void;
     }) {
         this.x = params.x;
         this.y = params.y;

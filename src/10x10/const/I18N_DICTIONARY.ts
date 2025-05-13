@@ -11,4 +11,8 @@ export const I18N_DICTIONARY = {
         en: 'level',
         ru: 'уровень',
     },
+    menu: {
+        en: 'menu',
+        ru: 'меню',
+    },
 } as const;

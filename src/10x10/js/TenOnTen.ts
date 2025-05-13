@@ -6,6 +6,7 @@ import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { Signal } from 'senaev-utils/src/utils/Signal';
 
+import { MenuButton } from '../components/MenuButton';
 import { RefreshButton } from '../components/RefreshButton';
 import {
     UndoButton,
@@ -209,6 +210,17 @@ export class TenOnTen {
             this.refreshButton.setVisible(canRefresh);
         });
         this.canRefresh.next(initialState?.isNewLevel === true);
+
+        const mainMenuPanel = document.createElement('div');
+        mainMenuPanel.classList.add('mainMenuPanel');
+        this.container.appendChild(mainMenuPanel);
+
+        new MenuButton({
+            onClick: () => {
+                //
+            },
+            container: mainMenuPanel,
+        });
 
         // запускаем инициализацию приложения
         // генерируем кубики в боковых панелях

@@ -1,20 +1,16 @@
-import {
-    base64url,
-    EncryptJWT,
-    jwtDecrypt,
-    JWTPayload,
-} from 'jose';
 import 'jquery.transit';
 import { isPositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
 import { isNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
+import { decryptString, encryptString } from 'senaev-utils/src/utils/encryptDecryptString/encryptDecryptString';
 
 import { initPlayGamaBridge, PlayGamaBridge } from '../PlayGama/initPlayGamaBridge';
 import { GlobalThis } from '../types/GlobalThis';
 import { hintWebpackBuildTime } from '../utils/hintWebpackBuildTime';
 
+import { SESSION_ENCRYPTION_SECRET } from './const/SESSION_ENCRYPTION_SECRET';
+import { STORAGE_KEY } from './const/STORAGE_KEY';
 import { TenOnTen, TenOnTenState } from './js/TenOnTen';
-
 import './main.css';
 
 hintWebpackBuildTime();
@@ -25,42 +21,19 @@ if (!container) {
     throw new Error('Container not found');
 }
 
-type StateObject = {
-    state: string;
-};
-
-const STORAGE_KEY = 's_t_y';
-const SESSION_ENCRYPTION_SECRET = base64url.decode('111some111local111random111secret1123456789');
 const encryptState = (state: TenOnTenState): Promise<string> => {
-    const protectedHeader = {
-        alg: 'dir',
-        enc: 'A128CBC-HS256',
-    };
     const stateString = JSON.stringify(state);
-    const jwtPayload: StateObject = {
-        state: stateString,
-    } satisfies JWTPayload;
 
-    return new EncryptJWT(jwtPayload)
-        .setProtectedHeader(protectedHeader)
-        .encrypt(SESSION_ENCRYPTION_SECRET);
+    return encryptString({
+        string: stateString,
+        secret: SESSION_ENCRYPTION_SECRET,
+    });
 };
-const decryptState = async (stateString: string): Promise<StateObject | undefined> => {
-    const { payload } = await jwtDecrypt(stateString, SESSION_ENCRYPTION_SECRET);
 
-    if (!isObject(payload)) {
-        return undefined;
-    }
-
-    const state = payload.state;
-    if (!isNonEmptyString(state)) {
-        return undefined;
-    }
-
-    return {
-        state,
-    };
-};
+const decryptState = async (string: string): Promise<string> => decryptString({
+    string,
+    secret: SESSION_ENCRYPTION_SECRET,
+});
 
 function showAdAfterLevelComplete(bridge: PlayGamaBridge) {
     bridge.advertisement.showInterstitial();
@@ -74,19 +47,15 @@ function isValidTenOnTenState(state: unknown): state is TenOnTenState {
     const playGamaBridge = await initPlayGamaBridge();
 
     const encryptedState = await playGamaBridge.storage.get(STORAGE_KEY);
-
     let initialState: TenOnTenState | undefined;
     if (isNonEmptyString(encryptedState)) {
         const decryptedState = await decryptState(encryptedState);
 
-        if (isObject(decryptedState)) {
-            const state = decryptedState.state;
-            if (isNonEmptyString(state)) {
-                const stateObject = JSON.parse(state);
+        if (isNonEmptyString(decryptedState)) {
+            const stateObject = JSON.parse(decryptedState);
 
-                if (isValidTenOnTenState(stateObject)) {
-                    initialState = stateObject;
-                }
+            if (isValidTenOnTenState(stateObject)) {
+                initialState = stateObject;
             }
         }
     }

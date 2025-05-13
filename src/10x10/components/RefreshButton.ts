@@ -1,5 +1,5 @@
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
-import refreshIcon from '../img/refresh.svg';
+import svgIcon from '../img/refresh.svg';
 
 export class RefreshButton {
     private readonly element: HTMLElement;
@@ -9,7 +9,7 @@ export class RefreshButton {
         container: Element;
     }) {
         const img = document.createElement('img');
-        img.src = refreshIcon;
+        img.src = svgIcon;
 
         const text = document.createElement('div');
         text.textContent = I18N_DICTIONARY['refresh']['en'];

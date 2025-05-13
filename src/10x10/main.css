@@ -61,6 +61,34 @@ body {
     width: 3em;
 }
 
+.mainMenuPanel {
+    position: absolute;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    left: 0.5em;
+    bottom: 0.5em;
+    height: 3em;
+    width: 3em;
+}
+
+.menuButton {
+    cursor: pointer;
+}
+
+.menuButton img {
+    width: 2em;
+    height: 2em;
+    font-size: 0.5em;
+}
+
+.menuButtonText {
+    font-size: 0.5em;
+    font-weight: bold;
+}
+
 .undoButton {
     cursor: pointer;
 }

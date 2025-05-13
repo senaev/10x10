@@ -1,0 +1,1 @@
+export const SESSION_ENCRYPTION_SECRET = '111some111local111random111secret1123456789';

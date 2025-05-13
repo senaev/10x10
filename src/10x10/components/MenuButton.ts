@@ -1,7 +1,7 @@
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
-import svgIcon from '../img/undo.svg';
+import svgIcon from '../img/menu.svg';
 
-export class UndoButton {
+export class MenuButton {
     private readonly element: HTMLElement;
 
     public constructor(params: {
@@ -12,21 +12,16 @@ export class UndoButton {
         img.src = svgIcon;
 
         const text = document.createElement('div');
-        text.textContent = I18N_DICTIONARY['undo']['en'];
+        text.classList.add('menuButtonText');
+        text.textContent = I18N_DICTIONARY['menu']['en'];
 
         this.element = document.createElement('div');
-        this.element.classList.add('undoButton');
+        this.element.classList.add('menuButton');
         this.element.addEventListener('click', params.onClick);
 
         this.element.appendChild(img);
         this.element.appendChild(text);
 
         params.container.appendChild(this.element);
-
-        this.setVisible(false);
-    }
-
-    public setVisible(visible: boolean) {
-        this.element.style.display = visible ? 'block' : 'none';
     }
 }

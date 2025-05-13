@@ -1,8 +1,8 @@
+import { DIRECTIONS } from './DIRECTIONS';
+
 export const FIELDS = [
     'main',
-    'top',
-    'right',
-    'bottom',
-    'left',
+    ...DIRECTIONS,
 ] as const;
+
 export type Field = (typeof FIELDS)[number];

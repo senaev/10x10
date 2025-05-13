@@ -1,10 +1,10 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Cube } from '../js/Cube';
-import { CubesMask } from '../js/Cubes';
+import { SideCubesMask } from '../js/Cubes';
 import { MovingCube } from '../js/MovingCube';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
-import { getCubeByAddress } from './getCubeByAddress';
+import { getSideCubeByAddress } from './getSideCubeByAddress';
 
 /**
 * Массовая анимация для кубиков, вспомогательная
@@ -19,7 +19,7 @@ export function animateMovingCubesFromMainFieldToSide({
     cube: Cube;
     toSideActions: MovingCube[];
     beyondTheSide: Cube[];
-    cubesMask: CubesMask;
+    cubesMask: SideCubesMask;
 }) {
     // получаем линию кубика
     const line = getCubeAddressInSideFieldInOrderFromMain({
@@ -72,19 +72,19 @@ export function animateMovingCubesFromMainFieldToSide({
     // он уже удален из линии, но его нужно анимировать, мы берем его
     // из массива удаленных кубиков этой линии
     if (pos - 2 > -1) {
-        cr = getCubeByAddress(cubesMask, line[pos - 2])!;
+        cr = getSideCubeByAddress(cubesMask, line[pos - 2])!;
     } else {
         cr = removeBS[removeBS.length + (pos - 2)];
     }
 
     if (pos > -1) {
-        c1 = getCubeByAddress(cubesMask, line[pos])!;
+        c1 = getSideCubeByAddress(cubesMask, line[pos])!;
     } else {
         c1 = removeBS[removeBS.length + pos];
     }
 
     if (pos - 1 > -1) {
-        c2 = getCubeByAddress(cubesMask, line[pos - 1])!;
+        c2 = getSideCubeByAddress(cubesMask, line[pos - 1])!;
     } else {
         c2 = removeBS[removeBS.length + (pos - 1)];
     }

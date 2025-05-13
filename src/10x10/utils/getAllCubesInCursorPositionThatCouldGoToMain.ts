@@ -1,12 +1,25 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Cube } from '../js/Cube';
-import { CubeAddress, CubesMask } from '../js/Cubes';
+import {
+    CubeCoordinates,
+    CubesFieldOptional,
+    SideCubeAddress,
+    SideCubesMask,
+} from '../js/Cubes';
 
-import { getCubeByAddress } from './getCubeByAddress';
+import { getSideCubeByAddress } from './getSideCubeByAddress';
 import { isTheSameAddress } from './isTheSameAddress';
 
 // находим все кубики от этого до ближнего к майн в линии относительно этого
-export function getAllCubesInCursorPositionThatCouldGoToMain(mask: CubesMask, originCubeAddress: CubeAddress): Cube[] | 'empty' | 'block' {
+export function getAllCubesInCursorPositionThatCouldGoToMain({
+    mainCubes,
+    sideCubesMask,
+    originCubeAddress,
+}: {
+    mainCubes: CubesFieldOptional;
+    sideCubesMask: SideCubesMask;
+    originCubeAddress: SideCubeAddress;
+}): Cube[] | 'empty' | 'block' {
     const isVertical = originCubeAddress.field === 'top' || originCubeAddress.field === 'bottom';
     const isLeftOrTop = originCubeAddress.field === 'left' || originCubeAddress.field === 'top';
     const statProp: 'x' | 'y' = isVertical ? 'x' : 'y';
@@ -32,17 +45,16 @@ export function getAllCubesInCursorPositionThatCouldGoToMain(mask: CubesMask, or
         ? END_OF_ARRAY
         : START_OF_ARRAY;
 
-    let address: CubeAddress = {
-        field: 'main',
+    const mainFieldAddress: CubeCoordinates = {
         x: isVertical ? originCubeAddress.x : 0,
         y: isVertical ? 0 : originCubeAddress.y,
     };
-    address[statProp] = originCubeAddress[statProp];
+    mainFieldAddress[statProp] = originCubeAddress[statProp];
     let countOfCubesThatCanBeMoved = 0;
     for (const key in cellsMain) {
-        address[dynamicProp] = cellsMain[key];
+        mainFieldAddress[dynamicProp] = cellsMain[key];
         // mask.main
-        if (getCubeByAddress(mask, address) === null) {
+        if (mainCubes[mainFieldAddress.x][mainFieldAddress.y] === null) {
             countOfCubesThatCanBeMoved++;
         } else {
             break;
@@ -52,8 +64,8 @@ export function getAllCubesInCursorPositionThatCouldGoToMain(mask: CubesMask, or
     // проверяем, если линия пустая, ходить вообще нельзя
     let allNullInLine = true;
     for (let key = 0; key < BOARD_SIZE; key++) {
-        address[dynamicProp] = key;
-        if (getCubeByAddress(mask, address) !== null) {
+        mainFieldAddress[dynamicProp] = key;
+        if (mainCubes[mainFieldAddress.x][mainFieldAddress.y] !== null) {
             allNullInLine = false;
             break;
         }
@@ -68,7 +80,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain(mask: CubesMask, or
         return 'block';
     }
 
-    address = {
+    const address: SideCubeAddress = {
         field: originCubeAddress.field,
         x: 0,
         y: 0,
@@ -78,7 +90,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain(mask: CubesMask, or
     const arr: Cube[] = [];
     for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
         address[dynamicProp] = cellsSide[key];
-        arr.push(getCubeByAddress(mask, address)!);
+        arr.push(getSideCubeByAddress(sideCubesMask, address)!);
 
         // если доходим до кубика, над которым курсор - заканчиваем маневр
         if (isTheSameAddress(originCubeAddress, address)) {

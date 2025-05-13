@@ -7,14 +7,14 @@ import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/pro
 import { forceRepaint } from '../../utils/forceRepaint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { Direction } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
-import { Direction } from '../types/Direction';
 import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
 import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { CubeAddress } from './Cubes';
+import { SideCubeAddress } from './Cubes';
 import { CubeAnimation } from './MoveMap';
 import { TenOnTen } from './TenOnTen';
 
@@ -149,8 +149,8 @@ export class Cube {
         direction: Direction| null;
         color: string;
         container: HTMLElement;
-        onClick: (address: CubeAddress) => void;
-        onHover: (address: CubeAddress, isHovered: boolean) => void;
+        onClick: (address: SideCubeAddress) => void;
+        onHover: (address: SideCubeAddress, isHovered: boolean) => void;
     }) {
         this.x = params.x;
         this.y = params.y;
@@ -373,7 +373,7 @@ export class Cube {
                 cube: this,
                 toSideActions: this.app.moveMap!.toSideActions,
                 beyondTheSide: this.app.moveMap!.beyondTheSide,
-                cubesMask: this.app.cubes.cubesMask,
+                cubesMask: this.app.cubes.sideCubes,
             });
         };
 

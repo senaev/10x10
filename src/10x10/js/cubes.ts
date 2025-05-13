@@ -1,8 +1,10 @@
+import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
+
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
-import { Direction } from '../types/Direction';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
-import { getCubeByAddress } from '../utils/getCubeByAddress';
+import { getSideCubeByAddress } from '../utils/getSideCubeByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
 
 import { Cube } from './Cube';
@@ -14,36 +16,37 @@ export type CubesFieldOptional = Record<number, Record<number, Cube | null>>;
 export type CubesFieldRequired = Record<number, Record<number, Cube>>;
 export type CubesFields = Record<Field, CubesFieldOptional>;
 
-export type CubeAddress = {
-    field: Field;
+export type CubeCoordinates = {
     x: number;
     y: number;
 };
 
-export type CubesMask = {
-    readonly main: CubesFieldOptional;
+export type SideCubeAddress = CubeCoordinates & {
+    field: Direction;
+};
+
+export type SideCubesMask = {
     readonly top: CubesFieldRequired;
     readonly right: CubesFieldRequired;
     readonly bottom: CubesFieldRequired;
     readonly left: CubesFieldRequired;
 };
 
-export function createCubesMaskWithNullValues(): CubesMask {
-    const cubesLocal: Partial<CubesFields> = {};
+export function createSideCubesMaskWithNullValues(): SideCubesMask {
+    const cubesLocal: Partial<Record<Direction, CubesFieldOptional>> = {};
 
-    for (const key in FIELDS) {
+    DIRECTIONS.forEach((direction) => {
         const field: CubesFieldOptional = {};
-        cubesLocal[FIELDS[key]] = field;
+        cubesLocal[direction] = field;
         for (let x = 0; x < BOARD_SIZE; x++) {
             field[x] = {};
             for (let y = 0; y < BOARD_SIZE; y++) {
                 field[x][y] = null;
             }
         }
-    }
+    });
 
     return {
-        main: cubesLocal.main!,
         top: cubesLocal.top as CubesFieldRequired,
         right: cubesLocal.right as CubesFieldRequired,
         bottom: cubesLocal.bottom as CubesFieldRequired,
@@ -51,34 +54,76 @@ export function createCubesMaskWithNullValues(): CubesMask {
     };
 }
 
+function createMainCubesMaskWithNullValues(): CubesFieldOptional {
+    const field: CubesFieldOptional = {};
+    for (let x = 0; x < BOARD_SIZE; x++) {
+        field[x] = {};
+        for (let y = 0; y < BOARD_SIZE; y++) {
+            field[x][y] = null;
+        }
+    }
+
+    return field;
+}
+
 export class Cubes {
     public readonly _app: TenOnTen;
-    public cubesMask: CubesMask;
+    public sideCubes: SideCubesMask;
+    public mainCubes: CubesFieldOptional;
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
-        this.cubesMask = createCubesMaskWithNullValues();
+        this.sideCubes = createSideCubesMaskWithNullValues();
+        this.mainCubes = createMainCubesMaskWithNullValues();
+    }
+
+    public _addMainCube(cube: Cube) {
+        this.mainCubes[cube.x][cube.y] = cube;
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    public _add(cube: Cube) {
-        this.cubesMask[cube.field][cube.x][cube.y] = cube;
+    public _addSideCube(cube: Cube) {
+        const field = cube.field;
+
+        if (field === 'main') {
+            throw new Error('main field is not allowed');
+        }
+
+        this.sideCubes[field][cube.x][cube.y] = cube;
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
-    public _get(address: CubeAddress) {
-        return getCubeByAddress(this.cubesMask, address);
+    public _getSideCube(address: SideCubeAddress): Cube {
+        if (address.field === 'main') {
+            throw new Error('main field is not allowed');
+        }
+
+        return getSideCubeByAddress(this.sideCubes, address)!;
     }
 
-    // устанавливаем начемие клетки, переданной в объекте, содержащем поле, икс, игрек
-    public _set(o: CubeAddress, value: Cube | null) {
+    public _getMainCube(o: CubeCoordinates): Cube | null {
+        return this.mainCubes[o.x][o.y];
+    }
+
+    public _setMainCube(o: CubeCoordinates, value: Cube | null) {
+        this.mainCubes[o.x][o.y] = value;
+    }
+
+    // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
+    public _setSideCube(o: SideCubeAddress, value: Cube) {
         if (o === undefined || value === undefined) {
             throw new Error(`cubes._set не получил параметры: o: ${o} value: ${value}`);
         }
 
-        this.cubesMask[o.field][o.x][o.y] = value;
+        const field = o.field;
 
-        return this.cubesMask[o.field][o.x][o.y];
+        if (field === 'main') {
+            throw new Error('main field is not allowed');
+        }
+
+        this.sideCubes[field][o.x][o.y] = value;
+
+        return value;
     }
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
@@ -90,7 +135,7 @@ export class Cubes {
 
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    func(this.cubesMask[field][x][y]!, field, x, y);
+                    func(this.sideCubes[field][x][y]!, field, x, y);
                 }
             }
         });
@@ -98,14 +143,14 @@ export class Cubes {
 
     // пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
     // не нулевым найденным кубиком
-    public _mainEach(func: (cube: Cube, field: Field, x: number, y: number, i: number) => void) {
+    public _mainEach(func: (cube: Cube, x: number, y: number, i: number) => void) {
         let i;
         i = 0;
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = this.cubesMask.main[x][y];
+                const cube = this.mainCubes[x][y];
                 if (cube !== null) {
-                    func(cube, 'main', x, y, i);
+                    func(cube, x, y, i);
                     i++;
                 }
             }
@@ -114,31 +159,39 @@ export class Cubes {
 
     // добавляем в линию кубик, по кубику мы должны определить, в какую линию
     public _pushInLine(cube: Cube) {
-        // console.log(cube.color);
+        const direction = cube.direction;
+
+        assertNonEmptyString(direction);
+
         // меняем значения кубика
-        cube.field = cube.direction!;
-        cube.direction = reverseDirection(cube.field);
+        cube.field = direction;
+        cube.direction = reverseDirection(direction);
+
         // получаем линию, в которую вставим кубик
         const line = getCubeAddressInSideFieldInOrderFromMain({
             x: cube.x,
             y: cube.y,
             field: cube.field,
         });
-            // присваиваем значения координат в поле кубику
+
+        // присваиваем значения координат в поле кубику
         cube.x = line[line.length - 1].x;
         cube.y = line[line.length - 1].y;
+
         // получаем удаляемый (дальний от mainField в линии) кубик
-        const removedCube = this._get(line[0])!;
+        const removedCube = this._getSideCube(line[0]);
+
         // сдвигаем линию на одну клетку от mainField
         for (let key = 0; key < line.length - 1; key++) {
-            this._set(line[key], this._get(line[key + 1]));
+            this._setSideCube(line[key], this._getSideCube(line[key + 1]));
         }
+
         // устанавливаем значение первой клетки
-        this._set(line[line.length - 1], cube);
+        this._setSideCube(line[line.length - 1], cube);
 
         /**
-         * заносим удаляемый кубик в массив удаляемых, а не
-         * удаляем его сразу же... дело тут в том, что при входжении в боковое поле
+         * Заносим удаляемый кубик в массив удаляемых, а не
+         * удаляем его сразу же... дело тут в том, что при вхождении в боковое поле
          * большого количества кубиков, при практически полной замене боковой линии,
          * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
          * html-элементы таких кубиков будут удалены еще до того, как начнется
@@ -176,8 +229,7 @@ export class Cubes {
             if (movingCube.x > -1 && movingCube.x < 10 && movingCube.y > -1 && movingCube.y < 10) {
                 // кубик просто перемещается и не входит не в какую панель
                 // устанавливаем кубик в новую клетку
-                this._set({
-                    field: 'main',
+                this._setMainCube({
                     x: movingCube.x,
                     y: movingCube.y,
                 }, movingCube.cube);
@@ -198,8 +250,7 @@ export class Cubes {
                         y: movingCube.cube.y,
                     })
                 ) {
-                    this._set({
-                        field: 'main',
+                    this._setMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
                     }, null);
@@ -211,14 +262,12 @@ export class Cubes {
                 // если кубик взорвался во время хода, убираем его с доски
 
                 if (
-                    this._get({
-                        field: 'main',
+                    this._getMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
                     }) === movingCube.cube
                 ) {
-                    this._set({
-                        field: 'main',
+                    this._setMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
                     }, null);
@@ -234,8 +283,7 @@ export class Cubes {
                 x: movingCube.cube.x,
                 y: movingCube.cube.y,
             })) {
-                this._set({
-                    field: 'main',
+                this._setMainCube({
                     x: movingCube.cube.x,
                     y: movingCube.cube.y,
                 }, null);

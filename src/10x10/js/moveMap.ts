@@ -10,7 +10,7 @@ import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 
 import { Cube } from './Cube';
-import { CubesMask } from './Cubes';
+import { SideCubesMask } from './Cubes';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
@@ -191,7 +191,7 @@ export class MoveMap {
         beyondTheSide,
     }: {
         startCubes: Cube[];
-        cubesMask: CubesMask;
+        cubesMask: SideCubesMask;
         animationsScript: CubeAnimationStep[];
         animationLength: UnsignedInteger;
         beyondTheSide: Cube[];

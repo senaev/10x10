@@ -1,12 +1,12 @@
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 
 import { Cube } from '../js/Cube';
-import { CubesMask } from '../js/Cubes';
+import { SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
-import { getCubeByAddress } from './getCubeByAddress';
+import { getSideCubeByAddress } from './getSideCubeByAddress';
 
-export function animateCubesFromSideToMainField(startCubes: Cube[], mask: CubesMask): void {
+export function animateCubesFromSideToMainField(startCubes: Cube[], mask: SideCubesMask): void {
     // получаем линию кубика
     // коллекция пока в начальном состоянии (до хода)
     const line = getCubeAddressInSideFieldInOrderFromMain({
@@ -65,7 +65,7 @@ export function animateCubesFromSideToMainField(startCubes: Cube[], mask: CubesM
     animationArr.forEach((animation, animationIndex) => {
         for (const num in animation) {
             const address = line[animation[num]];
-            const cube = getCubeByAddress(mask, address);
+            const cube = getSideCubeByAddress(mask, address);
 
             assertObject(cube);
 

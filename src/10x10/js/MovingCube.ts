@@ -1,4 +1,4 @@
-import { Direction } from '../types/Direction';
+import { Direction } from '../const/DIRECTIONS';
 
 import { Cube } from './Cube';
 

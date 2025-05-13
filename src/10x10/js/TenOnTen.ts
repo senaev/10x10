@@ -863,7 +863,7 @@ export class TenOnTen {
     private plusColor() {
         const colorsCount = getLevelColorsCount(this.level);
         const newColor = CUBE_COLORS[colorsCount - 1];
-        this.cubes._sideEach(function (cube) {
+        this.cubes._sideEach((cube) => {
             if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
                 cube.change({
                     color: newColor,

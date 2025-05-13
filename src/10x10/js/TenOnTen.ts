@@ -82,6 +82,8 @@ export class TenOnTen {
     private isNewLevel: boolean = true;
 
     private readonly bodySizeValue: Signal<PixelSize>;
+    private readonly canUndo: Signal<boolean> = new Signal(false);
+    private readonly canRefresh: Signal<boolean> = new Signal(false);
 
     private readonly callbacks: {
         [key in keyof TenOnTenCallbacks]: TenOnTenCallbacks[key][];
@@ -100,9 +102,11 @@ export class TenOnTen {
         initialState?: TenOnTenState;
     }) {
         this.container = container;
+        // this.container.tabIndex = 0;
 
-        const window = container.ownerDocument.defaultView!;
-        const body = container.ownerDocument.body;
+        const document = container.ownerDocument;
+        const window = document.defaultView!;
+        const body = document.body;
         function getBodySizeValue(): PixelSize {
             return {
                 width: body.clientWidth,
@@ -127,6 +131,20 @@ export class TenOnTen {
             setContainerFontSize();
         });
         setContainerFontSize();
+
+        document.addEventListener('keydown', (e) => {
+            const isCtrlOrMeta = e.metaKey || e.ctrlKey;
+            if (!isCtrlOrMeta) {
+                return;
+            }
+
+            const isZKey = e.key === 'z';
+            if (!isZKey) {
+                return;
+            }
+
+            console.log('undo');
+        });
 
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
         // которому эти кубики принадлежат
@@ -180,13 +198,19 @@ export class TenOnTen {
             onClick: this.undo,
             container: actionButtons,
         });
-        this.undoButton.setVisible(initialState?.previous ? true : false);
+        this.canUndo.subscribe((canUndo) => {
+            this.undoButton.setVisible(canUndo);
+        });
+        this.canUndo.next(initialState?.previous ? true : false);
 
         this.refreshButton = new RefreshButton({
             onClick: this.refresh,
             container: actionButtons,
         });
-        this.refreshButton.setVisible(initialState?.previous === null);
+        this.canRefresh.subscribe((canRefresh) => {
+            this.refreshButton.setVisible(canRefresh);
+        });
+        this.canRefresh.next(initialState?.isNewLevel === true);
 
         // запускаем инициализацию приложения
         // генерируем кубики в боковых панелях
@@ -210,7 +234,6 @@ export class TenOnTen {
         } else {
             this.generateMainCubes();
         }
-
     }
 
     public getState(): TenOnTenState {
@@ -226,7 +249,7 @@ export class TenOnTen {
         this.setLevel(state.level);
 
         this.isNewLevel = state.isNewLevel;
-        this.refreshButton.setVisible(state.isNewLevel);
+        this.canRefresh.next(state.isNewLevel);
 
         this.previousStepMap = state.previous;
         this.applyCubesState(state.current);
@@ -299,7 +322,7 @@ export class TenOnTen {
             ANIMATION_TIME * 4
         );
 
-        this.undoButton.setVisible(false);
+        this.canUndo.next(false);
 
         // пробегаем в массиве по каждому кубику предыдущего массива
         const previousStepMap = this.previousStepMap!;
@@ -347,13 +370,8 @@ export class TenOnTen {
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
-            if (this.end === 'next_level') {
-                this.undoButton.setVisible(false);
-                this.refreshButton.setVisible(true);
-            } else {
-                this.undoButton.setVisible(true);
-                this.refreshButton.setVisible(false);
-            }
+            this.canUndo.next(this.end !== 'next_level');
+            this.canRefresh.next(this.end === 'next_level');
 
             if (this.end !== null) {
                 switch (this.end) {

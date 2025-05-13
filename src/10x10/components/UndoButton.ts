@@ -22,6 +22,8 @@ export class UndoButton {
         this.element.appendChild(text);
 
         params.container.appendChild(this.element);
+
+        this.setVisible(false);
     }
 
     public setVisible(visible: boolean) {

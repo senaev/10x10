@@ -81,10 +81,6 @@ export class Cubes {
         this.mainCubes = createMainCubesMaskWithNullValues();
     }
 
-    public _addMainCube(cube: CubeView) {
-        this.mainCubes[cube.x][cube.y] = cube;
-    }
-
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public _addSideCube(cube: CubeView) {
         const field = cube.field.value();
@@ -105,12 +101,16 @@ export class Cubes {
         return this.mainCubes[x][y] ?? undefined;
     }
 
-    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView | undefined) {
-        if (value === undefined) {
-            this.mainCubes[x][y] = null;
-        } else {
-            this.mainCubes[x][y] = value;
-        }
+    public _addMainCube(cube: CubeView) {
+        this.mainCubes[cube.x][cube.y] = cube;
+    }
+
+    public _removeMainCube({ x, y }: CubeCoordinates) {
+        this.mainCubes[x][y] = null;
+    }
+
+    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView) {
+        this.mainCubes[x][y] = value;
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -247,10 +247,10 @@ export class Cubes {
                         y: movingCube.cube.y,
                     })
                 ) {
-                    this._setMainCube({
+                    this._removeMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
-                    }, undefined);
+                    });
                 }
 
                 movingCube.cube.x = movingCube.x;
@@ -264,10 +264,10 @@ export class Cubes {
                         y: movingCube.cube.y,
                     }) === movingCube.cube
                 ) {
-                    this._setMainCube({
+                    this._removeMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
-                    }, undefined);
+                    });
                 }
             }
         });
@@ -280,10 +280,10 @@ export class Cubes {
                 x: movingCube.cube.x,
                 y: movingCube.cube.y,
             })) {
-                this._setMainCube({
+                this._removeMainCube({
                     x: movingCube.cube.x,
                     y: movingCube.cube.y,
-                }, undefined);
+                });
             }
 
             // пушим кубик в коллекцию боковой линии

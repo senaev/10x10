@@ -310,10 +310,10 @@ export class TenOnTen {
         const cubesLocal = this.cubes;
         // удаляем нафиг кубики с главного поля
         cubesLocal._mainEach(function (cube, x, y) {
-            cubesLocal._setMainCube({
+            cubesLocal._removeMainCube({
                 x,
                 y,
-            }, undefined);
+            });
             cube.animate({
                 action: 'remove',
                 steps: 4,
@@ -627,14 +627,14 @@ export class TenOnTen {
                     throw new Error('only main field cube is able to be removed');
                 }
                 // удаляем нафиг кубик
-                this.cubes._setMainCube(
-                    {
-                        x: changed[key].x,
-                        y: changed[key].y,
-                    },
-                    null!
-                );
-                cube!.animate({
+                this.cubes._removeMainCube({
+                    x: changed[key].x,
+                    y: changed[key].y,
+                });
+
+                assertObject(cube);
+
+                cube.animate({
                     action: 'remove',
                     steps: 4,
                 });

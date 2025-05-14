@@ -142,20 +142,20 @@ body {
     height: 0.95em;
     width: 0.95em;
     border-radius: 0.3em;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.arrowImage {
+    width: 0.65em;
+    height: 0.65em;
 }
 
 .cubeHidden {
     display: none;
 }
-
-
-.direction_visible.direction_right {}
-
-.direction_visible.direction_top {}
-
-.direction_visible.direction_left {}
-
-.direction_visible.direction_bottom {}
 
 .levelInfoPanel {
     position: absolute;

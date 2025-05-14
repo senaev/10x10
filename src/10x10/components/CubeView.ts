@@ -12,7 +12,9 @@ import { appearCubeFromZeroSizePoint } from '../animations/appearCubeFromZeroSiz
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
-import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
+import {
+    Direction, DIRECTION_TO_ARROW_ROTATE, DIRECTIONS,
+} from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAddress } from '../js/Cubes';
@@ -87,7 +89,7 @@ export class CubeView {
         visualCubeElement.classList.add('visualCube');
 
         const arrowElement = document.createElement('img');
-        arrowElement.classList.add('arrow');
+        arrowElement.classList.add('arrowImage');
         arrowElement.src = arrowSvg;
         visualCubeElement.appendChild(arrowElement);
 
@@ -106,11 +108,13 @@ export class CubeView {
 
             return null;
         });
+
         subscribeSignalAndCallWithCurrentValue(cubeVisualDirection, (direction) => {
             if (direction) {
-                this.visualCubeElement.classList.add('direction_visible');
+                arrowElement.style.display = 'block';
+                arrowElement.style.transform = `rotate(${DIRECTION_TO_ARROW_ROTATE[direction]}deg)`;
             } else {
-                this.visualCubeElement.classList.remove('direction_visible');
+                arrowElement.style.display = 'none';
             }
         });
 

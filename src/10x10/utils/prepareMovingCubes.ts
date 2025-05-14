@@ -27,7 +27,7 @@ export function prepareMovingCubes({
         const movingCube = new MovingCube({
             x: cube.x,
             y: cube.y,
-            color: cube.color,
+            color: cube.color.value(),
             direction: cube.direction.value(),
             cube,
         });
@@ -66,7 +66,7 @@ export function prepareMovingCubes({
         const movingCube = new MovingCube({
             x: startMovingCubeX,
             y: startMovingCubeY,
-            color: cube.color,
+            color: cube.color.value(),
             direction: cube.direction.value(),
             cube,
         });

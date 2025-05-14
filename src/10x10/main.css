@@ -148,84 +148,30 @@ body {
     display: none;
 }
 
-.readyToMove,
-.dright {
+
+.direction_visible.direction_right {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: -1px;
 }
 
-.readyToMove.ftop,
-.dbottom {
+.direction_visible.direction_top {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: 33.3%;
 }
 
-.readyToMove.fright,
-.dleft {
+.direction_visible.direction_left {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: 66.6%;
 }
 
-.readyToMove.fbottom,
-.dtop {
+.direction_visible.direction_bottom {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
     background-position: 100%;
 }
-
-.cube.blue {
-    background-color: #4e7cff;
-    border-color: #7a9cff;
-}
-
-.cube.green {
-    background-color: #0e9f0e;
-    border-color: #12b012;
-}
-
-.cube.yellow {
-    background-color: #e7df00;
-    border-color: #fff600;
-}
-
-.cube.red {
-    background-color: #ff4949;
-    border-color: #ff6f6f;
-}
-
-.cube.brown {
-    background-color: #df690a;
-    border-color: #ee710b;
-}
-
-.cube.pink {
-    background-color: #ffc0cb;
-    border-color: #fed6dd;
-}
-
-.cube.white {
-    background-color: #ddd;
-    border-color: #e0e0e0;
-}
-
-.cube.purple {
-    background-color: #ff46ff;
-    border-color: #fc69fc;
-}
-
-.cube.lightblue {
-    background-color: #9bcada;
-    border-color: #add8e6;
-}
-
-.cube.orange {
-    background-color: #ffb121;
-    border-color: #ffbb3f;
-}
-
 
 .levelInfoPanel {
     position: absolute;

@@ -5,7 +5,7 @@ import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
-import { Signal } from 'senaev-utils/src/utils/Signal';
+import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 
 import { animateCubeBump } from '../animations/animateCubeBump';
 import { CubeView } from '../components/CubeView';
@@ -16,7 +16,7 @@ import {
 } from '../components/UndoButton';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CUBE_COLORS } from '../const/CUBE_COLORS';
+import { CUBE_COLORS_ARRAY, CubeColor } from '../const/CUBE_COLORS';
 import { Direction } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
@@ -51,7 +51,7 @@ export type TenOnTenCallbacks = {
 const APP_WIDTH_IN_CUBES = 17;
 
 export type MaskFieldValue = {
-    color: string;
+    color: CubeColor;
     direction: Direction | null;
     toMineOrder: number | null;
 };
@@ -742,7 +742,7 @@ export class TenOnTen {
         }
 
         for (const cube of allToFirstInLine) {
-            cube.setRowVisibility(isHovered);
+            cube.setReadyToMove(isHovered);
         }
     };
 
@@ -825,7 +825,7 @@ export class TenOnTen {
             const colorsCount = getLevelColorsCount(this.level);
 
             // цвета, которые есть в смежных кубиках
-            const appearanceColors = [];
+            const appearanceColors: string[] = [];
             for (let key = 0; key < 4; key++) {
                 const coordinates: CubeCoordinates = {
                     x: cell!.x,
@@ -840,16 +840,16 @@ export class TenOnTen {
                 ) {
                     const c = this.cubes._getMainCube(coordinates);
                     if (c !== null) {
-                        appearanceColors.push(c.color);
+                        appearanceColors.push(c.color.value());
                     }
                 }
             }
 
             // цвета, которых нету в смежных
-            const noAppearanceColors = [];
+            const noAppearanceColors: CubeColor[] = [];
             for (let key = 0; key < colorsCount; key++) {
-                if (appearanceColors.indexOf(CUBE_COLORS[key]) === -1) {
-                    noAppearanceColors.push(CUBE_COLORS[key]);
+                if (appearanceColors.indexOf(CUBE_COLORS_ARRAY[key]) === -1) {
+                    noAppearanceColors.push(CUBE_COLORS_ARRAY[key]);
                 }
             }
 
@@ -922,7 +922,7 @@ export class TenOnTen {
     // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
     private plusColor() {
         const colorsCount = getLevelColorsCount(this.level);
-        const newColor = CUBE_COLORS[colorsCount - 1];
+        const newColor = CUBE_COLORS_ARRAY[colorsCount - 1];
         this.cubes._sideEach((cube) => {
             if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
                 cube.change({
@@ -958,7 +958,7 @@ export class TenOnTen {
                         fieldValue[x][y] = null;
                     } else {
                         const resultValue: MaskFieldValue = {
-                            color: cube.color,
+                            color: cube.color.value(),
                             direction: cube.direction.value(),
                             toMineOrder: cube.toMineOrder,
                         };
@@ -973,7 +973,7 @@ export class TenOnTen {
 
     private createCube(params: CubeAddress & {
         appearWithAnimation: boolean;
-        color: string;
+        color: CubeColor;
         direction: Direction | null;
         toMineOrder: number | null;
     }) {

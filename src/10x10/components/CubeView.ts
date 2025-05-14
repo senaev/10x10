@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
-import { Signal } from 'senaev-utils/src/utils/Signal';
+import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 import { combineSignalsIntoNewOne } from 'senaev-utils/src/utils/Signal/combineSignalsIntoNewOne/combineSignalsIntoNewOne';
+import { subscribeSignalAndCallWithCurrentValue } from 'senaev-utils/src/utils/Signal/subscribeSignalAndCallWithCurrentValue/subscribeSignalAndCallWithCurrentValue';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { forceRepaint } from '../../utils/forceRepaint';
@@ -10,7 +11,8 @@ import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWi
 import { appearCubeFromZeroSizePoint } from '../animations/appearCubeFromZeroSizePoint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { Direction } from '../const/DIRECTIONS';
+import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
+import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
 import { CubeAddress } from '../js/Cubes';
 import { CubeAnimation } from '../js/MoveMap';
@@ -41,9 +43,10 @@ export class CubeView {
     public readonly element: HTMLElement;
     public readonly visualCubeElement: HTMLElement;
     public readonly field: Signal<Field>;
+    public readonly color: Signal<CubeColor>;
+    public readonly readyToMove: Signal<boolean> = new Signal(false);
     public x: number;
     public y: number;
-    public color: string;
     public toMineOrder: number | null;
     private readonly container: HTMLElement;
 
@@ -58,7 +61,7 @@ export class CubeView {
         field: Field;
         app: TenOnTen;
         direction: Direction| null;
-        color: string;
+        color: CubeColor;
         container: HTMLElement;
         onClick: (address: CubeAddress) => void;
         onHover: (address: CubeAddress, isHovered: boolean) => void;
@@ -85,23 +88,33 @@ export class CubeView {
         const { signal: cubeVisualDirection } = combineSignalsIntoNewOne([
             this.direction,
             this.field,
-        ], (direction, field) => {
-            if (field !== 'main') {
-                return null;
+            this.readyToMove,
+        ], (direction, field, readyToMove) => {
+            if (readyToMove) {
+                return direction;
             }
 
-            return direction;
+            if (field === 'main') {
+                return direction;
+            }
+
+            return null;
+        });
+        subscribeSignalAndCallWithCurrentValue(cubeVisualDirection, (direction) => {
+            if (direction) {
+                this.visualCubeElement.classList.add('direction_visible');
+            } else {
+                this.visualCubeElement.classList.remove('direction_visible');
+            }
         });
 
-        cubeVisualDirection.subscribe((direction) => {
-            console.log('direction', direction);
+        this.direction.subscribe((direction) => {
             if (direction) {
                 this.visualCubeElement.classList.add(`direction_${direction}`);
             } else {
-                this.visualCubeElement.classList.remove('direction_top');
-                this.visualCubeElement.classList.remove('direction_right');
-                this.visualCubeElement.classList.remove('direction_bottom');
-                this.visualCubeElement.classList.remove('direction_left');
+                DIRECTIONS.forEach((dir) => {
+                    this.visualCubeElement.classList.remove(`direction_${dir}`);
+                });
             }
         });
 
@@ -112,7 +125,10 @@ export class CubeView {
             this.direction.next(reverseDirection(this.field.value()));
         }
 
-        this.color = params.color;
+        this.color = new Signal<CubeColor>(params.color);
+        subscribeSignalAndCallWithCurrentValue(this.color, (color) => {
+            this.visualCubeElement.style.backgroundColor = CUBE_COLORS[color];
+        });
 
         // Проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
         if (this.field.value() !== 'main') {
@@ -126,7 +142,7 @@ export class CubeView {
         }
 
         this.element.classList.add('cube');
-        this.element.classList.add(this.color);
+        // this.element.classList.add(this.color);
         this.element.classList.add(`f${this.field.value()}`);
 
         this.element.appendChild(visualCubeElement);
@@ -175,12 +191,8 @@ export class CubeView {
         }
     }
 
-    public setRowVisibility(isVisible: boolean) {
-        if (isVisible) {
-            this.element.classList.add('readyToMove');
-        } else {
-            this.element.classList.remove('readyToMove');
-        }
+    public setReadyToMove(readyToMove: boolean) {
+        this.readyToMove.next(readyToMove);
     }
 
     // Задаем html-элементу кубика положение на доске
@@ -492,13 +504,13 @@ export class CubeView {
     }
 
     // Меняем параметры кубика, при этом его анимируем
-    public change(o: { color?: string; direction?: Direction }) {
+    public change(o: { color?: CubeColor; direction?: Direction }) {
         const changeParams = () => {
             // Если меняем цвет и это не тот же цвет, что сейчас
-            if (o.color !== undefined && o.color !== this.color) {
-                const prevColor = this.color;
-                this.color = o.color;
-                $(this.element).removeClass(prevColor).addClass(this.color);
+            if (o.color !== undefined && o.color !== this.color.value()) {
+                const prevColor = this.color.value();
+                this.color.next(o.color);
+                $(this.element).removeClass(prevColor).addClass(this.color.value());
             }
             // Если меняем направление и это не то же направление, что сейчас
             if (o.direction !== undefined && o.direction !== this.direction.value()) {

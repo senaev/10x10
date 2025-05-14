@@ -2,21 +2,23 @@ import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import {
     CubeCoordinates,
-    CubesFieldOptional,
     SideCubeAddress,
     SideCubesMask,
 } from '../js/Cubes';
 
+import { getCubeByCoordinates } from './getCubeByCoordinates';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { isTheSameAddress } from './isTheSameAddress';
 
-// находим все кубики от этого до ближнего к майн в линии относительно этого
+/**
+ * Находим все кубики от этого до ближнего к майн в линии относительно этого
+ */
 export function getAllCubesInCursorPositionThatCouldGoToMain({
     mainCubes,
     sideCubesMask,
     originCubeAddress,
 }: {
-    mainCubes: CubesFieldOptional;
+    mainCubes: Set<CubeView>;
     sideCubesMask: SideCubesMask;
     originCubeAddress: SideCubeAddress;
 }): CubeView[] | 'empty' | 'block' {
@@ -53,29 +55,29 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
     let countOfCubesThatCanBeMoved = 0;
     for (const key in cellsMain) {
         mainFieldAddress[dynamicProp] = cellsMain[key];
-        // mask.main
-        if (mainCubes[mainFieldAddress.x][mainFieldAddress.y] === null) {
+
+        if (!getCubeByCoordinates(mainFieldAddress, mainCubes)) {
             countOfCubesThatCanBeMoved++;
         } else {
             break;
         }
     }
 
-    // проверяем, если линия пустая, ходить вообще нельзя
+    // Проверяем, если линия пустая, ходить вообще нельзя
     let allNullInLine = true;
     for (let key = 0; key < BOARD_SIZE; key++) {
         mainFieldAddress[dynamicProp] = key;
-        if (mainCubes[mainFieldAddress.x][mainFieldAddress.y] !== null) {
+        if (getCubeByCoordinates(mainFieldAddress, mainCubes)) {
             allNullInLine = false;
             break;
         }
     }
-    // если все нули в линии - возвращаем индикатор пустоты
+    // Если все нули в линии - возвращаем индикатор пустоты
     if (allNullInLine) {
         return 'empty';
     }
 
-    // если сразу за полем кубик - ничего не возвращаем
+    // Если сразу за полем кубик - ничего не возвращаем
     if (countOfCubesThatCanBeMoved === 0) {
         return 'block';
     }
@@ -92,7 +94,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
         address[dynamicProp] = cellsSide[key];
         arr.push(getSideCubeViewByAddress(sideCubesMask, address)!);
 
-        // если доходим до кубика, над которым курсор - заканчиваем маневр
+        // Если доходим до кубика, над которым курсор - заканчиваем маневр
         if (isTheSameAddress(originCubeAddress, address)) {
             break;
         }

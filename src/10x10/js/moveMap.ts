@@ -216,7 +216,7 @@ export class MoveMap {
 
         // удаляем ненужные html-элементы
         for (const cube of beyondTheSide) {
-            cube.remove();
+            cube.removeElementFromDOM();
         }
     }
 }

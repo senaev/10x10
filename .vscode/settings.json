@@ -16,7 +16,7 @@
     "cSpell.language": "en,ru",
     "search.exclude": {
         "**/node_modules": true,
-        "**/public/playgama-bridge.js": true,
+        "**/public/libs/playgama-bridge.js": true,
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",

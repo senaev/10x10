@@ -66,7 +66,7 @@ export class CubeView {
         color: CubeColor;
         container: HTMLElement;
         onClick: (address: CubeAddress) => void;
-        onHover: (address: CubeAddress, isHovered: boolean) => void;
+        onHover: (cube: CubeView, isHovered: boolean) => void;
     }) {
         this.x = params.x;
         this.y = params.y;
@@ -82,6 +82,9 @@ export class CubeView {
 
         // Указатель на DOM-элемент кубика с прослушиванием событий
         this.element = document.createElement('div');
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this.element as any).cube = this;
 
         const visualCubeElement = document.createElement('div');
         visualCubeElement.classList.add('visualCube');
@@ -156,18 +159,10 @@ export class CubeView {
         this.element.appendChild(visualCubeElement);
 
         this.element.addEventListener('mouseover', () => {
-            params.onHover({
-                field: this.field.value(),
-                x: this.x,
-                y: this.y,
-            }, true);
+            params.onHover(this, true);
         });
         this.element.addEventListener('mouseout', () => {
-            params.onHover({
-                field: this.field.value(),
-                x: this.x,
-                y: this.y,
-            }, false);
+            params.onHover(this, false);
         });
 
         this.element.addEventListener('mousedown', () => {
@@ -281,7 +276,7 @@ export class CubeView {
     }
 
     // Добавляем объект анимации на обработку через время, полученное в атрибутах
-    public remove() {
+    public removeElementFromDOM() {
         this.element.remove();
     }
 
@@ -398,7 +393,7 @@ export class CubeView {
                     easing: 'out',
                 },
                 () => {
-                    this.remove();
+                    this.removeElementFromDOM();
                 }
             );
         };
@@ -485,7 +480,7 @@ export class CubeView {
                         easing: 'out',
                     },
                     () => {
-                        this.remove();
+                        this.removeElementFromDOM();
                     }
                 );
             break;

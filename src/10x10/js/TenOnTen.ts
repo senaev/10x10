@@ -36,6 +36,7 @@ import {
     CubeAddress,
     CubeCoordinates,
     Cubes,
+    findCubeInSideCubes,
     SideCubeAddress,
 } from './Cubes';
 import { MoveMap } from './MoveMap';
@@ -308,11 +309,11 @@ export class TenOnTen {
     public refresh = () => {
         this.blockApp = true;
         const cubesLocal = this.cubes;
-        // удаляем нафиг кубики с главного поля
-        cubesLocal._mainEach(function (cube, x, y) {
+        // Удаляем нафиг кубики с главного поля
+        cubesLocal.mainCubes.forEach((cube) => {
             cubesLocal._removeMainCube({
-                x,
-                y,
+                x: cube.x,
+                y: cube.y,
             });
             cube.animate({
                 action: 'remove',
@@ -406,9 +407,9 @@ export class TenOnTen {
         // создаем маску для возможности возврата хода
         this.previousStepMap = this.generateMask();
 
-        // создаем массив из всех кубиков, которые есть на доске
+        // Создаем массив из всех кубиков, которые есть на доске
         const mainFieldCubes: CubeView[] = [];
-        this.cubes._mainEach((cube) => {
+        this.cubes.mainCubes.forEach((cube) => {
             mainFieldCubes.push(cube);
         });
 
@@ -447,7 +448,6 @@ export class TenOnTen {
                     this.nextLevel();
                     break;
                 case 'game_over':
-
                     alert('game over');
                     break;
                 default:
@@ -671,7 +671,7 @@ export class TenOnTen {
         // генерируем кубики в боковых панелях
         this.cubes._sideEach((cube, field, x, y) => {
             if (cube) {
-                cube.remove();
+                cube.removeElementFromDOM();
             }
 
             this.createCube({
@@ -730,14 +730,18 @@ export class TenOnTen {
         this.run(sideCubeAddress);
     };
 
-    private readonly handleHover = ({
-        x,
-        y,
-        field,
-    }: CubeAddress, isHovered: boolean) => {
+    private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
+        const field = hoveredCube.field.value();
+
         if (field === 'main') {
             return;
         }
+
+        const { x, y } = findCubeInSideCubes({
+            sideCubes: this.cubes.sideCubes,
+            cube: hoveredCube,
+            field,
+        });
 
         const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubes,
@@ -774,8 +778,8 @@ export class TenOnTen {
     }
 
     private clearMainField() {
-        this.cubes._mainEach((cube) => {
-            cube.remove();
+        this.cubes.mainCubes.forEach((cube) => {
+            cube.removeElementFromDOM();
         });
     }
 
@@ -802,7 +806,10 @@ export class TenOnTen {
                     nullCells = [];
                     for (let x = 0; x < BOARD_SIZE; x++) {
                         for (let y = 0; y < BOARD_SIZE; y++) {
-                            if (this.cubes.mainCubes[x][y] === null) {
+                            if (!this.cubes._getMainCube({
+                                x,
+                                y,
+                            })) {
                                 nullCells.push({
                                     x,
                                     y,
@@ -897,10 +904,13 @@ export class TenOnTen {
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal.mainCubes[x][y];
+                const cube = cubesLocal._getMainCube({
+                    x,
+                    y,
+                });
 
                 // если на поле еще остались кубики, уровень не завершен
-                if (cube !== null) {
+                if (cube) {
                     next_level = false;
                 }
 
@@ -909,7 +919,7 @@ export class TenOnTen {
                 if (
                     x === 0 || y === 0 || x === BOARD_SIZE - 1 || y === BOARD_SIZE - 1
                 ) {
-                    if (cube === null) {
+                    if (!cube) {
                         game_over = false;
                     }
                 }

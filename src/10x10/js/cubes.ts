@@ -1,3 +1,4 @@
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { CubeView } from '../components/CubeView';
@@ -5,15 +6,15 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
+import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
 
-import { __findCubeInMainMask } from './MainMask';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
-export type CubesFieldOptional = Record<number, Record<number, CubeView | null>>;
-export type CubesFieldRequired = Record<number, Record<number, CubeView>>;
+export type CubesFieldOptional = (CubeView | null)[][];
+export type CubesFieldRequired = CubeView[][];
 export type CubesFields = Record<Field, CubesFieldOptional>;
 
 export type CubeCoordinates = {
@@ -36,16 +37,42 @@ export type SideCubesMask = {
     readonly left: CubesFieldRequired;
 };
 
+export function findCubeInSideCubes({
+    field,
+    cube,
+    sideCubes,
+}: {
+    field: Direction;
+    cube: CubeView;
+    sideCubes: SideCubesMask;
+}): CubeCoordinates {
+    const mask = sideCubes[field];
+
+    for (let x = 0; x < mask.length; x++) {
+        for (let y = 0; y < mask[x].length; y++) {
+            if (mask[x][y] === cube) {
+                return {
+                    x,
+                    y,
+                };
+            }
+        }
+    }
+
+    throw new Error('cube not found in sideCubes');
+}
+
 export function createSideCubesMaskWithNullValues(): SideCubesMask {
     const cubesLocal: Partial<Record<Direction, CubesFieldOptional>> = {};
 
     DIRECTIONS.forEach((direction) => {
-        const field: CubesFieldOptional = {};
+        const field: CubesFieldOptional = [];
         cubesLocal[direction] = field;
+
         for (let x = 0; x < BOARD_SIZE; x++) {
-            field[x] = {};
+            field.push([]);
             for (let y = 0; y < BOARD_SIZE; y++) {
-                field[x][y] = null;
+                field.at(-1)!.push(null);
             }
         }
     });
@@ -58,27 +85,14 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
     };
 }
 
-function createMainCubesMaskWithNullValues(): CubesFieldOptional {
-    const field: CubesFieldOptional = {};
-    for (let x = 0; x < BOARD_SIZE; x++) {
-        field[x] = {};
-        for (let y = 0; y < BOARD_SIZE; y++) {
-            field[x][y] = null;
-        }
-    }
-
-    return field;
-}
-
 export class Cubes {
     public readonly _app: TenOnTen;
     public sideCubes: SideCubesMask;
-    public mainCubes: CubesFieldOptional;
+    public mainCubes: Set<CubeView> = new Set();
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
         this.sideCubes = createSideCubesMaskWithNullValues();
-        this.mainCubes = createMainCubesMaskWithNullValues();
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
@@ -98,19 +112,25 @@ export class Cubes {
     }
 
     public _getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
-        return this.mainCubes[x][y] ?? undefined;
+        return getCubeByCoordinates({
+            x,
+            y,
+        }, this.mainCubes);
     }
 
     public _addMainCube(cube: CubeView) {
-        this.mainCubes[cube.x][cube.y] = cube;
+        this.mainCubes.add(cube);
     }
 
     public _removeMainCube({ x, y }: CubeCoordinates) {
-        this.mainCubes[x][y] = null;
-    }
+        const cube = getCubeByCoordinates({
+            x,
+            y,
+        }, this.mainCubes);
 
-    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView) {
-        this.mainCubes[x][y] = value;
+        assertObject(cube, 'cannot delete cube from mainCubes');
+
+        this.mainCubes.delete(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -136,22 +156,6 @@ export class Cubes {
                 }
             }
         });
-    }
-
-    // пробегаемся по всем элементам главного поля, выполняем переданную функцию с каждым
-    // не нулевым найденным кубиком
-    public _mainEach(func: (cube: CubeView, x: number, y: number, i: number) => void) {
-        let i;
-        i = 0;
-        for (let x = 0; x < BOARD_SIZE; x++) {
-            for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = this.mainCubes[x][y];
-                if (cube !== null) {
-                    func(cube, x, y, i);
-                    i++;
-                }
-            }
-        }
     }
 
     // добавляем в линию кубик, по кубику мы должны определить, в какую линию
@@ -226,31 +230,9 @@ export class Cubes {
             if (movingCube.x > -1 && movingCube.x < 10 && movingCube.y > -1 && movingCube.y < 10) {
                 // кубик просто перемещается и не входит не в какую панель
                 // устанавливаем кубик в новую клетку
-                this._setMainCube({
-                    x: movingCube.x,
-                    y: movingCube.y,
-                }, movingCube.cube);
-                // при этом если клетку, с которой сошел кубик, ещё не занял другой кубик
-                // обнуляем эту клетку
-                // console.log(mCube.color + " - > " + mCube.cube.x + " " + mCube.cube.y + " : " + mCube.x + " " + mCube.y);
 
-                if (
-                    movingCube.cube.x < 0 || movingCube.cube.x > 9 || movingCube.cube.y < 0 || movingCube.cube.y > 9
-                ) {
-                    // eslint-disable-next-line no-console
-                    console.log(movingCube, movingCube.cube.x, movingCube.cube.y, movingCube.x, movingCube.y);
-                }
-
-                if (
-                    !__findCubeInMainMask(movingCubes, {
-                        x: movingCube.cube.x,
-                        y: movingCube.cube.y,
-                    })
-                ) {
-                    this._removeMainCube({
-                        x: movingCube.cube.x,
-                        y: movingCube.cube.y,
-                    });
+                if (!this.mainCubes.has(movingCube.cube)) {
+                    this.mainCubes.add(movingCube.cube);
                 }
 
                 movingCube.cube.x = movingCube.x;
@@ -258,32 +240,16 @@ export class Cubes {
             } else if (movingCube.x === -1 && movingCube.y === -1) {
                 // если кубик взорвался во время хода, убираем его с доски
 
-                if (
-                    this._getMainCube({
-                        x: movingCube.cube.x,
-                        y: movingCube.cube.y,
-                    }) === movingCube.cube
-                ) {
-                    this._removeMainCube({
-                        x: movingCube.cube.x,
-                        y: movingCube.cube.y,
-                    });
-                }
+                this.mainCubes.delete(movingCube.cube);
             }
         });
 
         // убираем в боковые поля кубики, которые ушли туда во время хода
         toSideActions.forEach((movingCube) => {
-            // если клетку, с которой сошел кубик, ещё не занял другой кубик
-            // обнуляем эту клетку
-            if (!__findCubeInMainMask(movingCubes, {
-                x: movingCube.cube.x,
-                y: movingCube.cube.y,
-            })) {
-                this._removeMainCube({
-                    x: movingCube.cube.x,
-                    y: movingCube.cube.y,
-                });
+            if (this.mainCubes.has(movingCube.cube)) {
+                this.mainCubes.delete(movingCube.cube);
+            } else {
+                // cube from side to side
             }
 
             // пушим кубик в коллекцию боковой линии

@@ -317,7 +317,7 @@ export class TenOnTen {
                 y: cube.y,
             });
             cube.animate({
-                action: 'remove',
+                animation: 'remove',
                 steps: 4,
             });
         });
@@ -636,7 +636,7 @@ export class TenOnTen {
                 assertObject(cube);
 
                 cube.animate({
-                    action: 'remove',
+                    animation: 'remove',
                     steps: 4,
                 });
                 break;

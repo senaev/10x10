@@ -97,17 +97,17 @@ export function animateMovingCubesFromMainFieldToSide({
 
     // третий кубик пропадает
     cr.animate({
-        action: 'disappearanceInSide',
+        animation: 'disappearanceInSide',
         steps: 1,
     });
 
     // остальные два сдвигаются ближе к линии
     c2.animate({
-        action: 'further',
+        animation: 'further',
         steps: 1,
     });
     c1.animate({
-        action: 'further',
+        animation: 'further',
         steps: 1,
     });
 }

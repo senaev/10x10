@@ -1,10 +1,10 @@
 import { CubeView } from '../components/CubeView';
 import { Direction } from '../const/DIRECTIONS';
 
-export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
+export type MoveAction = 'st' | 'sb' | 'sl' | 'sr';
 
-export type AnimationStep = {
-    do: 'toSide' | MoveAnimation | 'boom';
+export type ActionStep = {
+    do: 'toSide' | 'boom' | MoveAction;
 } | null;
 
 /**
@@ -18,7 +18,7 @@ export class MovingCube {
     public y: number;
     public color: string;
     public direction: Direction | null;
-    public steps: AnimationStep[];
+    public steps: ActionStep[];
     public toSideTime: number | undefined;
 
     public cube: CubeView;

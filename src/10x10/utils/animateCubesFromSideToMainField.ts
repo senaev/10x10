@@ -76,7 +76,7 @@ export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: Si
             assertObject(cube);
 
             cube.addAnimate({
-                animation: animationNames[num],
+                action: animationNames[num],
                 duration: 1,
                 delay: animationIndex,
             });

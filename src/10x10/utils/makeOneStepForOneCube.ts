@@ -1,12 +1,12 @@
 import { __findCubeInMainMask } from '../js/MainMask';
-import { AnimationStep, MovingCube } from '../js/MovingCube';
+import { ActionStep, MovingCube } from '../js/MovingCube';
 
 import { directionToAnimation } from './directionToAnimation';
 
 /**
  * Один шаг для кубика, возвращает информацию о шаге для анимации
  */
-export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): AnimationStep {
+export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): ActionStep {
     // если кубик взорван, он стоит на месте
     if (cube.x === -1 && cube.y === -1) {
         return null;

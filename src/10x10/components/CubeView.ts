@@ -25,8 +25,24 @@ import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalI
 import { reverseDirection } from '../utils/reverseDirection';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 
+export type CubeAnimations = {
+    srBump: {};
+    sbBump: {};
+    slBump: {};
+    stBump: {};
+    toSide: {};
+    nearer: {};
+    appearanceInSide: {};
+    disappearanceInSide: {};
+    further: {};
+    boom: {};
+    remove: {};
+};
+
+export type CubeAnimationName = keyof CubeAnimations;
+
 export type CubeAnimateAction = {
-    action: string;
+    animation: CubeAnimationName;
     steps: number;
 };
 
@@ -216,7 +232,7 @@ export class CubeView {
 
     // добавляем объект анимации на обработку через время, полученное в атрибутах
     public addAnimate({
-        animation: action,
+        action,
         delay,
         duration,
     }: CubeAnimation) {
@@ -226,7 +242,7 @@ export class CubeView {
         setTimeout(
             () => {
                 this.animate({
-                    action: action!,
+                    animation: action as CubeAnimationName,
                     steps: duration,
                 });
             },
@@ -241,7 +257,7 @@ export class CubeView {
 
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
-    public animate({ action, steps }: CubeAnimateAction) {
+    public animate({ animation: action, steps }: CubeAnimateAction) {
         const field = this.field.value();
 
         /*
@@ -448,6 +464,7 @@ export class CubeView {
                 );
             break;
         default:
+            debugger;
             // eslint-disable-next-line no-console
             console.log(`Неизвестная анимация: ${action}`);
             break;

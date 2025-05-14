@@ -1,22 +1,44 @@
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
+import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
-import { CubeView } from '../components/CubeView';
+import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
+import { MOVE_ACTION_TO_MOVE_ANIMATION_MAP } from '../const/MOVE_ACTION_TO_MOVE_ANIMATION_MAP';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 
 import { SideCubesMask } from './Cubes';
-import { MovingCube } from './MovingCube';
+import { MoveAction, MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
+// {"steps":[null,null,null,null,null,null,null,null,null,null,null,{"do":"sb"},null,null,null,null,null,null,null,{"do":"sb"},{"do":"sb"},{"do":"sb"},{"do":"sb"},{"do":"toSide"},null]}
+// {"actions":[{"action":null,"duration":0,"delay":0},{"action":null,"duration":1,"delay":0},{"action":null,"duration":1,"delay":1},{"action":null,"duration":1,"delay":2},{"action":null,"duration":1,"delay":3},{"action":null,"duration":1,"delay":4},{"action":null,"duration":1,"delay":5},{"action":null,"duration":1,"delay":6},{"action":null,"duration":1,"delay":7},{"action":null,"duration":1,"delay":8},{"action":null,"duration":1,"delay":9},{"action":null,"duration":1,"delay":10},{"action":"sbBump","duration":2,"delay":11},{"action":null,"duration":1,"delay":13},{"action":null,"duration":1,"delay":14},{"action":null,"duration":1,"delay":15},{"action":null,"duration":1,"delay":16},{"action":null,"duration":1,"delay":17},{"action":null,"duration":1,"delay":18},{"action":"toSide","duration":5,"delay":19},{"action":null,"duration":1,"delay":24}]}
+// {"nullToDelayActions":[{"action":"sbBump","duration":2,"delay":11},{"action":"toSide","duration":5,"delay":19}]}
+
+// {"steps":[{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},null,null,null,{"do":"sl"},{"do":"sl"},null,null,{"do":"sl"},{"do":"toSide"},null,null,null,null,null,null,null,null,null]}
+// {"actions":[{"action":null,"duration":0,"delay":0},{"action":"slBump","duration":8,"delay":0},{"action":null,"duration":1,"delay":8},{"action":null,"duration":1,"delay":9},{"action":"slBump","duration":3,"delay":10},{"action":null,"duration":1,"delay":13},{"action":"toSide","duration":2,"delay":14},{"action":null,"duration":1,"delay":16},{"action":null,"duration":1,"delay":17},{"action":null,"duration":1,"delay":18},{"action":null,"duration":1,"delay":19},{"action":null,"duration":1,"delay":20},{"action":null,"duration":1,"delay":21},{"action":null,"duration":1,"delay":22},{"action":null,"duration":1,"delay":23},{"action":null,"duration":1,"delay":24}]}
+// {"nullToDelayActions":[{"action":"slBump","duration":8,"delay":0},{"action":"slBump","duration":3,"delay":10},{"action":"toSide","duration":2,"delay":14}]}
+
+// {"steps":[null,null,null,null,null,null,null,null,null,null,{"do":"sb"},{"do":"toSide"},null,null,null,null,null,null,null,null,null,null,null,null,null]}
+// {"actions":[{"action":null,"duration":0,"delay":0},{"action":null,"duration":1,"delay":0},{"action":null,"duration":1,"delay":1},{"action":null,"duration":1,"delay":2},{"action":null,"duration":1,"delay":3},{"action":null,"duration":1,"delay":4},{"action":null,"duration":1,"delay":5},{"action":null,"duration":1,"delay":6},{"action":null,"duration":1,"delay":7},{"action":null,"duration":1,"delay":8},{"action":null,"duration":1,"delay":9},{"action":"toSide","duration":2,"delay":10},{"action":null,"duration":1,"delay":12},{"action":null,"duration":1,"delay":13},{"action":null,"duration":1,"delay":14},{"action":null,"duration":1,"delay":15},{"action":null,"duration":1,"delay":16},{"action":null,"duration":1,"delay":17},{"action":null,"duration":1,"delay":18},{"action":null,"duration":1,"delay":19},{"action":null,"duration":1,"delay":20},{"action":null,"duration":1,"delay":21},{"action":null,"duration":1,"delay":22},{"action":null,"duration":1,"delay":23},{"action":null,"duration":1,"delay":24}]}
+// {"nullToDelayActions":[{"action":"toSide","duration":2,"delay":10}]}
+
+// {"steps":[{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},{"do":"sl"},null,{"do":"boom"},null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}
+// {"actions":[{"action":null,"duration":0,"delay":0},{"action":"slBump","duration":8,"delay":0},{"action":"boom","duration":1,"delay":8},{"action":null,"duration":1,"delay":9},{"action":null,"duration":1,"delay":10},{"action":null,"duration":1,"delay":11},{"action":null,"duration":1,"delay":12},{"action":null,"duration":1,"delay":13},{"action":null,"duration":1,"delay":14},{"action":null,"duration":1,"delay":15},{"action":null,"duration":1,"delay":16},{"action":null,"duration":1,"delay":17},{"action":null,"duration":1,"delay":18},{"action":null,"duration":1,"delay":19},{"action":null,"duration":1,"delay":20},{"action":null,"duration":1,"delay":21},{"action":null,"duration":1,"delay":22},{"action":null,"duration":1,"delay":23},{"action":null,"duration":1,"delay":24}]}
+// {"nullToDelayActions":[{"action":"slBump","duration":8,"delay":0},{"action":"boom","duration":1,"delay":8}]}
+
+// {"steps":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}
+// {"actions":[{"action":null,"duration":0,"delay":0},{"action":null,"duration":1,"delay":0},{"action":null,"duration":1,"delay":1},{"action":null,"duration":1,"delay":2},{"action":null,"duration":1,"delay":3},{"action":null,"duration":1,"delay":4},{"action":null,"duration":1,"delay":5},{"action":null,"duration":1,"delay":6},{"action":null,"duration":1,"delay":7},{"action":null,"duration":1,"delay":8},{"action":null,"duration":1,"delay":9},{"action":null,"duration":1,"delay":10},{"action":null,"duration":1,"delay":11},{"action":null,"duration":1,"delay":12},{"action":null,"duration":1,"delay":13},{"action":null,"duration":1,"delay":14},{"action":null,"duration":1,"delay":15},{"action":null,"duration":1,"delay":16},{"action":null,"duration":1,"delay":17},{"action":null,"duration":1,"delay":18},{"action":null,"duration":1,"delay":19},{"action":null,"duration":1,"delay":20},{"action":null,"duration":1,"delay":21},{"action":null,"duration":1,"delay":22},{"action":null,"duration":1,"delay":23},{"action":null,"duration":1,"delay":24}]}
+// {"nullToDelayActions":[]}
+
 export type CubeAnimation = {
-    animation: string | null;
-    duration: number;
+    action: CubeAnimationName | null;
+    duration: PositiveInteger;
     delay?: number;
 };
 
@@ -89,93 +111,105 @@ export class MoveMap {
         // проходимся в цикле по всем кубикам
         for (const { original, moving } of cubesToMove) {
             const steps = moving.steps;
+            if (original.element.xxx) {
+                console.log({ steps });
+            }
 
             // массив с действиями одного кубика
-            const actions: CubeAnimation[] = [
+            const actions: {
+                action: CubeAnimationName | MoveAction | null;
+                duration: PositiveInteger;
+            }[] = [
                 {
-                    animation: null,
+                    action: null,
                     duration: 0,
                 },
             ];
 
-            // пробегаемся по массиву шагов анимации
+            // Пробегаемся по массиву шагов анимации
             for (let key = 0; key < steps.length; key++) {
-                // один шаг анимации
+                // Один шаг анимации
                 const step = steps[key];
-                // последний шаг анимации, к которому добавляем продолжительность
+
+                // Последний шаг анимации, к которому добавляем продолжительность
                 // в случае совпадения со следующим шагом
-                const lastAction = actions[actions.length - 1];
+                const lastAction = actions.at(-1)!;
 
                 if (step === null) {
-                    if ([
-                        'st',
-                        'sr',
-                        'sl',
-                        'sb',
-                    ].indexOf(lastAction.animation!) > -1) {
-                        lastAction.animation = `${lastAction.animation}Bump`;
+                    const moveAnimation = MOVE_ACTION_TO_MOVE_ANIMATION_MAP[lastAction.action! as keyof typeof MOVE_ACTION_TO_MOVE_ANIMATION_MAP];
+
+                    if (moveAnimation) {
+                        lastAction.action = moveAnimation;
                         lastAction.duration++;
                     } else {
                         actions.push({
-                            animation: null,
+                            action: null,
                             duration: 1,
                         });
                     }
+                } else if (step.do === lastAction.action) {
+                    // Если это такой же шаг, как и предыдущий, увеличиваем его продолжительность
+                    lastAction.duration++;
                 } else {
-
-                    // если это такой же шаг, как и предыдущий
-                    if (step.do === lastAction.animation) {
-                    // иначе просто увеличиваем продолжительность предыдущего
+                    // Для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
+                    if (step.do === 'toSide') {
+                        lastAction.action = 'toSide';
                         lastAction.duration++;
+                        // Для сортировки попаданий в боковое поле
+                        moving.toSideTime = key;
+                        // Заносим м-кубик в массив попадания в боковое поле
+                        this.toSideActions.push(moving);
                     } else {
-                    // для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
-                        switch (step.do) {
-                        case 'toSide':
-                            lastAction.animation = 'toSide';
-                            lastAction.duration++;
-                            // для сортировки попаданий в боковое поле
-                            moving.toSideTime = key;
-                            // заносим м-кубик в массив попадания в боковое поле
-                            this.toSideActions.push(moving);
-                            break;
-                        default:
-                            actions.push({
-                                animation: step.do,
-                                duration: 1,
-                            });
-                            break;
-                        }
+                        actions.push({
+                            action: step.do,
+                            duration: 1,
+                        });
                     }
                 }
-
             }
-            if (actions.length === 1 && actions[0].animation === null) {
+
+            if (actions.length === 1 && actions[0].action === null) {
                 actions.shift();
             }
 
-            // подтягиваем задержки
-            if (actions.length !== 0) {
-                // итоговый массив, в котором продолжительность анимаций
-                // и задержки выстроены, как надо
-                const nullToDelayActions = [];
-                let delay = 0;
-                for (let key1 = 0; key1 < actions.length; key1++) {
-                    const action: CubeAnimation = actions[key1];
-                    // выставляем задержку от начала хода
-                    action.delay = delay;
-                    // добавляем к задержке следующего действия текущую продолжительность
-                    delay += action.duration;
-                    if (action.animation !== null) {
-                        nullToDelayActions.push(action);
-                    }
-                }
-
-                this.animationsScript.push({
-                    animations: nullToDelayActions,
-                    cube: original,
-                });
+            if (actions.length === 0) {
+                throw new Error('actions.length === 0');
             }
+
+            if (original.element.xxx) {
+                console.log({ actions });
+            }
+            // итоговый массив, в котором продолжительность анимаций
+            // и задержки выстроены, как надо
+            const nullToDelayActions = [];
+            let delay = 0;
+            for (let key1 = 0; key1 < actions.length; key1++) {
+                const action = actions[key1] as {
+                    // MoveAction (st, sb, sl, sr) к этому моменту удалены,
+                    // поскольку ни одна анимация не заканчивается просто движением,
+                    // все они преобразуются либо в 'toSide', либо в 'slBump', либо во что-то еще
+                    action: CubeAnimationName | null;
+                    duration: PositiveInteger;
+                    delay?: number;
+                };
+                    // выставляем задержку от начала хода
+                action.delay = delay;
+                // добавляем к задержке следующего действия текущую продолжительность
+                delay += action.duration;
+                if (action.action !== null) {
+                    nullToDelayActions.push(action);
+                }
+            }
+
+            if (original.element.xxx) {
+                console.log({ nullToDelayActions });
+            }
+            this.animationsScript.push({
+                animations: nullToDelayActions,
+                cube: original,
+            });
         }
+
         // сортируем попавшие в боковое поле м-кубики по времени попадания
         this.toSideActions.sort(function (a, b) {
             return a.toSideTime! - b.toSideTime!;

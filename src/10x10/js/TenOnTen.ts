@@ -693,25 +693,14 @@ export class TenOnTen {
         this.levelElement.textContent = String(level);
     }
 
-    private readonly handleCubeClick = ({
-        x,
-        y,
-        field,
-    }: CubeAddress) => {
+    private readonly handleCubeClick = (cube: CubeView) => {
         // Если стоит блокировка событий приложения - не даём пользователю ничего сделать
         if (this.blockApp) {
             return;
         }
 
-        // Если щелчок произошел по главному полю - ничего не делаем
-        if (field === 'main') {
-            const cube = this.cubes._getMainCube({
-                x,
-                y,
-            });
-
-            assertObject(cube);
-
+        const isMainCube = this.cubes.mainCubes.has(cube);
+        if (isMainCube) {
             animateCubeBump({
                 element: cube.element,
                 duration: ANIMATION_TIME * 2,
@@ -720,37 +709,40 @@ export class TenOnTen {
             return;
         }
 
-        const sideCubeAddress: SideCubeAddress = {
-            x,
-            y,
-            field,
-        };
+        const sideCubeAddress = findCubeInSideCubes({
+            sideCubes: this.cubes.sideCubes,
+            cube,
+        });
+
+        if (!sideCubeAddress) {
+            throw new Error('sideCubeAddress of clicked cube is not found');
+        }
 
         // отправляем в путь-дорогу
         this.run(sideCubeAddress);
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        const field = hoveredCube.field.value();
+        const isMainCube = this.cubes.mainCubes.has(hoveredCube);
 
-        if (field === 'main') {
+        if (isMainCube) {
             return;
         }
 
-        const { x, y } = findCubeInSideCubes({
+        const sideCubeAddress = findCubeInSideCubes({
             sideCubes: this.cubes.sideCubes,
             cube: hoveredCube,
-            field,
         });
+
+        if (!sideCubeAddress) {
+            // cube could be removed from the board despite the fact that view is still there
+            return;
+        }
 
         const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubes,
             sideCubesMask: this.cubes.sideCubes,
-            originCubeAddress: {
-                x,
-                y,
-                field,
-            },
+            originCubeAddress: sideCubeAddress,
         });
 
         if (typeof allToFirstInLine === 'string') {

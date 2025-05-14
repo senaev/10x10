@@ -38,28 +38,29 @@ export type SideCubesMask = {
 };
 
 export function findCubeInSideCubes({
-    field,
     cube,
     sideCubes,
 }: {
-    field: Direction;
     cube: CubeView;
     sideCubes: SideCubesMask;
-}): CubeCoordinates {
-    const mask = sideCubes[field];
+}): SideCubeAddress | undefined {
+    for (const field of DIRECTIONS) {
+        const mask = sideCubes[field];
 
-    for (let x = 0; x < mask.length; x++) {
-        for (let y = 0; y < mask[x].length; y++) {
-            if (mask[x][y] === cube) {
-                return {
-                    x,
-                    y,
-                };
+        for (let x = 0; x < mask.length; x++) {
+            for (let y = 0; y < mask[x].length; y++) {
+                if (mask[x][y] === cube) {
+                    return {
+                        field,
+                        x,
+                        y,
+                    };
+                }
             }
         }
     }
 
-    throw new Error('cube not found in sideCubes');
+    return undefined;
 }
 
 export function createSideCubesMaskWithNullValues(): SideCubesMask {

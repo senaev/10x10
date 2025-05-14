@@ -17,7 +17,6 @@ import {
 } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
-import { CubeAddress } from '../js/Cubes';
 import { CubeAnimation } from '../js/MoveMap';
 import { TenOnTen } from '../js/TenOnTen';
 import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
@@ -65,7 +64,7 @@ export class CubeView {
         direction: Direction| null;
         color: CubeColor;
         container: HTMLElement;
-        onClick: (address: CubeAddress) => void;
+        onClick: (cube: CubeView) => void;
         onHover: (cube: CubeView, isHovered: boolean) => void;
     }) {
         this.x = params.x;
@@ -166,11 +165,7 @@ export class CubeView {
         });
 
         this.element.addEventListener('mousedown', () => {
-            params.onClick({
-                field: this.field.value(),
-                x: this.x,
-                y: this.y,
-            });
+            params.onClick(this);
         });
 
         // Время попадания в поле майн

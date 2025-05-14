@@ -17,5 +17,10 @@
     "search.exclude": {
         "**/node_modules": true,
         "**/public/playgama-bridge.js": true,
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[svg]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
 }

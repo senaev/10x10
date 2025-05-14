@@ -14,6 +14,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
+import arrowSvg from '../img/arrow.svg';
 import { CubeAddress } from '../js/Cubes';
 import { CubeAnimation } from '../js/MoveMap';
 import { TenOnTen } from '../js/TenOnTen';
@@ -85,6 +86,11 @@ export class CubeView {
         this.visualCubeElement = visualCubeElement;
         visualCubeElement.classList.add('visualCube');
 
+        const arrowElement = document.createElement('img');
+        arrowElement.classList.add('arrow');
+        arrowElement.src = arrowSvg;
+        visualCubeElement.appendChild(arrowElement);
+
         const { signal: cubeVisualDirection } = combineSignalsIntoNewOne([
             this.direction,
             this.field,
@@ -109,10 +115,6 @@ export class CubeView {
         });
 
         this.direction.subscribe((direction) => {
-            if (this.field.value() === 'bottom' && this.x === 9 && this.y === 0) {
-                console.log('direction', direction);
-            }
-
             if (direction) {
                 this.visualCubeElement.classList.add(`direction_${direction}`);
             } else {

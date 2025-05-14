@@ -24,6 +24,7 @@
   "homepage": "https://github.com/senaev/10x10#readme",
   "devDependencies": {
     "@eslint/js": "9.17.0",
+    "@prettier/plugin-xml": "^3.4.1",
     "@stylistic/eslint-plugin": "2.12.1",
     "@types/express": "^5.0.1",
     "@types/jquery": "^3.5.32",
@@ -43,6 +44,7 @@
     "jquery.transit": "^0.9.12",
     "lefthook": "^1.11.12",
     "postcss-loader": "^8.1.1",
+    "prettier": "^3.5.3",
     "senaev-utils": "github:senaev/senaev-utils#c667fe093da5df8468efd6b36761304343103891",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",

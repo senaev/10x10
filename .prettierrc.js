@@ -4,4 +4,17 @@ module.exports = {
     singleQuote: true,
     jsxSingleQuote: true,
     singleAttributePerLine: true,
+    // Add SVG-specific settings
+    printWidth: 100,
+    htmlWhitespaceSensitivity: 'css',
+    embeddedLanguageFormatting: 'auto',
+    plugins: ['@prettier/plugin-xml'],
+    overrides: [
+        {
+            files: '*.svg',
+            options: {
+                parser: 'xml',
+            },
+        },
+    ],
 };

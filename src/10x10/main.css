@@ -149,29 +149,13 @@ body {
 }
 
 
-.direction_visible.direction_right {
-    background-image: url(./img/arrow.png);
-    background-repeat: no-repeat;
-    background-position: -1px;
-}
+.direction_visible.direction_right {}
 
-.direction_visible.direction_top {
-    background-image: url(./img/arrow.png);
-    background-repeat: no-repeat;
-    background-position: 100%;
-}
+.direction_visible.direction_top {}
 
-.direction_visible.direction_left {
-    background-image: url(./img/arrow.png);
-    background-repeat: no-repeat;
-    background-position: 66.6%;
-}
+.direction_visible.direction_left {}
 
-.direction_visible.direction_bottom {
-    background-image: url(./img/arrow.png);
-    background-repeat: no-repeat;
-    background-position: 33.3%;
-}
+.direction_visible.direction_bottom {}
 
 .levelInfoPanel {
     position: absolute;

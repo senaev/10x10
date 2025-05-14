@@ -97,14 +97,15 @@ export class Cubes {
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    public _addSideCube(cube: CubeView) {
-        const field = cube.field.value();
-
-        if (field === 'main') {
-            throw new Error('main field is not allowed');
-        }
-
-        this.sideCubes[field][cube.x][cube.y] = cube;
+    public _addSideCube(
+        cube: CubeView,
+        {
+            field,
+        x,
+        y,
+        }: SideCubeAddress
+    ) {
+        this.sideCubes[field][x][y] = cube;
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку

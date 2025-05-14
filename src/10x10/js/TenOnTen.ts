@@ -991,7 +991,11 @@ export class TenOnTen {
         direction: Direction | null;
         toMineOrder: number | null;
     }) {
-        const { field } = params;
+        const {
+            field,
+            x,
+            y,
+        } = params;
 
         const cube = new CubeView({
             ...params,
@@ -1004,7 +1008,11 @@ export class TenOnTen {
         if (field === 'main') {
             this.cubes._addMainCube(cube);
         } else {
-            this.cubes._addSideCube(cube);
+            this.cubes._addSideCube(cube, {
+                field,
+                x,
+                y,
+            });
         }
 
         return cube;

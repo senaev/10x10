@@ -3,13 +3,13 @@ import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
+import { CubeView } from '../components/CubeView';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 
-import { CubeView } from '../components/CubeView';
 import { SideCubesMask } from './Cubes';
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';

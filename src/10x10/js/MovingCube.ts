@@ -1,6 +1,5 @@
-import { Direction } from '../const/DIRECTIONS';
-
 import { CubeView } from '../components/CubeView';
+import { Direction } from '../const/DIRECTIONS';
 
 export type MoveAnimation = 'st' | 'sb' | 'sl' | 'sr';
 

@@ -313,7 +313,7 @@ export class TenOnTen {
             cubesLocal._setMainCube({
                 x,
                 y,
-            }, null);
+            }, undefined);
             cube.animate({
                 action: 'remove',
                 steps: 4,
@@ -380,22 +380,21 @@ export class TenOnTen {
         this.previousStepMap = null;
     };
 
-    public async run(sideCubeAddress: SideCubeAddress) {
-
+    public async run(clickedSideCubeAddress: SideCubeAddress) {
         // Если по боковому полю - ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
         const startCubes = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubes,
             sideCubesMask: this.cubes.sideCubes,
-            originCubeAddress: sideCubeAddress,
+            originCubeAddress: clickedSideCubeAddress,
         });
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
-            const cube = getSideCubeViewByAddress(this.cubes.sideCubes, sideCubeAddress);
+            const cube = getSideCubeViewByAddress(this.cubes.sideCubes, clickedSideCubeAddress);
 
             animateCubeBump({
-                isVertical: sideCubeAddress.field === 'top' || sideCubeAddress.field === 'bottom',
+                isVertical: clickedSideCubeAddress.field === 'top' || clickedSideCubeAddress.field === 'bottom',
                 element: cube.element,
                 duration: ANIMATION_TIME * 4,
             });
@@ -554,16 +553,16 @@ export class TenOnTen {
                                 y: yNumber,
                             });
                         // если предыдущее - null
-                        if (pCube === null) {
+                        if (!pCube) {
                             // а новое - что-то другое
                             // удаляем кубик из нового значения
-                            if (cube !== null) {
+                            if (cube) {
                                 changed.push({
                                     field: fieldName as Field,
                                     x: xNumber,
                                     y: yNumber,
                                     pCube: null,
-                                    cube,
+                                    cube: cube ?? null,
                                     action: 'remove',
                                 });
                             }
@@ -571,7 +570,7 @@ export class TenOnTen {
                             // если же раньше тут тоже был кубик
                             // а сейчас кубика нету
                             // заполняем клетку кубиком
-                            if (cube === null) {
+                            if (!cube) {
                                 changed.push({
                                     field: fieldName as Field,
                                     x: xNumber,
@@ -851,9 +850,9 @@ export class TenOnTen {
                 if (
                     coordinates.x > -1 && coordinates.y > -1 && coordinates.x < 10 && coordinates.y < 10
                 ) {
-                    const c = this.cubes._getMainCube(coordinates);
-                    if (c !== null) {
-                        appearanceColors.push(c.color.value());
+                    const cube = this.cubes._getMainCube(coordinates);
+                    if (cube) {
+                        appearanceColors.push(cube.color.value());
                     }
                 }
             }
@@ -967,7 +966,7 @@ export class TenOnTen {
                             y,
                         });
 
-                    if (cube === null) {
+                    if (!cube) {
                         fieldValue[x][y] = null;
                     } else {
                         const resultValue: MaskFieldValue = {

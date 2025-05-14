@@ -101,12 +101,16 @@ export class Cubes {
         return getSideCubeViewByAddress(this.sideCubes, address)!;
     }
 
-    public _getMainCube({ x, y }: CubeCoordinates): CubeView | null {
-        return this.mainCubes[x][y];
+    public _getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
+        return this.mainCubes[x][y] ?? undefined;
     }
 
-    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView | null) {
-        this.mainCubes[x][y] = value;
+    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView | undefined) {
+        if (value === undefined) {
+            this.mainCubes[x][y] = null;
+        } else {
+            this.mainCubes[x][y] = value;
+        }
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -246,7 +250,7 @@ export class Cubes {
                     this._setMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
-                    }, null);
+                    }, undefined);
                 }
 
                 movingCube.cube.x = movingCube.x;
@@ -263,7 +267,7 @@ export class Cubes {
                     this._setMainCube({
                         x: movingCube.cube.x,
                         y: movingCube.cube.y,
-                    }, null);
+                    }, undefined);
                 }
             }
         });
@@ -279,7 +283,7 @@ export class Cubes {
                 this._setMainCube({
                     x: movingCube.cube.x,
                     y: movingCube.cube.y,
-                }, null);
+                }, undefined);
             }
 
             // пушим кубик в коллекцию боковой линии

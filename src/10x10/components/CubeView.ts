@@ -44,7 +44,6 @@ export type Transition = Partial<{
 export class CubeView {
     public readonly direction = new Signal<Direction | null>(null);
     public readonly element: HTMLElement;
-    public readonly visualCubeElement: HTMLElement;
     public readonly field: Signal<Field>;
     public readonly color: Signal<CubeColor>;
     public readonly readyToMove: Signal<boolean> = new Signal(false);
@@ -85,7 +84,6 @@ export class CubeView {
         this.element = document.createElement('div');
 
         const visualCubeElement = document.createElement('div');
-        this.visualCubeElement = visualCubeElement;
         visualCubeElement.classList.add('visualCube');
 
         const arrowElement = document.createElement('img');
@@ -120,10 +118,10 @@ export class CubeView {
 
         this.direction.subscribe((direction) => {
             if (direction) {
-                this.visualCubeElement.classList.add(`direction_${direction}`);
+                visualCubeElement.classList.add(`direction_${direction}`);
             } else {
                 DIRECTIONS.forEach((dir) => {
-                    this.visualCubeElement.classList.remove(`direction_${dir}`);
+                    visualCubeElement.classList.remove(`direction_${dir}`);
                 });
             }
         });
@@ -137,7 +135,7 @@ export class CubeView {
 
         this.color = new Signal<CubeColor>(params.color);
         subscribeSignalAndCallWithCurrentValue(this.color, (color) => {
-            this.visualCubeElement.style.backgroundColor = CUBE_COLORS[color];
+            visualCubeElement.style.backgroundColor = CUBE_COLORS[color];
         });
 
         // Проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен

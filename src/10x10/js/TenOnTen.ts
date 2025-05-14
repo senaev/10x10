@@ -3,8 +3,10 @@ import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleA
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
+import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 
 import { animateCubeBump } from '../animations/animateCubeBump';
@@ -704,7 +706,18 @@ export class TenOnTen {
 
         // Если щелчок произошел по главному полю - ничего не делаем
         if (field === 'main') {
-            // ❗️ add animation
+            const cube = this.cubes._getMainCube({
+                x,
+                y,
+            });
+
+            assertObject(cube);
+
+            animateCubeBump({
+                element: cube.element,
+                duration: ANIMATION_TIME * 2,
+                isVertical: randomBoolean(),
+            });
             return;
         }
 

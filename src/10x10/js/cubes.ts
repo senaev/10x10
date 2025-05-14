@@ -101,12 +101,12 @@ export class Cubes {
         return getSideCubeViewByAddress(this.sideCubes, address)!;
     }
 
-    public _getMainCube(o: CubeCoordinates): CubeView | null {
-        return this.mainCubes[o.x][o.y];
+    public _getMainCube({ x, y }: CubeCoordinates): CubeView | null {
+        return this.mainCubes[x][y];
     }
 
-    public _setMainCube(o: CubeCoordinates, value: CubeView | null) {
-        this.mainCubes[o.x][o.y] = value;
+    public _setMainCube({ x, y }: CubeCoordinates, value: CubeView | null) {
+        this.mainCubes[x][y] = value;
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек

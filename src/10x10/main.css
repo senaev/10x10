@@ -27,6 +27,8 @@ body {
 
     text-align: center;
     color: white;
+
+    user-select: none;
 }
 
 .backgroundField {

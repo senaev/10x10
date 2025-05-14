@@ -14,12 +14,12 @@ export async function animateCubeBump({
 }) {
     const scale: [number, number] = isVertical
         ? [
-            1.2,
+            1.4,
             0.8,
         ]
         : [
             0.8,
-            1.2,
+            1.4,
         ];
     const halfDuration = duration / 2;
 

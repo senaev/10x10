@@ -23,6 +23,7 @@ import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCub
 import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
+import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 
 export type CubeAnimateAction = {
     action: string;
@@ -173,8 +174,6 @@ export class CubeView {
             this.toMineOrder = getIncrementalIntegerForMainFieldOrder();
         }
 
-        this.toState();
-
         if (this.appearWithAnimation) {
             $(this.element)
                 .css({ scale: 0 })
@@ -191,41 +190,6 @@ export class CubeView {
 
     public setReadyToMove(readyToMove: boolean) {
         this.readyToMove.next(readyToMove);
-    }
-
-    // Задаем html-элементу кубика положение на доске
-    // Если параметры не переданы, устанавливаем текущую позицию кубика
-    // Если переданы - устанавливаем в поле кубику, в позицию х/у, переданные в параметрах
-    public toState(position?: { x: number; y: number }) {
-        let x: number;
-        let y: number;
-        if (position === undefined) {
-            x = this.x;
-            y = this.y;
-        } else {
-            x = position.x;
-            y = position.y;
-        }
-        let left = x;
-        let top = y;
-        switch (this.field.value()) {
-        case 'top':
-            top -= 10;
-            break;
-        case 'right':
-            left += 10;
-            break;
-        case 'bottom':
-            top += 10;
-            break;
-        case 'left':
-            left -= 10;
-            break;
-        }
-        this.element.style.left = `${left + 3.5}em`;
-        this.element.style.top = `${top + 3.5}em`;
-        this.element.setAttribute('data-top', String(top));
-        this.element.setAttribute('data-left', String(left));
     }
 
     public performIHavePawsAnimation() {
@@ -350,7 +314,11 @@ export class CubeView {
                 break;
             }
 
-            this.toState(pos);
+            setCubeViewPositionOnTheField(this, {
+                x: pos.x,
+                y: pos.y,
+                field: this.field.value(),
+            });
 
             await promiseTimeout(steps * ANIMATION_TIME);
 

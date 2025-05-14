@@ -30,6 +30,7 @@ import { getLevelCubesCount } from '../utils/getLevelCubesCount';
 import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
+import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 
 import {
     createSideCubesMaskWithNullValues,
@@ -1004,6 +1005,8 @@ export class TenOnTen {
             onClick: this.handleCubeClick,
             onHover: this.handleHover,
         });
+
+        setCubeViewPositionOnTheField(cube, params);
 
         if (field === 'main') {
             this.cubes._addMainCube(cube);

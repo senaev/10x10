@@ -158,7 +158,7 @@ body {
 .direction_visible.direction_top {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
-    background-position: 33.3%;
+    background-position: 100%;
 }
 
 .direction_visible.direction_left {
@@ -170,7 +170,7 @@ body {
 .direction_visible.direction_bottom {
     background-image: url(./img/arrow.png);
     background-repeat: no-repeat;
-    background-position: 100%;
+    background-position: 33.3%;
 }
 
 .levelInfoPanel {

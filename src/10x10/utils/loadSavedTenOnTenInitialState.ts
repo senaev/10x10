@@ -77,5 +77,8 @@ export async function loadSavedTenOnTenInitialState({
         }
     }
 
+    // eslint-disable-next-line no-console
+    console.log('initialState', isMockEnv ? initialState : Boolean(initialState));
+
     return initialState;
 }

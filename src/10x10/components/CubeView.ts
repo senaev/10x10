@@ -109,6 +109,10 @@ export class CubeView {
         });
 
         this.direction.subscribe((direction) => {
+            if (this.field.value() === 'bottom' && this.x === 9 && this.y === 0) {
+                console.log('direction', direction);
+            }
+
             if (direction) {
                 this.visualCubeElement.classList.add(`direction_${direction}`);
             } else {

@@ -50,9 +50,6 @@ function showInterstitial(playGamaBridge: PlayGamaBridge) {
 
     const initialState = await loadSavedTenOnTenInitialState({ playGamaBridge });
 
-    // eslint-disable-next-line no-console
-    console.log('initialState', isMockEnv ? initialState : Boolean(initialState));
-
     const tenOnTen = new TenOnTen({
         container,
         initialState,

@@ -44,6 +44,7 @@ export function animateMovingCubesFromMainFieldToSide({
     if (cube.field.value() === 'top' || cube.field.value() === 'bottom') {
         prop = 'x';
     }
+
     // позиция кубика среди тех, которые во время данного хода
     // попадают в данную линию данного поля 0-дальний от mainField
     let posInSide;

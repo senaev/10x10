@@ -40,6 +40,11 @@ export type CubesMove = {
     cubesToMove: CubeToMove[];
 };
 
+export type ToSideAction = {
+    toSideTime: number;
+    movingCube: MovingCube;
+};
+
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
  * Абстрагирует функции, связанные с анимацией от этого класса.
@@ -89,7 +94,7 @@ export class MoveMap {
 
         // массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
-        this.toSideActions = [];
+        const toSideActions: ToSideAction[] = [];
 
         // проходимся в цикле по всем кубикам
         for (const { original, moving } of cubesToMove) {
@@ -97,8 +102,11 @@ export class MoveMap {
 
             const { animations, toSideTime } = stepsToAnimations(steps);
 
-            if (toSideTime) {
-                moving.toSideTime = toSideTime;
+            if (isNumber(toSideTime)) {
+                toSideActions.push({
+                    toSideTime,
+                    movingCube: moving,
+                });
             }
 
             this.animationsScript.push({
@@ -106,17 +114,12 @@ export class MoveMap {
                 cube: original,
             });
         }
-
-        cubesToMove.forEach(({ moving }) => {
-            if (isNumber(moving.toSideTime)) {
-                this.toSideActions.push(moving);
-            }
-        });
-
         // сортируем попавшие в боковое поле м-кубики по времени попадания
-        this.toSideActions.sort(function (a, b) {
+        toSideActions.sort(function (a, b) {
             return a.toSideTime! - b.toSideTime!;
         });
+
+        this.toSideActions = toSideActions.map(({ movingCube }) => movingCube);
     }
 
     // когда ход просчитан, запускаем саму анимацию

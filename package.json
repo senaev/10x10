@@ -6,7 +6,8 @@
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "npx eslint . --fix",
-        "test:ci": "echo \"Error: no test specified\"",
+        "test": "vitest",
+        "test:ci": "vitest --run",
         "typecheck": "tsc --noEmit",
         "serve:static": "ts-node ./src/serve-static/enableStaticFilesServing.ts",
         "webpack:watch": "webpack --watch",
@@ -45,12 +46,13 @@
         "lefthook": "^1.11.12",
         "postcss-loader": "^8.1.1",
         "prettier": "^3.5.3",
-        "senaev-utils": "github:senaev/senaev-utils#860f471bf0ccce652d900e8fd5715643b0ac9550",
+        "senaev-utils": "github:senaev/senaev-utils#d57776ac0c7f32ce656082248b52f11629574e0d",
         "style-loader": "^4.0.0",
         "ts-loader": "^9.5.2",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.32.0",
+        "vitest": "^3.1.3",
         "webpack": "^5.99.8",
         "webpack-cli": "^6.0.1"
     }

@@ -440,8 +440,9 @@ export class TenOnTen {
 
         // пошаговый запуск анимации
         this.moveMap.animate({
-            startCubes,
-            cubesMask: this.cubes.sideCubes,
+            firstCubeAddress: clickedSideCubeAddress,
+            startCubesCount: startCubes.length,
+            sideCubesMask: this.cubes.sideCubes,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
             beyondTheSide: this.moveMap.beyondTheSide,

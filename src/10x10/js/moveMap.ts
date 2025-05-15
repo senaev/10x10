@@ -13,7 +13,7 @@ import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
-import { SideCubesMask } from './Cubes';
+import { SideCubeAddress, SideCubesMask } from './Cubes';
 import {
     MovingCube,
 } from './MovingCube';
@@ -131,19 +131,25 @@ export class MoveMap {
 
     // когда ход просчитан, запускаем саму анимацию
     public async animate({
-        startCubes,
-        cubesMask,
+        firstCubeAddress,
+        startCubesCount,
+        sideCubesMask,
         animationsScript,
         animationLength,
         beyondTheSide,
     }: {
-        startCubes: CubeView[];
-        cubesMask: SideCubesMask;
+        firstCubeAddress: SideCubeAddress;
+        startCubesCount: PositiveInteger;
+        sideCubesMask: SideCubesMask;
         animationsScript: CubeAnimationStep[];
         animationLength: UnsignedInteger;
         beyondTheSide: CubeView[];
     }): Promise<void> {
-        animateCubesFromSideToMainField(startCubes, cubesMask);
+        animateCubesFromSideToMainField({
+            firstCubeAddress,
+            startCubesCount,
+            sideCubesMask,
+        });
 
         // перебираем карту анимации и передаем каждому кубику объект действия,
         // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,

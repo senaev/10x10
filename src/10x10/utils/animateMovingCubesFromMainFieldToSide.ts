@@ -27,25 +27,25 @@ export function animateMovingCubesFromMainFieldToSide({
         throw new Error('animateMovingCubesFromMainFieldToSide: cube.field === "main"');
     }
 
-    // получаем линию кубика
+    // Получаем линию кубика
     const line = getCubeAddressInSideFieldInOrderFromMain({
         x: cube.x,
         y: cube.y,
         field,
     });
 
-    // массив, в который по порядку попадут все кубики,
+    // Массив, в который по порядку попадут все кубики,
     // которые войдут в эту же линию того же поля во время хода
     // 0 - который входит первым
     const allCubesToSideInThisLine = [];
 
-    // для идентификации линии
+    // Для идентификации линии
     let prop: 'x' | 'y' = 'y';
     if (cube.field.value() === 'top' || cube.field.value() === 'bottom') {
         prop = 'x';
     }
 
-    // позиция кубика среди тех, которые во время данного хода
+    // Позиция кубика среди тех, которые во время данного хода
     // попадают в данную линию данного поля 0-дальний от mainField
     let posInSide;
     for (const key in toSideActions) {
@@ -58,7 +58,7 @@ export function animateMovingCubesFromMainFieldToSide({
         }
     }
 
-    // массив кубиков, которые удалились за пределами этой линии во время хода
+    // Массив кубиков, которые удалились за пределами этой линии во время хода
     // 0 - первый удалённый(самый дальний)
     const removeBS = [];
     for (const key in beyondTheSide) {
@@ -68,13 +68,13 @@ export function animateMovingCubesFromMainFieldToSide({
         }
     }
 
-    // вычисляем, какие кубики будем двигать при вставке в линию
+    // Вычисляем, какие кубики будем двигать при вставке в линию
     const pos = BOARD_SIZE - allCubesToSideInThisLine.length + posInSide! - 1;
     let c1: CubeView;
     let c2: CubeView;
     let cr: CubeView;
 
-    // смысл этих условий в том, что если кубик, который надо анимировать,
+    // Смысл этих условий в том, что если кубик, который надо анимировать,
     // еще присутствует в линии, мы берем этот кубик оттуда, если же
     // он уже удален из линии, но его нужно анимировать, мы берем его
     // из массива удаленных кубиков этой линии
@@ -96,13 +96,13 @@ export function animateMovingCubesFromMainFieldToSide({
         c2 = removeBS[removeBS.length + (pos - 1)];
     }
 
-    // третий кубик пропадает
+    // Третий кубик пропадает
     cr.animate({
         animation: 'disappearanceInSide',
         steps: 1,
     });
 
-    // остальные два сдвигаются ближе к линии
+    // Остальные два сдвигаются ближе к линии
     c2.animate({
         animation: 'further',
         steps: 1,

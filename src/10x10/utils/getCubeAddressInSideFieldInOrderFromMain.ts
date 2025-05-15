@@ -2,7 +2,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { SideCubeAddress } from '../js/Cubes';
 
 /**
- * получаем массив координат кубиков линии в порядке от дальнего (относительно main field)
+ * Получаем массив координат кубиков линии в порядке от дальнего (относительно main field)
  * до ближайшего
  */
 export function getCubeAddressInSideFieldInOrderFromMain(address: SideCubeAddress): SideCubeAddress[] {

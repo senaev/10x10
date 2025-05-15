@@ -1,111 +1,38 @@
-import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
+import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 
-import { CubeView } from '../components/CubeView';
-import { SideCubesMask } from '../js/Cubes';
+import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 
-export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: SideCubesMask): void {
-    // const field = startCubes[0].field.value();
-
-    // if (field === 'main') {
-    //     throw new Error('animateCubesFromSideToMainField: startCubes[0].field === "main"');
-    // }
-
-    // // получаем линию кубика
-    // // коллекция пока в начальном состоянии (до хода)
-    // const line = getCubeAddressInSideFieldInOrderFromMain({
-    //     x: startCubes[0].x,
-    //     y: startCubes[0].y,
-    //     field,
-    // });
-
-    // // массив из возможных комбинаций анимаций
-    // let animationArr: number[][];
-    // switch (startCubes.length) {
-    // case 1:
-    //     animationArr = [
-    //         [
-    //             6,
-    //             7,
-    //             8,
-    //         ],
-    //     ];
-    //     break;
-    // case 2:
-    //     animationArr = [
-    //         [
-    //             6,
-    //             7,
-    //         ],
-    //         [
-    //             5,
-    //             6,
-    //             7,
-    //         ],
-    //     ];
-    //     break;
-    // case 3:
-    //     animationArr = [
-    //         [6],
-    //         [
-    //             5,
-    //             6,
-    //         ],
-    //         [
-    //             4,
-    //             5,
-    //             6,
-    //         ],
-    //     ];
-    //     break;
-    // default:
-    //     throw new Error(`Неверное значение длинны startCubes: ${startCubes.length}`);
-    // }
-    // const animationNames: CubeAnimationName[] = [
-    //     'appearanceInSide',
-    //     'nearer',
-    //     'nearer',
-    // ];
-    // animationArr.forEach((animation, animationIndex) => {
-    //     for (const num in animation) {
-    //         const address = line[animation[num]];
-    //         const cube = getSideCubeViewByAddress(mask, address);
-
-    //         assertObject(cube);
-
-    //         cube.addAnimate({
-    //             action: animationNames[num],
-    //             duration: 1,
-    //             delay: animationIndex,
-    //         });
-    //     }
-    // });
-
-    const field = startCubes[0].field.value();
-
-    if (field === 'main') {
-        throw new Error('animateCubesFromSideToMainField: startCubes[0].field === "main"');
-    }
-
-    // получаем линию кубика
-    // коллекция пока в начальном состоянии (до хода)
+export function animateCubesFromSideToMainField({
+    firstCubeAddress: {
+        field,
+        x,
+        y,
+    },
+    startCubesCount,
+    sideCubesMask,
+}: {
+    firstCubeAddress: SideCubeAddress;
+    startCubesCount: PositiveInteger;
+    sideCubesMask: SideCubesMask;
+}): void {
+    // Получаем линию кубика
+    // Коллекция пока в начальном состоянии (до хода)
     const line = getCubeAddressInSideFieldInOrderFromMain({
-        x: startCubes[0].x,
-        y: startCubes[0].y,
+        x,
+        y,
         field,
     });
 
-    for (let cubeIndexInLine = 0; cubeIndexInLine < (line.length - startCubes.length); cubeIndexInLine++) {
+    for (let cubeIndexInLine = 0; cubeIndexInLine < (line.length - startCubesCount); cubeIndexInLine++) {
         const address = line[cubeIndexInLine];
-        const cube = getSideCubeViewByAddress(mask, address);
-
-        assertObject(cube);
+        const cube = getSideCubeViewByAddress(sideCubesMask, address);
 
         cube.addAnimate({
             action: 'nearer',
-            duration: startCubes.length,
+            duration: startCubesCount,
             delay: 0,
         });
     }

@@ -3,11 +3,8 @@ import { isNumber } from 'senaev-utils/src/utils/Number/Number';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
-import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { CubeAnimationName, CubeView } from '../components/CubeView';
-import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
-import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getOppositeFieldCubeAddress } from '../utils/getOppositeFieldCubeAddress/getOppositeFieldCubeAddress';
@@ -15,7 +12,7 @@ import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import { reverseDirection } from '../utils/reverseDirection';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
-import { SideCubeAddress, SideCubesMask } from './Cubes';
+import { SideCubeAddress } from './Cubes';
 import {
     MovingCube,
 } from './MovingCube';

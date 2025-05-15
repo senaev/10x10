@@ -88,12 +88,12 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
 
 export class Cubes {
     public readonly _app: TenOnTen;
-    public sideCubes: SideCubesMask;
-    public mainCubes: Set<CubeView> = new Set();
+    public sideCubesMask: SideCubesMask;
+    public mainCubesMask: Set<CubeView> = new Set();
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
-        this.sideCubes = createSideCubesMaskWithNullValues();
+        this.sideCubesMask = createSideCubesMaskWithNullValues();
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
@@ -105,34 +105,34 @@ export class Cubes {
         y,
         }: SideCubeAddress
     ) {
-        this.sideCubes[field][x][y] = cube;
+        this.sideCubesMask[field][x][y] = cube;
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
     public _getSideCube(address: SideCubeAddress): CubeView {
-        return getSideCubeViewByAddress(this.sideCubes, address)!;
+        return getSideCubeViewByAddress(this.sideCubesMask, address)!;
     }
 
     public _getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
         return getCubeByCoordinates({
             x,
             y,
-        }, this.mainCubes);
+        }, this.mainCubesMask);
     }
 
     public _addMainCube(cube: CubeView) {
-        this.mainCubes.add(cube);
+        this.mainCubesMask.add(cube);
     }
 
     public _removeMainCube({ x, y }: CubeCoordinates) {
         const cube = getCubeByCoordinates({
             x,
             y,
-        }, this.mainCubes);
+        }, this.mainCubesMask);
 
         assertObject(cube, 'cannot delete cube from mainCubes');
 
-        this.mainCubes.delete(cube);
+        this.mainCubesMask.delete(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -141,7 +141,7 @@ export class Cubes {
         y,
         field,
     }: SideCubeAddress, value: CubeView): void {
-        this.sideCubes[field][x][y] = value;
+        this.sideCubesMask[field][x][y] = value;
     }
 
     // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -154,7 +154,7 @@ export class Cubes {
 
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    func(this.sideCubes[field][x][y]!, field, x, y);
+                    func(this.sideCubesMask[field][x][y]!, field, x, y);
                 }
             }
         });
@@ -189,8 +189,8 @@ export class Cubes {
                 // Кубик просто перемещается и не входит не в какую панель
                 // Устанавливаем кубик в новую клетку
 
-                if (!this.mainCubes.has(movingCube.cube)) {
-                    this.mainCubes.add(movingCube.cube);
+                if (!this.mainCubesMask.has(movingCube.cube)) {
+                    this.mainCubesMask.add(movingCube.cube);
                 }
 
                 movingCube.cube.x = movingCube.x;
@@ -198,14 +198,14 @@ export class Cubes {
             } else if (movingCube.x === -1 && movingCube.y === -1) {
                 // если кубик взорвался во время хода, убираем его с доски
 
-                this.mainCubes.delete(movingCube.cube);
+                this.mainCubesMask.delete(movingCube.cube);
             }
         });
 
         // Убираем в боковые поля кубики, которые ушли туда во время хода
         toSideActions.forEach((movingCube) => {
-            if (this.mainCubes.has(movingCube.cube)) {
-                this.mainCubes.delete(movingCube.cube);
+            if (this.mainCubesMask.has(movingCube.cube)) {
+                this.mainCubesMask.delete(movingCube.cube);
             } else {
                 // Кубик из боковой панели в боковую панель
                 // (что-то взрывается и кубик, с которого стартовали, пролетает насквозь)

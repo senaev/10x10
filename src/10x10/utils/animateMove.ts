@@ -4,7 +4,9 @@ import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/pro
 
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
-import { CubeAnimationStep, ToSideAction } from '../js/MoveMap';
+import {
+    AnimationScript,
+} from '../js/MoveMap';
 
 import { animateCubesFromSideToMainField } from './animateCubesFromSideToMainField';
 
@@ -15,21 +17,13 @@ export async function animateMove({
     sideCubesMask,
     animationsScript,
     animationLength,
-    toSideActions,
 }: {
     firstCubeAddress: SideCubeAddress;
     startCubesCount: PositiveInteger;
     sideCubesMask: SideCubesMask;
-    animationsScript: CubeAnimationStep[];
+    animationsScript: AnimationScript;
     animationLength: UnsignedInteger;
-    toSideActions: ToSideAction[];
 }): Promise<void> {
-    toSideActions.forEach(({
-        movingCube,
-        toSideParams,
-    }) => {
-        console.log(toSideParams);
-    });
 
     animateCubesFromSideToMainField({
         firstCubeAddress,
@@ -40,7 +34,10 @@ export async function animateMove({
     // перебираем карту анимации и передаем каждому кубику объект действия,
     // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
     // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
-    for (const { cube, animations } of animationsScript) {
+    for (const [
+        cube,
+        animations,
+    ] of animationsScript.entries()) {
         for (const animation of animations) {
             cube.addAnimate(animation);
         }

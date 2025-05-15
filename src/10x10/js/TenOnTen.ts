@@ -319,7 +319,7 @@ export class TenOnTen {
         this.blockApp = true;
         const cubesLocal = this.cubes;
         // Удаляем нафиг кубики с главного поля
-        cubesLocal.mainCubes.forEach((cube) => {
+        cubesLocal.mainCubesMask.forEach((cube) => {
             cubesLocal._removeMainCube({
                 x: cube.x,
                 y: cube.y,
@@ -394,14 +394,14 @@ export class TenOnTen {
         // Если по боковому полю - ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
         const startCubes = getAllCubesInCursorPositionThatCouldGoToMain({
-            mainCubes: this.cubes.mainCubes,
-            sideCubesMask: this.cubes.sideCubes,
+            mainCubes: this.cubes.mainCubesMask,
+            sideCubesMask: this.cubes.sideCubesMask,
             originCubeAddress: clickedSideCubeAddress,
         });
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
-            const cube = getSideCubeViewByAddress(this.cubes.sideCubes, clickedSideCubeAddress);
+            const cube = getSideCubeViewByAddress(this.cubes.sideCubesMask, clickedSideCubeAddress);
 
             animateCubeBump({
                 isVertical: clickedSideCubeAddress.field === 'top' || clickedSideCubeAddress.field === 'bottom',
@@ -418,7 +418,7 @@ export class TenOnTen {
 
         // Создаем массив из всех кубиков, которые есть на доске
         const mainFieldCubes: CubeView[] = [];
-        this.cubes.mainCubes.forEach((cube) => {
+        this.cubes.mainCubesMask.forEach((cube) => {
             mainFieldCubes.push(cube);
         });
 
@@ -443,10 +443,9 @@ export class TenOnTen {
         animateMove({
             firstCubeAddress: clickedSideCubeAddress,
             startCubesCount: startCubes.length,
-            sideCubesMask: this.cubes.sideCubes,
+            sideCubesMask: this.cubes.sideCubesMask,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
-            toSideActions: this.moveMap.toSideActions,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
@@ -706,7 +705,7 @@ export class TenOnTen {
             return;
         }
 
-        const isMainCube = this.cubes.mainCubes.has(cube);
+        const isMainCube = this.cubes.mainCubesMask.has(cube);
         if (isMainCube) {
             animateCubeBump({
                 element: cube.element,
@@ -717,7 +716,7 @@ export class TenOnTen {
         }
 
         const sideCubeAddress = findCubeInSideCubes({
-            sideCubes: this.cubes.sideCubes,
+            sideCubes: this.cubes.sideCubesMask,
             cube,
         });
 
@@ -730,14 +729,14 @@ export class TenOnTen {
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        const isMainCube = this.cubes.mainCubes.has(hoveredCube);
+        const isMainCube = this.cubes.mainCubesMask.has(hoveredCube);
 
         if (isMainCube) {
             return;
         }
 
         const sideCubeAddress = findCubeInSideCubes({
-            sideCubes: this.cubes.sideCubes,
+            sideCubes: this.cubes.sideCubesMask,
             cube: hoveredCube,
         });
 
@@ -747,8 +746,8 @@ export class TenOnTen {
         }
 
         const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain({
-            mainCubes: this.cubes.mainCubes,
-            sideCubesMask: this.cubes.sideCubes,
+            mainCubes: this.cubes.mainCubesMask,
+            sideCubesMask: this.cubes.sideCubesMask,
             originCubeAddress: sideCubeAddress,
         });
 
@@ -763,7 +762,7 @@ export class TenOnTen {
 
     private startNewGame() {
         this.clearMainField();
-        this.cubes.sideCubes = createSideCubesMaskWithNullValues();
+        this.cubes.sideCubesMask = createSideCubesMaskWithNullValues();
 
         this.createSideCubes();
 
@@ -777,10 +776,10 @@ export class TenOnTen {
     }
 
     private clearMainField() {
-        this.cubes.mainCubes.forEach((cube) => {
+        this.cubes.mainCubesMask.forEach((cube) => {
             cube.removeElementFromDOM();
         });
-        this.cubes.mainCubes.clear();
+        this.cubes.mainCubesMask.clear();
     }
 
     // генерируем кубики на главном поле

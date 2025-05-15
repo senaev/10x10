@@ -29,7 +29,6 @@ export type CubeAnimations = {
     stBump: {};
     toSide: {};
     nearer: {};
-    disappearanceInSide: {};
     further: {};
     boom: {};
     remove: {};
@@ -263,6 +262,7 @@ export class CubeView {
             const nextPropValue = sign === '+'
                 ? currentPropValue + dur
                 : currentPropValue - dur;
+
             this.element.style[prop] = `${nextPropValue}em`;
 
             const delayDuration = ANIMATION_TIME * (dur - 1);
@@ -281,26 +281,8 @@ export class CubeView {
             await animateCubeMovement({
                 element: this.element,
                 isVertical: field === 'top' || field === 'bottom',
-                distance: (field === 'top' || field === 'left') ? -1 : 1,
+                distance: (field === 'top' || field === 'left') ? -steps : steps,
             });
-        };
-
-        const disappearanceInSide = async () => {
-            const animationDuration = steps * ANIMATION_TIME;
-            this.element.style.transform = 'scale(1,1)';
-            this.element.style.opacity = '1';
-            this.element.style.transition = `transform ${animationDuration}ms ease-out, opacity ${animationDuration}ms ease-out`;
-            forceRepaint(this.element);
-
-            this.element.style.transform = 'scale(0,0)';
-            this.element.style.opacity = '0';
-            await promiseTimeout(animationDuration);
-
-            this.element.style.transition = '';
-            this.element.style.transform = '';
-            this.element.style.opacity = '';
-
-            this.element.classList.add('cubeHidden');
         };
 
         const boom = () => {
@@ -366,16 +348,13 @@ export class CubeView {
                         sign = '+';
                     }
                 }
+
                 slideToSide(prop, sign);
             })();
             break;
             // Передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':
             nearer();
-            break;
-            // Третий кубик в боковой линии пропадает
-        case 'disappearanceInSide':
-            disappearanceInSide();
             break;
             // Передвигаем кубик в боковой панели дальше от mainField
         case 'further':

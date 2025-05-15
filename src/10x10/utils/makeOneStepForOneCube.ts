@@ -1,7 +1,7 @@
+import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
+import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { __findCubeInMainMask } from '../js/MainMask';
 import { ActionStep, MovingCube } from '../js/MovingCube';
-
-import { directionToAnimation } from './directionToAnimation';
 
 /**
  * Один шаг для кубика, возвращает информацию о шаге для анимации
@@ -19,23 +19,9 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
 
     // если у кубика имеется направление, подсчитываем, где он может оказаться
     const nextPos = {
-        x: cube.x,
-        y: cube.y,
+        x: cube.x + DIRECTION_STEPS[cube.direction].x,
+        y: cube.y + DIRECTION_STEPS[cube.direction].y,
     };
-
-    if (cube.direction === 'top' || cube.direction === 'bottom') {
-        if (cube.direction === 'top') {
-            nextPos.y--;
-        } else {
-            nextPos.y++;
-        }
-    } else {
-        if (cube.direction === 'left') {
-            nextPos.x--;
-        } else {
-            nextPos.x++;
-        }
-    }
 
     // если следующая позиция - одно из боковых полей - отправляем кубик туда
     if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
@@ -53,7 +39,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
     }
 
     // если нет, идет обращение к коллекции кубиков, чтобы узнать, свободна ли следующая клетка
-    const animation = directionToAnimation(cube.direction);
+    const animation = DIRECTION_TO_ANIMATION[cube.direction];
     // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
     cube.x = nextPos.x;
     cube.y = nextPos.y;

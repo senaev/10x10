@@ -5,13 +5,13 @@ import { forceRepaint } from '../../utils/forceRepaint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 
 export async function animateCubeMovement({
+    element,
     isVertical,
     distance,
-    element,
 }: {
+    element: HTMLElement;
     isVertical: boolean;
     distance: Integer;
-    element: HTMLElement;
 }) {
     const duration = ANIMATION_TIME * Math.abs(distance);
 

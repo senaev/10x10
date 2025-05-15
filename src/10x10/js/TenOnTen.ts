@@ -22,6 +22,7 @@ import { CUBE_COLORS_ARRAY, CubeColor } from '../const/CUBE_COLORS';
 import { Direction } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
+import { animateMove } from '../utils/animateMove';
 import { getAllCubesInCursorPositionThatCouldGoToMain } from '../utils/getAllCubesInCursorPositionThatCouldGoToMain';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
@@ -439,12 +440,13 @@ export class TenOnTen {
         const animationLength = cubesMove.cubesToMove[0].moving.steps.length;
 
         // пошаговый запуск анимации
-        this.moveMap.animate({
+        animateMove({
             firstCubeAddress: clickedSideCubeAddress,
             startCubesCount: startCubes.length,
             sideCubesMask: this.cubes.sideCubes,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
+            toSideActions: this.moveMap.toSideActions,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
@@ -471,7 +473,7 @@ export class TenOnTen {
         this.cubes._mergeMoveMap({
             movingCubes: cubesMove.cubesToMove.map(({ moving }) => moving),
             startCubes,
-            toSideActions: this.moveMap.toSideActions,
+            toSideActions: this.moveMap.toSideActions.map(({ movingCube }) => movingCube),
         });
 
         this.checkStepEnd();

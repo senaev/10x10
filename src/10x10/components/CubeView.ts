@@ -145,7 +145,11 @@ export class CubeView {
         if (params.direction) {
             this.direction.next(params.direction);
         } else {
-            this.direction.next(reverseDirection(this.field.value()));
+            const field = this.field.value();
+
+            if (field !== 'main') {
+                this.direction.next(reverseDirection(field));
+            }
         }
 
         this.color = new Signal<CubeColor>(params.color);

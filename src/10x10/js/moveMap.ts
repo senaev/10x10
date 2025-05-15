@@ -10,7 +10,9 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { animateCubesFromSideToMainField } from '../utils/animateCubesFromSideToMainField';
 import { directionToAnimation } from '../utils/directionToAnimation';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
+import { getOppositeFieldCubeAddress } from '../utils/getOppositeFieldCubeAddress/getOppositeFieldCubeAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
+import { reverseDirection } from '../utils/reverseDirection';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
 import { SideCubeAddress, SideCubesMask } from './Cubes';
@@ -40,8 +42,13 @@ export type CubesMove = {
     cubesToMove: CubeToMove[];
 };
 
+export type ToSideParams = {
+    time: UnsignedInteger;
+    sideCubeAddress: SideCubeAddress;
+};
+
 export type ToSideAction = {
-    toSideTime: number;
+    toSideParams: ToSideParams;
     movingCube: MovingCube;
 };
 
@@ -54,7 +61,7 @@ export type ToSideAction = {
  */
 export class MoveMap {
     public readonly startCubes: CubeView[];
-    public readonly toSideActions: MovingCube[] = [];
+    public readonly toSideActions: ToSideAction[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
 
     public readonly cubesMove: CubesMove;
@@ -109,8 +116,19 @@ export class MoveMap {
             // }
 
             if (isNumber(toSideTime)) {
+                const initialDirection = original.direction.value();
+
+                assertNonEmptyString(initialDirection);
+
                 toSideActions.push({
-                    toSideTime,
+                    toSideParams: {
+                        time: toSideTime,
+                        sideCubeAddress: getOppositeFieldCubeAddress({
+                            field: reverseDirection(initialDirection),
+                            x: original.x,
+                            y: original.y,
+                        }),
+                    },
                     movingCube: moving,
                 });
             }
@@ -120,43 +138,13 @@ export class MoveMap {
                 cube: original,
             });
         }
+
         // сортируем попавшие в боковое поле м-кубики по времени попадания
         toSideActions.sort(function (a, b) {
-            return a.toSideTime! - b.toSideTime!;
+            return a.toSideParams.time - b.toSideParams.time;
         });
 
-        this.toSideActions = toSideActions.map(({ movingCube }) => movingCube);
+        this.toSideActions = toSideActions;
     }
 
-    // когда ход просчитан, запускаем саму анимацию
-    public async animate({
-        firstCubeAddress,
-        startCubesCount,
-        sideCubesMask,
-        animationsScript,
-        animationLength,
-    }: {
-        firstCubeAddress: SideCubeAddress;
-        startCubesCount: PositiveInteger;
-        sideCubesMask: SideCubesMask;
-        animationsScript: CubeAnimationStep[];
-        animationLength: UnsignedInteger;
-    }): Promise<void> {
-        animateCubesFromSideToMainField({
-            firstCubeAddress,
-            startCubesCount,
-            sideCubesMask,
-        });
-
-        // перебираем карту анимации и передаем каждому кубику объект действия,
-        // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
-        // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
-        for (const { cube, animations } of animationsScript) {
-            for (const animation of animations) {
-                cube.addAnimate(animation);
-            }
-        }
-
-        await promiseTimeout(animationLength * ANIMATION_TIME - 1);
-    }
 }

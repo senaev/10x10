@@ -1,7 +1,6 @@
 import { Direction } from '../const/DIRECTIONS';
-import { Field } from '../const/FIELDS';
 
-export function reverseDirection (field: Field): Direction | null {
+export function reverseDirection (field: Direction): Direction {
     if (field === 'top') {
         return 'bottom';
     }
@@ -14,9 +13,5 @@ export function reverseDirection (field: Field): Direction | null {
         return 'right';
     }
 
-    if (field === 'right') {
-        return 'left';
-    }
-
-    return null;
+    return 'left';
 }

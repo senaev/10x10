@@ -22,9 +22,9 @@ export function stepsToAnimations(steps: ActionStep[]): {
     ];
 
     // Пробегаемся по массиву шагов анимации
-    for (let key = 0; key < steps.length; key++) {
+    for (let time = 0; time < steps.length; time++) {
     // Один шаг анимации
-        const step = steps[key];
+        const step = steps[time];
 
         // Последний шаг анимации, к которому добавляем продолжительность
         // в случае совпадения со следующим шагом
@@ -52,7 +52,7 @@ export function stepsToAnimations(steps: ActionStep[]): {
                 lastAction.duration++;
 
                 // Для сортировки попаданий в боковое поле
-                toSideTime = key;
+                toSideTime = time;
             } else {
                 actions.push({
                     action: step.do,

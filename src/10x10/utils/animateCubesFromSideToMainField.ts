@@ -1,6 +1,6 @@
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 
-import { CubeView } from '../components/CubeView';
+import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
@@ -63,7 +63,7 @@ export function animateCubesFromSideToMainField(startCubes: CubeView[], mask: Si
     default:
         throw new Error(`Неверное значение длинны startCubes: ${startCubes.length}`);
     }
-    const animationNames = [
+    const animationNames: CubeAnimationName[] = [
         'appearanceInSide',
         'nearer',
         'nearer',

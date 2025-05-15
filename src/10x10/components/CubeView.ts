@@ -464,10 +464,7 @@ export class CubeView {
                 );
             break;
         default:
-            debugger;
-            // eslint-disable-next-line no-console
-            console.log(`Неизвестная анимация: ${action}`);
-            break;
+            throw new Error(`Неизвестная анимация: ${action}`);
         }
     }
 

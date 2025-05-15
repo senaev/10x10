@@ -22,7 +22,7 @@ import { TenOnTen } from './TenOnTen';
 export type CubeAnimation = {
     action: CubeAnimationName | null;
     duration: PositiveInteger;
-    delay?: number;
+    delay: number;
 };
 
 export type CubeAnimationStep = {
@@ -53,7 +53,6 @@ export type ToSideAction = {
  * для основного приложения.
  */
 export class MoveMap {
-    public readonly beyondTheSide: CubeView[] = [];
     public readonly startCubes: CubeView[];
     public readonly toSideActions: MovingCube[] = [];
     public readonly animationsScript: CubeAnimationStep[] = [];
@@ -136,14 +135,12 @@ export class MoveMap {
         sideCubesMask,
         animationsScript,
         animationLength,
-        beyondTheSide,
     }: {
         firstCubeAddress: SideCubeAddress;
         startCubesCount: PositiveInteger;
         sideCubesMask: SideCubesMask;
         animationsScript: CubeAnimationStep[];
         animationLength: UnsignedInteger;
-        beyondTheSide: CubeView[];
     }): Promise<void> {
         animateCubesFromSideToMainField({
             firstCubeAddress,
@@ -161,10 +158,5 @@ export class MoveMap {
         }
 
         await promiseTimeout(animationLength * ANIMATION_TIME - 1);
-
-        // удаляем ненужные html-элементы
-        for (const cube of beyondTheSide) {
-            cube.removeElementFromDOM();
-        }
     }
 }

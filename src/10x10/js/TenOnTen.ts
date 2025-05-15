@@ -445,7 +445,6 @@ export class TenOnTen {
             sideCubesMask: this.cubes.sideCubes,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
-            beyondTheSide: this.moveMap.beyondTheSide,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
@@ -779,6 +778,7 @@ export class TenOnTen {
         this.cubes.mainCubes.forEach((cube) => {
             cube.removeElementFromDOM();
         });
+        this.cubes.mainCubes.clear();
     }
 
     // генерируем кубики на главном поле

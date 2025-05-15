@@ -160,50 +160,6 @@ export class Cubes {
         });
     }
 
-    // добавляем в линию кубик, по кубику мы должны определить, в какую линию
-    public _pushInLine(cube: CubeView) {
-        const direction = cube.direction.value();
-
-        assertNonEmptyString(direction);
-
-        // Меняем значения кубика
-        cube.field.next(direction);
-        cube.direction.next(reverseDirection(direction));
-
-        // Получаем линию, в которую вставим кубик
-        const line = getCubeAddressInSideFieldInOrderFromMain({
-            x: cube.x,
-            y: cube.y,
-            field: direction,
-        });
-
-        // Присваиваем значения координат в поле кубику
-        cube.x = line[line.length - 1].x;
-        cube.y = line[line.length - 1].y;
-
-        // Получаем удаляемый (дальний от mainField в линии) кубик
-        const removedCube = this._getSideCube(line[0]);
-
-        // Сдвигаем линию на одну клетку от mainField
-        for (let key = 0; key < line.length - 1; key++) {
-            this._setSideCube(line[key], this._getSideCube(line[key + 1]));
-        }
-
-        // Устанавливаем значение первой клетки
-        this._setSideCube(line[line.length - 1], cube);
-
-        /**
-         * Заносим удаляемый кубик в массив удаляемых, а не
-         * удаляем его сразу же... дело тут в том, что при вхождении в боковое поле
-         * большого количества кубиков, при практически полной замене боковой линии,
-         * ссылки могут удаляться на cubesWidth - 1 кубиков в этой линии, соответственно
-         * html-элементы таких кубиков будут удалены еще до того, как начнется
-         * какая-либо анимация, поэтому заносим удаляемые кубики в массив, а по мере
-         * анимации вставки кубика в боковое поле, будем удалять и сами вьюхи
-         */
-        this._app.moveMap!.beyondTheSide!.push(removedCube);
-    }
-
     public _mergeMoveMap({
         movingCubes,
         startCubes,
@@ -246,16 +202,42 @@ export class Cubes {
             }
         });
 
-        // убираем в боковые поля кубики, которые ушли туда во время хода
+        // Убираем в боковые поля кубики, которые ушли туда во время хода
         toSideActions.forEach((movingCube) => {
             if (this.mainCubes.has(movingCube.cube)) {
                 this.mainCubes.delete(movingCube.cube);
             } else {
-                // cube from side to side
+                // Кубик из боковой панели в боковую панель
+                // (что-то взрывается и кубик, с которого стартовали, пролетает насквозь)
             }
 
-            // пушим кубик в коллекцию боковой линии
-            this._pushInLine(movingCube.cube);
+            const cube = movingCube.cube;
+            const direction = cube.direction.value();
+
+            assertNonEmptyString(direction);
+
+            // Меняем значения кубика
+            cube.field.next(direction);
+            cube.direction.next(reverseDirection(direction));
+
+            // Получаем линию, в которую вставим кубик
+            const line = getCubeAddressInSideFieldInOrderFromMain({
+                x: cube.x,
+                y: cube.y,
+                field: direction,
+            });
+
+            // Присваиваем значения координат в поле кубику
+            cube.x = line[line.length - 1].x;
+            cube.y = line[line.length - 1].y;
+
+            // Сдвигаем линию на одну клетку от mainField
+            for (let key = 0; key < line.length - 1; key++) {
+                this._setSideCube(line[key], this._getSideCube(line[key + 1]));
+            }
+
+            // Устанавливаем значение первой клетки
+            this._setSideCube(line[line.length - 1], cube);
         });
     }
 

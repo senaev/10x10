@@ -72,24 +72,28 @@ export function stepsToAnimations(steps: ActionStep[]): {
 
     // итоговый массив, в котором продолжительность анимаций
     // и задержки выстроены, как надо
-    const nullToDelayActions = [];
+    const nullToDelayActions: CubeAnimation[] = [];
     let delay = 0;
-    for (let key1 = 0; key1 < actions.length; key1++) {
-        const action = actions[key1] as {
-        // MoveAction (st, sb, sl, sr) к этому моменту удалены,
-        // поскольку ни одна анимация не заканчивается просто движением,
-        // все они преобразуются либо в 'toSide', либо в 'slBump', либо во что-то еще
-            action: CubeAnimationName | null;
-            duration: PositiveInteger;
-            delay?: number;
-        };
-        // выставляем задержку от начала хода
-        action.delay = delay;
-        // добавляем к задержке следующего действия текущую продолжительность
-        delay += action.duration;
-        if (action.action !== null) {
-            nullToDelayActions.push(action);
+    for (let key = 0; key < actions.length; key++) {
+        const {
+            action,
+            duration,
+        } = actions[key];
+
+        if (action === 'sb' || action === 'sl' || action === 'sr' || action === 'st') {
+            throw new Error('one move action should be removed during animation creation');
         }
+
+        if (action !== null) {
+            nullToDelayActions.push({
+                action,
+                duration,
+                delay,
+            });
+        }
+
+        // добавляем к задержке следующего действия текущую продолжительность
+        delay += duration;
     }
 
     return {

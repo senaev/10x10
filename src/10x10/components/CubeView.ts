@@ -9,9 +9,7 @@ import { forceRepaint } from '../../utils/forceRepaint';
 import { animateCubeMovement } from '../animations/animateCubeMovement';
 import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWithBump';
 import { animateElementPivotWithChange, PivotAnimationType } from '../animations/animateElementPivotWithChange';
-import { appearCubeFromZeroSizePoint } from '../animations/appearCubeFromZeroSizePoint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
-import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
 import {
     Direction, DIRECTION_TO_ARROW_ROTATE, DIRECTIONS,
@@ -20,11 +18,9 @@ import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAnimation } from '../js/MoveMap';
 import { TenOnTen } from '../js/TenOnTen';
-import { animateMovingCubesFromMainFieldToSide } from '../utils/animateMovingCubesFromMainFieldToSide';
 import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
-import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 
 export type CubeAnimations = {
     srBump: {};
@@ -33,7 +29,6 @@ export type CubeAnimations = {
     stBump: {};
     toSide: {};
     nearer: {};
-    appearanceInSide: {};
     disappearanceInSide: {};
     further: {};
     boom: {};
@@ -268,13 +263,6 @@ export class CubeView {
 
             const delayDuration = ANIMATION_TIME * (dur - 1);
             await promiseTimeout(delayDuration);
-
-            animateMovingCubesFromMainFieldToSide({
-                cube: this,
-                toSideActions: this.app.moveMap!.toSideActions,
-                beyondTheSide: this.app.moveMap!.beyondTheSide,
-                cubesMask: this.app.cubes.sideCubes,
-            });
         };
 
         const nearer = async () => {
@@ -290,40 +278,6 @@ export class CubeView {
                 element: this.element,
                 isVertical: field === 'top' || field === 'bottom',
                 distance: (field === 'top' || field === 'left') ? -1 : 1,
-            });
-        };
-
-        const appearanceInSide = async () => {
-            const pos = {
-                x: this.x,
-                y: this.y,
-            };
-            switch (this.field.value()) {
-            case 'top':
-                pos.y = BOARD_SIZE - 3;
-                break;
-            case 'right':
-                pos.x = 2;
-                break;
-            case 'bottom':
-                pos.y = 2;
-                break;
-            case 'left':
-                pos.x = BOARD_SIZE - 3;
-                break;
-            }
-
-            setCubeViewPositionOnTheField(this, {
-                x: pos.x,
-                y: pos.y,
-                field: this.field.value(),
-            });
-
-            await promiseTimeout(steps * ANIMATION_TIME);
-
-            this.element.classList.remove('cubeHidden');
-            await appearCubeFromZeroSizePoint({
-                element: this.element,
             });
         };
 
@@ -414,10 +368,6 @@ export class CubeView {
             // Передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':
             nearer();
-            break;
-            // Кубик появляется третьим в боковом поле
-        case 'appearanceInSide':
-            appearanceInSide();
             break;
             // Третий кубик в боковой линии пропадает
         case 'disappearanceInSide':

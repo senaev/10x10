@@ -158,13 +158,7 @@ export class CubeView {
             visualCubeElement.style.backgroundColor = CUBE_COLORS[color];
         });
 
-        if (this.field.value() === 'main' && this.direction.value() !== null) {
-            this.element.classList.add(`d${this.direction.value()}`);
-        }
-
         this.element.classList.add('cube');
-        // this.element.classList.add(this.color);
-        this.element.classList.add(`f${this.field.value()}`);
 
         this.element.appendChild(visualCubeElement);
 
@@ -275,11 +269,6 @@ export class CubeView {
             const delayDuration = ANIMATION_TIME * (dur - 1);
             await promiseTimeout(delayDuration);
 
-            const dir = reverseDirection(this.field.value());
-            this.element.classList.remove(`d${this.field.value()}`);
-            this.element.classList.remove(`f${dir}`);
-            this.element.classList.add(`f${this.field.value()}`);
-
             animateMovingCubesFromMainFieldToSide({
                 cube: this,
                 toSideActions: this.app.moveMap!.toSideActions,
@@ -292,7 +281,7 @@ export class CubeView {
             await animateCubeMovement({
                 element: this.element,
                 isVertical: field === 'top' || field === 'bottom',
-                distance: (field === 'top' || field === 'left') ? 1 : -1,
+                distance: (field === 'top' || field === 'left') ? steps : -steps,
             });
         };
 

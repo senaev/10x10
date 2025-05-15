@@ -23,7 +23,7 @@ body {
 .cubesContainer {
     position: absolute;
 
-    overflow: hidden;
+    /* overflow: hidden; */
 
     width: 16em;
     height: 16em;
@@ -152,9 +152,12 @@ body {
 
 .visualCube {
     position: absolute;
+
     height: 0.95em;
     width: 0.95em;
     border-radius: 0.3em;
+
+    pointer-events: none;
 
     display: flex;
     justify-content: center;

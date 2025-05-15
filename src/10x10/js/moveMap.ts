@@ -102,6 +102,13 @@ export class MoveMap {
 
             const { animations, toSideTime } = stepsToAnimations(steps);
 
+            // if (moving.cube.element.logStepsAndAnimations) {
+            //     console.log({
+            //         steps,
+            //         animations,
+            //     });
+            // }
+
             if (isNumber(toSideTime)) {
                 toSideActions.push({
                     toSideTime,
@@ -137,11 +144,6 @@ export class MoveMap {
         beyondTheSide: CubeView[];
     }): Promise<void> {
         animateCubesFromSideToMainField(startCubes, cubesMask);
-
-        // добавляем постоянную стрелку к html-элементу кубика, с которого начинается анимация
-        for (const key in startCubes) {
-            startCubes[key].element.classList.add(`d${startCubes[key].direction.value()}`);
-        }
 
         // перебираем карту анимации и передаем каждому кубику объект действия,
         // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,

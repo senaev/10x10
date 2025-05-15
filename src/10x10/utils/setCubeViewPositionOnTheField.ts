@@ -12,8 +12,8 @@ export function setCubeViewPositionOnTheField(cubeView: CubeView, {
 }: CubeAddress) {
 
     const left = x + FIELD_OFFSETS[field].x;
-    cubeView.element.style.left = `${left + 3.5}em`;
+    cubeView.element.style.left = `${left + 3}em`;
 
     const top = y + FIELD_OFFSETS[field].y;
-    cubeView.element.style.top = `${top + 3.5}em`;
+    cubeView.element.style.top = `${top + 3}em`;
 }

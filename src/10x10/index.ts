@@ -15,7 +15,7 @@ import {
 
 hintWebpackBuildTime();
 
-const container = document.getElementById('app');
+const container = document.getElementById('app-container');
 
 if (!container) {
     throw new Error('Container not found');

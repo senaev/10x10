@@ -75,8 +75,9 @@ export type TenOnTenState = {
 };
 
 export class TenOnTen {
-    public readonly container: HTMLElement;
-    public readonly levelInfoPanel: Element;
+    public readonly tenOnTenContainer: HTMLElement;
+    public readonly levelInfoPanel: HTMLDivElement;
+    public readonly cubesContainer: HTMLDivElement;
 
     public level: number;
     public readonly cubes: Cubes;
@@ -117,12 +118,20 @@ export class TenOnTen {
         initialState?: TenOnTenState;
     }) {
 
-        this.container = container;
         // this.container.tabIndex = 0;
 
         const document = container.ownerDocument;
         const window = document.defaultView!;
         const body = document.body;
+
+        this.tenOnTenContainer = document.createElement('div');
+        this.tenOnTenContainer.classList.add('tenOnTenContainer');
+        container.appendChild(this.tenOnTenContainer);
+
+        this.cubesContainer = document.createElement('div');
+        this.cubesContainer.classList.add('cubesContainer');
+        this.tenOnTenContainer.appendChild(this.cubesContainer);
+
         function getBodySizeValue(): PixelSize {
             return {
                 width: body.clientWidth,
@@ -136,9 +145,9 @@ export class TenOnTen {
             const MAX_CONTAINER_SIZE = 640;
             const containerSize = Math.min(bodyMinSize, MAX_CONTAINER_SIZE);
 
-            this.container.style.fontSize = `${containerSize / APP_WIDTH_IN_CUBES}px`;
-            this.container.style.width = `${containerSize}px`;
-            this.container.style.height = `${containerSize}px`;
+            this.tenOnTenContainer.style.fontSize = `${containerSize / APP_WIDTH_IN_CUBES}px`;
+            this.tenOnTenContainer.style.width = `${containerSize}px`;
+            this.tenOnTenContainer.style.height = `${containerSize}px`;
         };
 
         this.bodySizeValue = new Signal<PixelSize>(getBodySizeValue(), deepEqual);
@@ -184,13 +193,11 @@ export class TenOnTen {
             backgroundCube.classList.add('backgroundCube');
             background.appendChild(backgroundCube);
         }
-
-        this.container.classList.add('tenOnTenContainer');
-        this.container.appendChild(background);
+        this.cubesContainer.appendChild(background);
 
         const levelInfoPanel = document.createElement('div');
         levelInfoPanel.classList.add('levelInfoPanel');
-        this.container.appendChild(levelInfoPanel);
+        this.tenOnTenContainer.appendChild(levelInfoPanel);
         this.levelInfoPanel = levelInfoPanel;
 
         const levelElement = document.createElement('div');
@@ -206,7 +213,7 @@ export class TenOnTen {
 
         const actionButtons = document.createElement('div');
         actionButtons.classList.add('actionButtons');
-        this.container.appendChild(actionButtons);
+        this.tenOnTenContainer.appendChild(actionButtons);
 
         this.undoButton = new UndoButton({
             onClick: this.undo,
@@ -230,7 +237,7 @@ export class TenOnTen {
 
         const mainMenuPanel = document.createElement('div');
         mainMenuPanel.classList.add('mainMenuPanel');
-        this.container.appendChild(mainMenuPanel);
+        this.tenOnTenContainer.appendChild(mainMenuPanel);
 
         const mainMenuElement = document.createElement('div');
         mainMenuElement.style.display = 'none';
@@ -263,7 +270,7 @@ export class TenOnTen {
             });
             mainMenuItemsElement.appendChild(mainMenuItemElement);
         });
-        this.container.appendChild(mainMenuElement);
+        this.tenOnTenContainer.appendChild(mainMenuElement);
 
         new MenuButton({
             onClick: () => {
@@ -1001,7 +1008,7 @@ export class TenOnTen {
         const cube = new CubeView({
             ...params,
             app: this,
-            container: this.container,
+            container: this.cubesContainer,
             onClick: this.handleCubeClick,
             onHover: this.handleHover,
         });

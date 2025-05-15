@@ -157,13 +157,6 @@ export class CubeView {
             visualCubeElement.style.backgroundColor = CUBE_COLORS[color];
         });
 
-        // Проверка на то, что данный кубик в боковом поле дальше третьего и не должен быть отображен
-        if (this.field.value() !== 'main') {
-            if (!this._inFieldIsVisible()) {
-                this.element.classList.add('cubeHidden');
-            }
-        }
-
         if (this.field.value() === 'main' && this.direction.value() !== null) {
             this.element.classList.add(`d${this.direction.value()}`);
         }
@@ -468,21 +461,6 @@ export class CubeView {
         }
     }
 
-    // Проверка, показывать кубик или нет в поле
-    public _inFieldIsVisible() {
-        let pos;
-        if (this.field.value() === 'main') {
-            return true;
-        }
-        if (this.field.value() === 'top' || this.field.value() === 'bottom') {
-            pos = this['y'];
-            return this.field.value() === 'top' ? pos > 6 : pos < 3;
-        } else {
-            pos = this['x'];
-            return this.field.value() === 'left' ? pos > 6 : pos < 3;
-        }
-    }
-
     // Меняем параметры кубика, при этом его анимируем
     public change(o: { color?: CubeColor; direction?: Direction }) {
         const changeParams = () => {
@@ -508,35 +486,31 @@ export class CubeView {
             }
         };
 
-        if (this._inFieldIsVisible()) {
-            let prop: keyof Transition;
-            // Для красотенюшки задаем разную анимацию для разных полей
-            if (this.field.value() === 'main') {
-                prop = 'rotate3d';
-            } else if (this.field.value() === 'top' || this.field.value() === 'bottom') {
-                prop = 'rotateX';
-            } else {
-                prop = 'rotateY';
-            }
-
-            // анимация скрытия/открытия
-            const transition1: Transition = { duration: ANIMATION_TIME * 2 };
-            const transition2: Transition = { duration: ANIMATION_TIME * 2 };
-            if (this.field.value() === 'main') {
-                transition1[prop] = '1,1,0,90deg';
-                transition2[prop] = '1,1,0,0deg';
-            } else {
-                transition1[prop] = String(90);
-                transition2[prop] = String(0);
-            }
-            // сама анимация с изменением состояния по ходу
-            $(this.element)
-                .transition(transition1, function () {
-                    changeParams();
-                })
-                .transition(transition2);
+        let prop: keyof Transition;
+        // Для красотенюшки задаем разную анимацию для разных полей
+        if (this.field.value() === 'main') {
+            prop = 'rotate3d';
+        } else if (this.field.value() === 'top' || this.field.value() === 'bottom') {
+            prop = 'rotateX';
         } else {
-            changeParams();
+            prop = 'rotateY';
         }
+
+        // анимация скрытия/открытия
+        const transition1: Transition = { duration: ANIMATION_TIME * 2 };
+        const transition2: Transition = { duration: ANIMATION_TIME * 2 };
+        if (this.field.value() === 'main') {
+            transition1[prop] = '1,1,0,90deg';
+            transition2[prop] = '1,1,0,0deg';
+        } else {
+            transition1[prop] = String(90);
+            transition2[prop] = String(0);
+        }
+        // сама анимация с изменением состояния по ходу
+        $(this.element)
+            .transition(transition1, function () {
+                changeParams();
+            })
+            .transition(transition2);
     }
 }

@@ -14,6 +14,10 @@ export async function animateCubeMovementWithBump ({
     isVertical: boolean;
     distance: PositiveInteger;
 }) {
+    if (element.xxx) {
+        console.log('animateCubeMovementWithBump start');
+    }
+
     await animateCubeMovement({
         isVertical,
         element,
@@ -25,4 +29,8 @@ export async function animateCubeMovementWithBump ({
         element,
         duration: ANIMATION_TIME,
     });
+
+    if (element.xxx) {
+        console.log('animateCubeMovementWithBump end');
+    }
 };

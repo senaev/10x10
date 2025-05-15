@@ -2,6 +2,7 @@ import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
+import { CubeAnimationName } from '../components/CubeView';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
 import {
@@ -31,16 +32,33 @@ export async function animateMove({
         sideCubesMask,
     });
 
-    // перебираем карту анимации и передаем каждому кубику объект действия,
-    // состоящий из переменных: само действие, продолжительность, задержка перед выполнением,
-    // далее кубик запускает таймер до выполнения и выполняет нужную анимацию
     for (const [
         cube,
         animations,
     ] of animationsScript.entries()) {
-        for (const animation of animations) {
-            cube.addAnimate(animation);
-        }
+        (async () => {
+            if (cube.element.xxx) {
+                console.log('animateMove', animations);
+            }
+
+            let time = 0;
+            for (const {
+                action,
+                duration,
+                delay,
+            } of animations) {
+                const stepsToAction = delay - time;
+
+                await promiseTimeout(stepsToAction * ANIMATION_TIME);
+
+                await cube.animate({
+                    animation: action as CubeAnimationName,
+                    steps: duration,
+                });
+
+                time += (delay + duration);
+            }
+        })();
     }
 
     await promiseTimeout(animationLength * ANIMATION_TIME - 1);

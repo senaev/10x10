@@ -1,8 +1,9 @@
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
-import { collectIntegerSequences } from 'senaev-utils/src/utils/Number/collectIntegerSequences/collectIntegerSequences';
+import { mapSetIfNotExists } from 'senaev-utils/src/utils/Map/mapSetIfNotExists/mapSetIfNotExists';
 import { isNumber } from 'senaev-utils/src/utils/Number/Number';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
@@ -139,7 +140,10 @@ export class MoveMap {
             return a.toSideParams.time - b.toSideParams.time;
         });
 
-        const linesShifts: Record<SideCubesLineIndicator, UnsignedInteger[]> = {};
+        const linesShifts: Record<SideCubesLineIndicator, {
+            time: UnsignedInteger;
+            cube: CubeView;
+        }[]> = {};
         toSideActions.forEach(({
             movingCube,
             toSideParams: {
@@ -153,7 +157,10 @@ export class MoveMap {
                 linesShifts[sideCubesLineIndicator] = [];
             }
 
-            linesShifts[sideCubesLineIndicator].push(time);
+            linesShifts[sideCubesLineIndicator].push({
+                time,
+                cube: movingCube.cube,
+            });
         });
 
         getObjectEntries(linesShifts).forEach(([
@@ -162,18 +169,79 @@ export class MoveMap {
         ]) => {
             const sideCubeAddress = parseSideCubesLineIndicator(sideCubesLineIndicator);
 
-            const sequences = collectIntegerSequences(shifts);
+            type IntegerSequence = {
+                start: UnsignedInteger;
+                length: PositiveInteger;
+                cubes: CubeView[];
+            };
+
+            const sequences: IntegerSequence[] = [
+                {
+                    start: shifts[0].time,
+                    length: 1,
+                    cubes: [shifts[0].cube],
+                },
+            ];
+
+            for (let i = 1; i < shifts.length; i += 1) {
+                const lastSequence = sequences.at(-1)!;
+
+                if (lastSequence.start + lastSequence.length === shifts[i].time) {
+                    lastSequence.length += 1;
+                    lastSequence.cubes.push(shifts[i].cube);
+                } else {
+                    sequences.push({
+                        start: shifts[i].time,
+                        length: 1,
+                        cubes: [shifts[i].cube],
+                    });
+                }
+            }
 
             const affectedCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(sideCubeAddress);
             const affectedCubes = affectedCubeAddresses.map((address) => getSideCubeViewByAddress(params.app.cubes.sideCubesMask, address));
             sequences.forEach(({
                 start,
                 length,
-            }) => {
+                cubes,
+            }, sequenceIndex) => {
                 affectedCubes.forEach((cube) => {
-                    //
+                    const animations = mapSetIfNotExists(this.animationsScript, cube, []);
+
+                    animations.push({
+                        action: 'further',
+                        duration: length,
+                        delay: start,
+                    });
+                });
+
+                cubes.forEach((cube, i) => {
+                    const animations = this.animationsScript.get(cube);
+
+                    assertObject(animations);
+
+                    const lastAnimation = animations.at(-1);
+
+                    assertObject(lastAnimation);
+
+                    if (sequenceIndex === 0) {
+                        if (lastAnimation.action !== 'toSide') {
+                            throw new Error('last animation should be toSide');
+                        }
+
+                        const additionalDuration = cubes.length - i - 1;
+                        lastAnimation.duration += additionalDuration;
+                    } else {
+                        // throw new Error('delay is already set');
+                    }
                 });
             });
+        });
+
+        this.animationsScript.forEach((animations, cube) => {
+            if (cube.element.xxx) {
+                console.log(animations);
+            }
         });
 
         this.toSideActions = toSideActions;

@@ -1,11 +1,9 @@
 import $ from 'jquery';
-import { assertUnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 import { combineSignalsIntoNewOne } from 'senaev-utils/src/utils/Signal/combineSignalsIntoNewOne/combineSignalsIntoNewOne';
 import { subscribeSignalAndCallWithCurrentValue } from 'senaev-utils/src/utils/Signal/subscribeSignalAndCallWithCurrentValue/subscribeSignalAndCallWithCurrentValue';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
-import { forceRepaint } from '../../utils/forceRepaint';
 import { animateCubeMovement } from '../animations/animateCubeMovement';
 import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWithBump';
 import { animateElementPivotWithChange, PivotAnimationType } from '../animations/animateElementPivotWithChange';
@@ -18,7 +16,6 @@ import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAnimation } from '../js/MoveMap';
 import { TenOnTen } from '../js/TenOnTen';
-import { bezier } from '../utils/bezier';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
@@ -217,23 +214,17 @@ export class CubeView {
     }
 
     // добавляем объект анимации на обработку через время, полученное в атрибутах
-    public addAnimate({
+    public async addAnimate({
         action,
         delay,
         duration,
     }: CubeAnimation) {
-        assertUnsignedInteger(delay);
-        assertUnsignedInteger(duration);
+        await promiseTimeout(delay * ANIMATION_TIME);
 
-        setTimeout(
-            () => {
-                this.animate({
-                    animation: action as CubeAnimationName,
-                    steps: duration,
-                });
-            },
-            (delay ?? 0) * ANIMATION_TIME
-        );
+        this.animate({
+            animation: action as CubeAnimationName,
+            steps: duration,
+        });
     }
 
     // Добавляем объект анимации на обработку через время, полученное в атрибутах
@@ -243,7 +234,7 @@ export class CubeView {
 
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
-    public animate({ animation: action, steps }: CubeAnimateAction) {
+    public async animate({ animation: action, steps }: CubeAnimateAction): Promise<void> {
         const field = this.field.value();
 
         /*
@@ -252,21 +243,11 @@ export class CubeView {
         * одним перемещением по возможности
         */
         const slideToSide = async (prop: 'left' | 'top', sign: '+' | '-') => {
-            const dur = steps;
-
-            const slideDuration = ANIMATION_TIME * dur;
-            this.element.style.transition = `${prop} ${slideDuration}ms cubic-bezier(.${bezier(dur)}, 0,.${100 - bezier(dur)}, 1)`;
-            forceRepaint(this.element);
-
-            const currentPropValue = parseFloat(this.element.style[prop]);
-            const nextPropValue = sign === '+'
-                ? currentPropValue + dur
-                : currentPropValue - dur;
-
-            this.element.style[prop] = `${nextPropValue}em`;
-
-            const delayDuration = ANIMATION_TIME * (dur - 1);
-            await promiseTimeout(delayDuration);
+            await animateCubeMovement({
+                element: this.element,
+                isVertical: prop === 'top',
+                distance: sign === '+' ? steps : -steps,
+            });
         };
 
         const nearer = async () => {
@@ -285,7 +266,7 @@ export class CubeView {
             });
         };
 
-        const boom = () => {
+        const boom = async () => {
             // console.log("boom:",cube.color, cube.x, cube.y);
             $(this.element).transition(
                 {
@@ -298,12 +279,14 @@ export class CubeView {
                     this.removeElementFromDOM();
                 }
             );
+
+            await promiseTimeout(ANIMATION_TIME);
         };
 
         switch (action) {
         // Движение вправо со столкновением
         case 'srBump':
-            animateCubeMovementWithBump({
+            await animateCubeMovementWithBump({
                 element: this.element,
                 isVertical: false,
                 distance: steps - 1,
@@ -311,7 +294,7 @@ export class CubeView {
             break;
             // Движение вниз со столкновением
         case 'sbBump':
-            animateCubeMovementWithBump({
+            await animateCubeMovementWithBump({
                 element: this.element,
                 isVertical: true,
                 distance: steps - 1,
@@ -319,7 +302,7 @@ export class CubeView {
             break;
             // Движение влево со столкновением
         case 'slBump':
-            animateCubeMovementWithBump({
+            await animateCubeMovementWithBump({
                 element: this.element,
                 isVertical: false,
                 distance: 1 - steps,
@@ -327,7 +310,7 @@ export class CubeView {
             break;
             // Движение вверх со столкновением
         case 'stBump':
-            animateCubeMovementWithBump({
+            await animateCubeMovementWithBump({
                 element: this.element,
                 isVertical: true,
                 distance: 1 - steps,
@@ -335,7 +318,7 @@ export class CubeView {
             break;
             // Движение с последующим вливанием в поле
         case 'toSide':
-            (() => {
+            await(async () => {
                 let sign: '+' | '-' = '-';
                 let prop: 'left' | 'top' = 'left';
                 if (field === 'top' || field === 'bottom') {
@@ -349,20 +332,20 @@ export class CubeView {
                     }
                 }
 
-                slideToSide(prop, sign);
+                await slideToSide(prop, sign);
             })();
             break;
             // Передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':
-            nearer();
+            await nearer();
             break;
             // Передвигаем кубик в боковой панели дальше от mainField
         case 'further':
-            further();
+            await further();
             break;
             // Передвигаем кубик в боковой панели дальше от mainField
         case 'boom':
-            boom();
+            await boom();
             break;
             // Уменьшаем и в конце удаляем
         case 'remove':
@@ -378,6 +361,7 @@ export class CubeView {
                         this.removeElementFromDOM();
                     }
                 );
+            await promiseTimeout(steps * ANIMATION_TIME);
             break;
         default:
             throw new Error(`Неизвестная анимация: ${action}`);

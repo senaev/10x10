@@ -648,10 +648,7 @@ export class TenOnTen {
                 });
                 break;
             case 'change':
-                cube!.change({
-                    color: changed[key].pCube!.color,
-                    direction: changed[key].pCube!.direction!,
-                });
+                cube!.changeColor(changed[key].pCube!.color);
                 break;
             default:
                 throw new Error(`Неизвестное значение в changed[key].action: ${changed[key].action}`);
@@ -947,9 +944,7 @@ export class TenOnTen {
         const newColor = CUBE_COLORS_ARRAY[colorsCount - 1];
         this.cubes._sideEach((cube) => {
             if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
-                cube.change({
-                    color: newColor,
-                });
+                cube.changeColor(newColor);
             }
         });
     }

@@ -8,6 +8,7 @@ import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/pro
 import { forceRepaint } from '../../utils/forceRepaint';
 import { animateCubeMovement } from '../animations/animateCubeMovement';
 import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWithBump';
+import { animateElementPivotWithChange, PivotAnimationType } from '../animations/animateElementPivotWithChange';
 import { appearCubeFromZeroSizePoint } from '../animations/appearCubeFromZeroSizePoint';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
@@ -462,55 +463,25 @@ export class CubeView {
     }
 
     // Меняем параметры кубика, при этом его анимируем
-    public change(o: { color?: CubeColor; direction?: Direction }) {
-        const changeParams = () => {
-            // Если меняем цвет и это не тот же цвет, что сейчас
-            if (o.color !== undefined && o.color !== this.color.value()) {
-                const prevColor = this.color.value();
-                this.color.next(o.color);
-                $(this.element).removeClass(prevColor).addClass(this.color.value());
-            }
-            // Если меняем направление и это не то же направление, что сейчас
-            if (o.direction !== undefined && o.direction !== this.direction.value()) {
-                const prevDirection = this.direction.value();
-                this.direction.next(o.direction);
+    public changeColor(color: CubeColor): void {
+        const field = this.field.value();
 
-                // Стили следует менять только у кубиков на главном поле, так как
-                // слили dtop, dright, dbotom, dleft присваивают кубикам стрелки
-                if (this.field.value() === 'main') {
-                    $(this.element).removeClass(`d${prevDirection}`);
-                    if (this.direction.value() !== null) {
-                        $(this.element).addClass(`d${this.direction.value()}`);
-                    }
-                }
-            }
-        };
+        const animationDuration = ANIMATION_TIME * 8;
 
-        let prop: keyof Transition;
-        // Для красотенюшки задаем разную анимацию для разных полей
-        if (this.field.value() === 'main') {
-            prop = 'rotate3d';
-        } else if (this.field.value() === 'top' || this.field.value() === 'bottom') {
-            prop = 'rotateX';
-        } else {
-            prop = 'rotateY';
-        }
+        const transformType: PivotAnimationType = field === 'main'
+            ? 'rotate3d'
+            : (field === 'top' || field === 'bottom')
+                ? 'rotateX'
+                : 'rotateY';
 
-        // анимация скрытия/открытия
-        const transition1: Transition = { duration: ANIMATION_TIME * 2 };
-        const transition2: Transition = { duration: ANIMATION_TIME * 2 };
-        if (this.field.value() === 'main') {
-            transition1[prop] = '1,1,0,90deg';
-            transition2[prop] = '1,1,0,0deg';
-        } else {
-            transition1[prop] = String(90);
-            transition2[prop] = String(0);
-        }
-        // сама анимация с изменением состояния по ходу
-        $(this.element)
-            .transition(transition1, function () {
-                changeParams();
-            })
-            .transition(transition2);
+        animateElementPivotWithChange({
+            element: this.element,
+            duration: animationDuration,
+            transformType,
+            onHalfAnimationCallback: () => {
+                this.color.next(color);
+            },
+        });
+
     }
 }

@@ -42,12 +42,12 @@ export function stepsToAnimations(steps: ActionStep[]): {
                     duration: 1,
                 });
             }
-        } else if (step.do === lastAction.action) {
+        } else if (step === lastAction.action) {
         // Если это такой же шаг, как и предыдущий, увеличиваем его продолжительность
             lastAction.duration++;
         } else {
         // Для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
-            if (step.do === 'toSide') {
+            if (step === 'toSide') {
                 lastAction.action = 'toSide';
                 lastAction.duration++;
 
@@ -55,7 +55,7 @@ export function stepsToAnimations(steps: ActionStep[]): {
                 toSideTime = time;
             } else {
                 actions.push({
-                    action: step.do,
+                    action: step,
                     duration: 1,
                 });
             }

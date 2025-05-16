@@ -47,7 +47,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
                 if (group.indexOf(mCube) === -1) {
                     mCube.steps.push(null);
                 } else {
-                    mCube.steps.push({ do: 'boom' });
+                    mCube.steps.push('boom');
                     // взорвавшимся м-кубикам присваиваем координаты -1 -1,
                     // чтобы в дальнейшей анимации они не участвовали
                     mCube.x = -1;

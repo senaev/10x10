@@ -30,7 +30,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
         cube.y = nextPos.y;
         cube.direction = null;
 
-        return { do: 'toSide' };
+        return 'toSide';
     }
 
     // если следующая клетка занята - кубик стоит на месте
@@ -45,5 +45,5 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
     cube.x = nextPos.x;
     cube.y = nextPos.y;
 
-    return { do: animation };
+    return animation;
 }

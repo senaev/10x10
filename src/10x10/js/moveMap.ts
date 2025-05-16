@@ -89,9 +89,7 @@ export class MoveMap {
 
                     assertNonEmptyString(direction);
 
-                    moving.steps.push({
-                        do: DIRECTION_TO_ANIMATION[direction],
-                    });
+                    moving.steps.push(DIRECTION_TO_ANIMATION[direction]);
                 } else {
                     moving.steps.push(null);
                 }

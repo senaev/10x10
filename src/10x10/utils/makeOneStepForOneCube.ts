@@ -1,7 +1,8 @@
 import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
-import { __findCubeInMainMask } from '../js/MainMask';
 import { ActionStep, MovingCube } from '../js/MovingCube';
+
+import { findCubeWithCoordinatesInArray } from './findCubeWithCoordinatesInArray';
 
 /**
  * Один шаг для кубика, возвращает информацию о шаге для анимации
@@ -33,7 +34,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
     }
 
     // если следующая клетка занята - кубик стоит на месте
-    const cubeInNextPosition = __findCubeInMainMask(movingCubes, nextPos);
+    const cubeInNextPosition = findCubeWithCoordinatesInArray(movingCubes, nextPos);
     if (cubeInNextPosition) {
         return null;
     }

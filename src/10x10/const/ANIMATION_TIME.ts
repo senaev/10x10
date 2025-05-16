@@ -1,4 +1,4 @@
 /**
  * Время одного шага анимации
  */
-export const ANIMATION_TIME = 200;
+export const ANIMATION_TIME = 100;

@@ -46,19 +46,10 @@ export function stepsToAnimations(steps: ActionStep[]): {
         // Если это такой же шаг, как и предыдущий, увеличиваем его продолжительность
             lastAction.duration++;
         } else {
-        // Для каждого действия - по-своему, в том числе в зависимости от предыдущих действий
-            if (step === 'toSide') {
-                lastAction.action = 'toSide';
-                lastAction.duration++;
-
-                // Для сортировки попаданий в боковое поле
-                toSideTime = time;
-            } else {
-                actions.push({
-                    action: step,
-                    duration: 1,
-                });
-            }
+            actions.push({
+                action: step,
+                duration: 1,
+            });
         }
     }
 
@@ -95,6 +86,8 @@ export function stepsToAnimations(steps: ActionStep[]): {
         // добавляем к задержке следующего действия текущую продолжительность
         delay += duration;
     }
+
+    console.log(nullToDelayActions);
 
     return {
         animations: nullToDelayActions,

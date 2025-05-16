@@ -28,9 +28,10 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
     if (nextPos.x < 0 || nextPos.x > 9 || nextPos.y < 0 || nextPos.y > 9) {
         cube.x = nextPos.x;
         cube.y = nextPos.y;
+        const action = DIRECTION_TO_ANIMATION[cube.direction];
         cube.direction = null;
 
-        return 'toSide';
+        return action;
     }
 
     // если следующая клетка занята - кубик стоит на месте

@@ -3,7 +3,7 @@ import { Direction } from '../const/DIRECTIONS';
 
 export type MoveAction = 'st' | 'sb' | 'sl' | 'sr';
 
-export type ActionStep = 'toSide' | 'boom' | MoveAction | null;
+export type ActionStep = 'boom' | MoveAction | null;
 
 /**
  * класс для удобной работы с м-кубиком

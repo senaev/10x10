@@ -43,15 +43,15 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
         // еще один шаг хода, при этом обновляем массив м-кубиков
         // сюда попадут все кубики, которые будут взорваны
         adjacentCubes.forEach((group) => {
-            movingCubes.forEach((mCube) => {
-                if (group.indexOf(mCube) === -1) {
-                    mCube.steps.push(null);
-                } else {
-                    mCube.steps.push('boom');
+            movingCubes.forEach((movingCube) => {
+                if (group.includes(movingCube)) {
+                    movingCube.steps.push('boom');
                     // взорвавшимся м-кубикам присваиваем координаты -1 -1,
                     // чтобы в дальнейшей анимации они не участвовали
-                    mCube.x = -1;
-                    mCube.y = -1;
+                    movingCube.x = -1;
+                    movingCube.y = -1;
+                } else {
+                    movingCube.steps.push(null);
                 }
             });
         });

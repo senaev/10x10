@@ -17,7 +17,6 @@ export class MovingCube {
     public color: string;
     public direction: Direction | null;
     public steps: ActionStep[];
-    public toSideTime: number | undefined;
 
     public cube: CubeView;
 

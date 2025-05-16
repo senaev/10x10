@@ -13,6 +13,7 @@ export function searchAdjacentCubes<T extends { x: number; y: number; color: str
         if (byColorPrev[mCube.color] === undefined) {
             byColorPrev[mCube.color] = [];
         }
+
         // добавляем в этот массив все кубики, которые есть на доске
         if (
             mCube.x > -1 && mCube.x < BOARD_SIZE && mCube.y > -1 && mCube.y < BOARD_SIZE

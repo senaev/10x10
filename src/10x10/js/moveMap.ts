@@ -106,25 +106,25 @@ export class MoveMap {
         for (const { original, moving } of cubesToMove) {
             const steps = moving.steps;
 
-            const { animations, toSideTime } = stepsToAnimations(steps);
+            const { animations } = stepsToAnimations(steps);
 
-            if (isNumber(toSideTime)) {
-                const initialDirection = original.direction.value();
+            // if (isNumber(toSideTime)) {
+            //     const initialDirection = original.direction.value();
 
-                assertNonEmptyString(initialDirection);
+            //     assertNonEmptyString(initialDirection);
 
-                toSideActions.push({
-                    toSideParams: {
-                        time: toSideTime,
-                        sideCubeAddress: getOppositeFieldCubeAddress({
-                            field: reverseDirection(initialDirection),
-                            x: original.x,
-                            y: original.y,
-                        }),
-                    },
-                    movingCube: moving,
-                });
-            }
+            //     toSideActions.push({
+            //         toSideParams: {
+            //             time: toSideTime,
+            //             sideCubeAddress: getOppositeFieldCubeAddress({
+            //                 field: reverseDirection(initialDirection),
+            //                 x: original.x,
+            //                 y: original.y,
+            //             }),
+            //         },
+            //         movingCube: moving,
+            //     });
+            // }
 
             this.animationsScript.set(original, animations);
         }

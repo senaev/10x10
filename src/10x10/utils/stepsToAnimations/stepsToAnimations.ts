@@ -7,9 +7,7 @@ import { ActionStep, MoveAction } from '../../js/MovingCube';
 
 export function stepsToAnimations(steps: ActionStep[]): {
     animations: CubeAnimation[];
-    toSideTime: number | undefined;
 } {
-    let toSideTime: number | undefined;
     // массив с действиями одного кубика
     const actions: {
         action: CubeAnimationName | MoveAction | null;
@@ -87,10 +85,7 @@ export function stepsToAnimations(steps: ActionStep[]): {
         delay += duration;
     }
 
-    console.log(nullToDelayActions);
-
     return {
         animations: nullToDelayActions,
-        toSideTime,
     };
 };

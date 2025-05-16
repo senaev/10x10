@@ -24,7 +24,6 @@ export type CubeAnimations = {
     sbBump: {};
     slBump: {};
     stBump: {};
-    toSide: {};
     nearer: {};
     further: {};
     boom: {};
@@ -237,19 +236,6 @@ export class CubeView {
     public async animate({ animation: action, steps }: CubeAnimateAction): Promise<void> {
         const field = this.field.value();
 
-        /*
-        * движение в боковую панель без разрывов анимации,
-        * чтобы сохранить максимальную плавность анимации, делать
-        * одним перемещением по возможности
-        */
-        const slideToSide = async (prop: 'left' | 'top', sign: '+' | '-') => {
-            await animateCubeMovement({
-                element: this.element,
-                isVertical: prop === 'top',
-                distance: sign === '+' ? steps : -steps,
-            });
-        };
-
         const nearer = async () => {
             await animateCubeMovement({
                 element: this.element,
@@ -315,25 +301,6 @@ export class CubeView {
                 isVertical: true,
                 distance: 1 - steps,
             });
-            break;
-            // Движение с последующим вливанием в поле
-        case 'toSide':
-            await(async () => {
-                let sign: '+' | '-' = '-';
-                let prop: 'left' | 'top' = 'left';
-                if (field === 'top' || field === 'bottom') {
-                    prop = 'top';
-                    if (field === 'bottom') {
-                        sign = '+';
-                    }
-                } else {
-                    if (field === 'right') {
-                        sign = '+';
-                    }
-                }
-
-                await slideToSide(prop, sign);
-            })();
             break;
             // Передвигаем кубик в боковом поле ближе к mainField
         case 'nearer':

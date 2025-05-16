@@ -866,7 +866,7 @@ export class TenOnTen {
             // цвета, которых нету в смежных
             const noAppearanceColors: CubeColor[] = [];
             for (let key = 0; key < colorsCount; key++) {
-                if (appearanceColors.indexOf(CUBE_COLORS_ARRAY[key]) === -1) {
+                if (!appearanceColors.includes(CUBE_COLORS_ARRAY[key])) {
                     noAppearanceColors.push(CUBE_COLORS_ARRAY[key]);
                 }
             }

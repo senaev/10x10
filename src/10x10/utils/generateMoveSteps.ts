@@ -1,6 +1,13 @@
+import { separateArray } from 'senaev-utils/src/utils/Array/separateArray/separateArray';
+import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
+import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
+
+import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { MovingCube } from '../js/MovingCube';
 
-import { makeOneStepForOneCube } from './makeOneStepForOneCube';
+import {
+    getCubeInPosition, getCubeNextPosition, isPositionOnMainField, makeOneStepForOneCube,
+} from './makeOneStepForOneCube';
 import { searchAdjacentCubes } from './searchAdjacentCubes';
 
 /**
@@ -15,13 +22,54 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
             // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
             let somethingHappened = false;
 
-            for (const movingCube of movingCubes) {
+            const movedToSide = [];
+
+            const [
+                cubesOnField,
+                cubesOutOfField,
+            ] = separateArray(movingCubes, isPositionOnMainField);
+
+            for (const movingCube of cubesOnField) {
                 const step = makeOneStepForOneCube(movingCube, movingCubes);
 
-                movingCube.steps.push(step);
+                if (isObject(step)) {
+                    movingCube.steps.push(DIRECTION_TO_ANIMATION[step.field]);
+                    movedToSide.push(movingCube);
+                } else {
+                    movingCube.steps.push(step);
+                }
 
                 if (step !== null) {
                     somethingHappened = true;
+                }
+            }
+
+            const movedOutOfField = new Set<MovingCube>();
+            movedToSide.forEach((movingCube) => {
+                while (true) {
+                    const direction = movingCube.direction;
+                    assertNonEmptyString(direction);
+
+                    const nextCubePosition = getCubeNextPosition(movingCube);
+
+                    const cubeInNextPosition = getCubeInPosition(cubesOutOfField, nextCubePosition);
+
+                    movingCube.x = nextCubePosition.x;
+                    movingCube.y = nextCubePosition.y;
+                    movingCube.steps.push(DIRECTION_TO_ANIMATION[direction]);
+                    movedOutOfField.add(movingCube);
+
+                    if (!cubeInNextPosition) {
+                        break;
+                    }
+
+                    movingCube = cubeInNextPosition;
+                }
+            });
+
+            for (const movingCube of cubesOutOfField) {
+                if (!movedOutOfField.has(movingCube)) {
+                    movingCube.steps.push(null);
                 }
             }
 

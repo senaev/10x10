@@ -37,9 +37,6 @@ export async function animateMove({
         animations,
     ] of animationsScript.entries()) {
         (async () => {
-            if (cube.element.xxx) {
-                console.log('animateMove', animations);
-            }
 
             let time = 0;
             for (const {

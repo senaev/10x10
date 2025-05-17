@@ -33,7 +33,6 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
                 const step = makeOneStepForOneCube(movingCube, movingCubes);
 
                 if (isObject(step)) {
-                    movingCube.steps.push(DIRECTION_TO_ANIMATION[step.field]);
                     movedToSide.push(movingCube);
                 } else {
                     movingCube.steps.push(step);

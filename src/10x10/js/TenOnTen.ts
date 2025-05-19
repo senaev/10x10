@@ -461,6 +461,7 @@ export class TenOnTen {
             sideCubesMask: this.cubes.sideCubesMask,
             animationsScript,
             animationLength,
+            cubes: this.cubes,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем

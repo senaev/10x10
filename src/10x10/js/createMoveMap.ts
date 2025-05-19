@@ -19,6 +19,7 @@ import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations'
 
 import { SideCubeAddress, SideCubesMask } from './CubesViews';
 import {
+    CubeAddressString,
     getCubeAddressString,
     MovingCube,
     MovingCubeStepAction,
@@ -50,7 +51,7 @@ export type ToSideAction = {
     movingCube: MovingCube;
 };
 
-export type AnimationScript = Map<CubeView, CubeAnimation[]>;
+export type AnimationScript = Map<CubeAddressString, CubeAnimation[]>;
 
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
@@ -125,7 +126,7 @@ export function createMoveMap (params: {
 
         const { animations } = stepsToAnimations(steps);
 
-        animationsScript.set(original, animations);
+        animationsScript.set(moving.initialAddress, animations);
     }
 
     const compoundAnimationSteps = startCubesCount + stepsCount;
@@ -153,7 +154,7 @@ export function createMoveMap (params: {
 
         for (const cubeAddress of cubeAddressesToMove) {
             const cube = getSideCubeViewByAddress(sideCubesMask, cubeAddress);
-            animationsScript.set(cube, animations);
+            animationsScript.set(getCubeAddressString(cubeAddress), animations);
         }
     }
 

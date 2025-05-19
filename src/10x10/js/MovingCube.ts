@@ -1,9 +1,7 @@
 import { CubeView } from '../components/CubeView';
 import { Direction } from '../const/DIRECTIONS';
 
-export type MoveAction = 'st' | 'sb' | 'sl' | 'sr';
-
-export type ActionStep = 'boom' | MoveAction | null;
+export type ActionStep = 'boom' | Direction | null;
 
 /**
  * класс для удобной работы с м-кубиком

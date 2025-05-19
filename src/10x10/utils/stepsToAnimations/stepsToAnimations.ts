@@ -1,15 +1,16 @@
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 
 import { CubeAnimationName } from '../../components/CubeView';
+import { Direction } from '../../const/DIRECTIONS';
 import { CubeAnimation } from '../../js/MoveMap';
-import { ActionStep, MoveAction } from '../../js/MovingCube';
+import { ActionStep } from '../../js/MovingCube';
 
 export function stepsToAnimations(steps: ActionStep[]): {
     animations: CubeAnimation[];
 } {
     // массив с действиями одного кубика
     const actions: {
-        action: CubeAnimationName | MoveAction | null;
+        action: CubeAnimationName | Direction | null;
         duration: PositiveInteger;
     }[] = [
         {

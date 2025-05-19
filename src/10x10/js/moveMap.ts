@@ -5,7 +5,6 @@ import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { CubeAnimationName, CubeView } from '../components/CubeView';
-import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
@@ -58,7 +57,6 @@ export type AnimationScript = Map<CubeView, CubeAnimation[]>;
  * для основного приложения.
  */
 export class MoveMap {
-    public readonly startCubes: CubeView[];
     public readonly toSideActions: ToSideAction[] = [];
     public readonly animationsScript: AnimationScript = new Map();
 
@@ -72,7 +70,6 @@ export class MoveMap {
         const mainFieldCubes = params.mainFieldCubes;
 
         const startCubes = params.startCubes;
-        this.startCubes = startCubes;
 
         this.cubesMove = prepareMovingCubes({
             startCubes,
@@ -89,7 +86,7 @@ export class MoveMap {
 
                     assertNonEmptyString(direction);
 
-                    moving.steps.push(DIRECTION_TO_ANIMATION[direction]);
+                    moving.steps.push(direction);
                 } else {
                     moving.steps.push(null);
                 }
@@ -137,7 +134,7 @@ export class MoveMap {
         ] of sideLinesMovementSteps.entries()) {
             const sideCubeLineId = parseSideCubesLineId(sideCubesLineId);
 
-            const action = DIRECTION_TO_ANIMATION[sideCubeLineId.field];
+            const action = sideCubeLineId.field;
             const actions: ActionStep[] = createArray(toSideTimes.at(-1)!, null);
             for (const stepId of toSideTimes) {
                 actions[stepId] = action;

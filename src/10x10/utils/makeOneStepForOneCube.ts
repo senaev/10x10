@@ -1,5 +1,4 @@
 import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
-import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { Direction } from '../const/DIRECTIONS';
 import { CubeCoordinates } from '../js/Cubes';
 import { ActionStep, MovingCube } from '../js/MovingCube';
@@ -66,7 +65,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
     }
 
     // если нет, идет обращение к коллекции кубиков, чтобы узнать, свободна ли следующая клетка
-    const animation = DIRECTION_TO_ANIMATION[direction];
+    const animation = direction;
 
     // если следующая клетка свободна, задаем значениям позиции кубика значения следующей клетки
     cube.x = nextPosition.x;

@@ -19,10 +19,10 @@ import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalI
 import { reverseDirection } from '../utils/reverseDirection';
 
 export type CubeAnimations = {
-    sr: {};
-    sb: {};
-    sl: {};
-    st: {};
+    right: {};
+    left: {};
+    top: {};
+    bottom: {};
     nearer: {};
     further: {};
     boom: {};
@@ -270,7 +270,7 @@ export class CubeView {
 
         switch (action) {
         // Движение вправо со столкновением
-        case 'sr':
+        case 'right':
             await animateCubeMovement({
                 element: this.element,
                 isVertical: false,
@@ -278,7 +278,7 @@ export class CubeView {
             });
             break;
             // Движение вниз со столкновением
-        case 'sb':
+        case 'bottom':
             await animateCubeMovement({
                 element: this.element,
                 isVertical: true,
@@ -286,7 +286,7 @@ export class CubeView {
             });
             break;
             // Движение влево со столкновением
-        case 'sl':
+        case 'left':
             await animateCubeMovement({
                 element: this.element,
                 isVertical: false,
@@ -294,7 +294,7 @@ export class CubeView {
             });
             break;
             // Движение вверх со столкновением
-        case 'st':
+        case 'top':
             await animateCubeMovement({
                 element: this.element,
                 isVertical: true,

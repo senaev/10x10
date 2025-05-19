@@ -3,7 +3,6 @@ import { mapGetOrSet } from 'senaev-utils/src/utils/Map/mapGetOrSet/mapGetOrSet'
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
-import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { MovingCube } from '../js/MovingCube';
 
 import { getOppositeFieldCubeAddress } from './getOppositeFieldCubeAddress/getOppositeFieldCubeAddress';
@@ -55,7 +54,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
 
                         tempMovingCube.x = nextCubePosition.x;
                         tempMovingCube.y = nextCubePosition.y;
-                        tempMovingCube.steps.push(DIRECTION_TO_ANIMATION[direction]);
+                        tempMovingCube.steps.push(direction);
                         movedOutOfMainField.add(tempMovingCube);
 
                         if (!cubeInNextPosition) {

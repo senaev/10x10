@@ -1,9 +1,9 @@
 import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
 
-import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { SideCubesMask } from '../js/CubesViews';
+import { CubeCoordinates, SideCubesMask } from '../js/CubesViews';
 import { getCubeAddressString, MovingCube } from '../js/MovingCube';
+import { MainFieldCubeStateValue } from '../js/TenOnTen';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
@@ -21,9 +21,9 @@ export function prepareMovingCubes({
 }: {
     startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
-    mainFieldCubes: CubeView[];
+    mainFieldCubes: (MainFieldCubeStateValue & CubeCoordinates)[];
 }): MovingCube[] {
-    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
+    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder - b.toMineOrder);
 
     // Основной массив со значениями
     // Сюда будут попадать м-кубики, участвующие в анимации
@@ -39,13 +39,13 @@ export function prepareMovingCubes({
             initialAddress: getCubeAddressString({
                 x: cube.x,
                 y: cube.y,
-                field: cube.field.value(),
+                field: 'main',
             }),
             toMineOrder,
             x: cube.x,
             y: cube.y,
-            color: cube.color.value(),
-            direction: cube.direction.value(),
+            color: cube.color,
+            direction: cube.direction,
             stepActions: [],
         };
 

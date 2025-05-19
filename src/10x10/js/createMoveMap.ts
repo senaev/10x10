@@ -73,7 +73,15 @@ export function createMoveMap (params: {
     const cubesToMove = prepareMovingCubes({
         startCubesParameters,
         sideCubesMask,
-        mainFieldCubes,
+        mainFieldCubes: mainFieldCubes.map((cube) => {
+            return {
+                color: cube.color.value(),
+                direction: cube.direction.value(),
+                toMineOrder: cube.toMineOrder!,
+                x: cube.x,
+                y: cube.y,
+            };
+        }),
     });
 
     const startCubeAddresses = getStartCubesByStartCubesParameters({

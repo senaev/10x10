@@ -25,7 +25,7 @@ export function animateCubesFromSideToMainField({
         x,
         y,
         field,
-    }));
+    })).reverse();
 
     for (let cubeIndexInLine = 0; cubeIndexInLine < (line.length - startCubesCount); cubeIndexInLine++) {
         const address = line[cubeIndexInLine];

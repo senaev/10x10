@@ -102,7 +102,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
     const sideCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(line);
 
     const cubes: CubeView[] = [];
-    for (let key = sideCubeAddresses.length - 1; key >= sideCubeAddresses.length - countOfCubesThatCanBeMoved; key--) {
+    for (let key = 0; key < countOfCubesThatCanBeMoved; key++) {
         const sideCubeAddress = sideCubeAddresses[key];
         const cube = getSideCubeViewByAddress(sideCubesMask, sideCubeAddress);
         cubes.push(cube);

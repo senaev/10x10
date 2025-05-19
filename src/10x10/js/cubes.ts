@@ -227,7 +227,7 @@ export class Cubes {
                 field: direction,
             });
             // Получаем линию, в которую вставим кубик
-            const line = getCubeAddressInSideFieldInOrderFromMain(lineId);
+            const line = getCubeAddressInSideFieldInOrderFromMain(lineId).reverse();
 
             // Присваиваем значения координат в поле кубику
             cube.x = line[line.length - 1].x;

@@ -149,7 +149,10 @@ export class MoveMap {
                 ? BOARD_SIZE - startCubesCount
                 : BOARD_SIZE;
 
-            const cubeAddressesToMove = getCubeAddressInSideFieldInOrderFromMain(sideCubesLineId).slice(0, cubesCountToAnimate);
+            const cubeAddressesToMove = getCubeAddressInSideFieldInOrderFromMain(sideCubesLineId)
+                .reverse()
+                .slice(0, cubesCountToAnimate);
+
             for (const cubeAddress of cubeAddressesToMove) {
                 const cube = getSideCubeViewByAddress(sideCubesMask, cubeAddress);
                 this.animationsScript.set(cube, animations);

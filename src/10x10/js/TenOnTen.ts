@@ -501,7 +501,7 @@ export class TenOnTen {
             x: startCubes[0].x,
             y: startCubes[0].y,
             field,
-        }));
+        })).reverse();
 
         // пробегаемся, меняем значения в коллекции
         for (let key = line.length - 1; key >= startCubes.length; key--) {

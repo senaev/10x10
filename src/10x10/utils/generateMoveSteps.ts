@@ -99,8 +99,8 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
 
         // Ищем, появились ли у нас в результате хода смежные кубики
         // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
-        const adjacentCubes = searchAdjacentCubes(movingCubes);
-        if (!adjacentCubes.length) {
+        const adjacentCubesGroups = searchAdjacentCubes(movingCubes);
+        if (!adjacentCubesGroups.length) {
             // заканчиваем ход
             return {
                 sideLinesMovementSteps,
@@ -110,10 +110,9 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
 
         // Если такие группы кубиков имеются, подрываем их и запускаем
         // еще один шаг хода, при этом обновляем массив м-кубиков
-        // сюда попадут все кубики, которые будут взорваны
-        adjacentCubes.forEach((group) => {
+        adjacentCubesGroups.forEach((adjacentCubesGroup) => {
             movingCubes.forEach((movingCube) => {
-                if (group.includes(movingCube)) {
+                if (adjacentCubesGroup.includes(movingCube)) {
                     movingCube.steps.push('boom');
                     // взорвавшимся м-кубикам присваиваем координаты -1 -1,
                     // чтобы в дальнейшей анимации они не участвовали

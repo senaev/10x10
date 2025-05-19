@@ -53,7 +53,7 @@ export async function animateMove({
                     steps: duration,
                 });
 
-                time += (delay + duration);
+                time += (stepsToAction + duration);
             }
         })();
     }

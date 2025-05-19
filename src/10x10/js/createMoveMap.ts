@@ -8,7 +8,6 @@ import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
-import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from '../utils/getStartCubesParameters';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
@@ -30,15 +29,6 @@ export type CubeAnimation = {
     action: CubeAnimationName | null;
     duration: PositiveInteger;
     delay: number;
-};
-
-export type CubeToMove = {
-    original: CubeView;
-    moving: MovingCube;
-};
-
-export type CubesMove = {
-    cubesToMove: CubeToMove[];
 };
 
 export type ToSideParams = {
@@ -67,7 +57,7 @@ export function createMoveMap (params: {
     app: TenOnTen;
 }): {
         animationsScript: AnimationScript;
-        cubesToMove: CubeToMove[];
+        cubesToMove: MovingCube[];
     } {
     const animationsScript: AnimationScript = new Map();
 
@@ -93,7 +83,7 @@ export function createMoveMap (params: {
 
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
     callTimes(startCubesCount, () => {
-        cubesToMove.forEach(({ moving }) => {
+        cubesToMove.forEach((moving) => {
             const isOneOfStartCubes = startCubeAddresses
                 .find((startCubeAddress) => {
                     if (!moving.direction) {
@@ -118,10 +108,10 @@ export function createMoveMap (params: {
     const {
         sideLinesMovementSteps,
         stepsCount,
-    } = generateMoveSteps(cubesToMove.map(({ moving }) => moving));
+    } = generateMoveSteps(cubesToMove);
 
     // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
-    for (const { original, moving } of cubesToMove) {
+    for (const moving of cubesToMove) {
         const steps = moving.stepActions;
 
         const { animations } = stepsToAnimations(steps);
@@ -153,8 +143,8 @@ export function createMoveMap (params: {
             .slice(0, cubesCountToAnimate);
 
         for (const cubeAddress of cubeAddressesToMove) {
-            const cube = getSideCubeViewByAddress(sideCubesMask, cubeAddress);
-            animationsScript.set(getCubeAddressString(cubeAddress), animations);
+            const cubeAddressString = getCubeAddressString(cubeAddress);
+            animationsScript.set(cubeAddressString, animations);
         }
     }
 

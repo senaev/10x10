@@ -452,7 +452,7 @@ export class TenOnTen {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        const animationLength = cubesToMove[0].moving.stepActions.length;
+        const animationLength = cubesToMove[0].stepActions.length;
 
         // пошаговый запуск анимации
         animateMove({
@@ -486,7 +486,7 @@ export class TenOnTen {
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes
         this.cubes._mergeMoveMap({
-            movingCubes: cubesToMove.map(({ moving }) => moving),
+            movingCubes: cubesToMove,
             startCubes,
             // toSideActions: toSideActions.map(({ movingCube }) => movingCube),
         });

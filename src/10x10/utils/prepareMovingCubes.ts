@@ -2,7 +2,6 @@ import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CubeToMove } from '../js/createMoveMap';
 import { SideCubesMask } from '../js/CubesViews';
 import { getCubeAddressString, MovingCube } from '../js/MovingCube';
 
@@ -23,12 +22,12 @@ export function prepareMovingCubes({
     startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
     mainFieldCubes: CubeView[];
-}): CubeToMove[] {
+}): MovingCube[] {
     const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
 
     // Основной массив со значениями
     // Сюда будут попадать м-кубики, участвующие в анимации
-    const movingCubesInMainField: CubeToMove[] = [];
+    const movingCubesInMainField: MovingCube[] = [];
 
     // создаем массив из всех кубиков, которые есть на доске
     mainFieldCubesSorted.forEach((cube) => {
@@ -50,10 +49,7 @@ export function prepareMovingCubes({
             stepActions: [],
         };
 
-        movingCubesInMainField.push({
-            moving: movingCube,
-            original: cube,
-        });
+        movingCubesInMainField.push(movingCube);
     });
 
     const startCubesAddresses = getStartCubesByStartCubesParameters({
@@ -65,7 +61,7 @@ export function prepareMovingCubes({
 
     // добавляем в маску кубик, с которого начинаем анимацию
     // кубики сразу добавляем на главное поле для расчетов движения
-    const startMovingCubes: CubeToMove[] = [];
+    const startMovingCubes: MovingCube[] = [];
     startCubeViews.forEach((cubeView, i) => {
         const initialAddress = {
             x: cubeView.x,
@@ -104,10 +100,7 @@ export function prepareMovingCubes({
             toMineOrder,
         };
 
-        startMovingCubes.push({
-            moving: movingCube,
-            original: cubeView,
-        });
+        startMovingCubes.push(movingCube);
     });
 
     return [

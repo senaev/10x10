@@ -1,3 +1,4 @@
+
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { SideCubeAddress } from '../js/Cubes';
 

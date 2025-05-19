@@ -45,17 +45,18 @@ export function prepareMovingCubes({
     startCubes.forEach((cube, i) => {
         cube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
+        const field = cube.field.value();
         let startMovingCubeX;
         let startMovingCubeY;
-        if (cube.field.value() === 'top' || cube.field.value() === 'bottom') {
+        if (field === 'top' || field === 'bottom') {
             startMovingCubeX = cube.x;
-            if (cube.field.value() === 'top') {
+            if (field === 'top') {
                 startMovingCubeY = startCubes.length - i - 1;
             } else {
                 startMovingCubeY = BOARD_SIZE - startCubes.length + i;
             }
         } else {
-            if (cube.field.value() === 'left') {
+            if (field === 'left') {
                 startMovingCubeX = startCubes.length - i - 1;
             } else {
                 startMovingCubeX = BOARD_SIZE - startCubes.length + i;

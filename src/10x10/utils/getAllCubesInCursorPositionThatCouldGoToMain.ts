@@ -1,3 +1,5 @@
+import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import {
@@ -6,9 +8,15 @@ import {
     SideCubesMask,
 } from '../js/Cubes';
 
+import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getCubeByCoordinates } from './getCubeByCoordinates';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
-import { isTheSameAddress } from './isTheSameAddress';
+import { createSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
+
+export type StartCubesParameters = {
+    line: SideCubesLineId;
+    count: UnsignedInteger;
+};
 
 /**
  * Находим все кубики от этого до ближнего к майн в линии относительно этого
@@ -72,6 +80,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
             break;
         }
     }
+
     // Если все нули в линии - возвращаем индикатор пустоты
     if (allNullInLine) {
         return 'empty';
@@ -88,17 +97,29 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
         y: 0,
     };
     address[statProp] = originCubeAddress[statProp];
+    address[dynamicProp] = originCubeAddress.field === 'top' || originCubeAddress.field === 'left' ? 9 : 0;
 
-    const arr: CubeView[] = [];
-    for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
-        address[dynamicProp] = cellsSide[key];
-        arr.push(getSideCubeViewByAddress(sideCubesMask, address)!);
+    const line: SideCubesLineId = createSideCubesLineId(address);
 
-        // Если доходим до кубика, над которым курсор - заканчиваем маневр
-        if (isTheSameAddress(originCubeAddress, address)) {
-            break;
-        }
+    const sideCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(address);
+
+    const cubes: CubeView[] = [];
+    for (let key = sideCubeAddresses.length - 1; key >= sideCubeAddresses.length - countOfCubesThatCanBeMoved; key--) {
+        const sideCubeAddress = sideCubeAddresses[key];
+        const cube = getSideCubeViewByAddress(sideCubesMask, sideCubeAddress);
+        cubes.push(cube);
     }
 
-    return arr;
+    return cubes;
+
+    // const arr: CubeView[] = [];
+    // for (let key = 0; key < 3 && key < countOfCubesThatCanBeMoved; key++) {
+    //     address[dynamicProp] = cellsSide[key];
+    //     arr.push(getSideCubeViewByAddress(sideCubesMask, address)!);
+
+    //     // Если доходим до кубика, над которым курсор - заканчиваем маневр
+    //     if (isTheSameAddress(originCubeAddress, address)) {
+    //         break;
+    //     }
+    // }
 }

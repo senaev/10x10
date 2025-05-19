@@ -5,6 +5,7 @@ import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { CubeAnimationName, CubeView } from '../components/CubeView';
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
@@ -71,6 +72,18 @@ export class MoveMap {
 
         const startCubes = params.startCubes;
 
+        const startCubesField = startCubes[0].field.value();
+        if (startCubesField === 'main') {
+            throw new Error('startCubesField should not be main');
+        }
+
+        const startCubesLineId = createSideCubesLineId({
+            x: startCubes[0].x,
+            y: startCubes[0].y,
+            field: startCubesField,
+        });
+        const startCubesCount = startCubes.length;
+
         this.cubesMove = prepareMovingCubes({
             startCubes,
             mainFieldCubes,
@@ -79,7 +92,7 @@ export class MoveMap {
         const { cubesToMove } = this.cubesMove;
 
         // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
-        callTimes(startCubes.length, () => {
+        callTimes(startCubesCount, () => {
             cubesToMove.forEach(({ isFromSide, moving }) => {
                 if (isFromSide) {
                     const { direction } = moving;
@@ -142,7 +155,13 @@ export class MoveMap {
 
             const { animations } = stepsToAnimations(actions);
 
-            console.log(animations);
+            const cubesCountToAnimate = sideCubesLineId === startCubesLineId
+                ? BOARD_SIZE - startCubesCount
+                : BOARD_SIZE;
+
+            console.log({
+                cubesCountToAnimate,
+            });
         }
 
         // Сортируем попавшие в боковое поле м-кубики по времени попадания

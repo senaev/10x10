@@ -2,7 +2,7 @@ import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 
 import { CubeAnimationName } from '../../components/CubeView';
 import { Direction } from '../../const/DIRECTIONS';
-import { CubeAnimation } from '../../js/MoveMap';
+import { CubeAnimation } from '../../js/createMoveMap';
 import { ActionStep } from '../../js/MovingCube';
 
 export function stepsToAnimations(steps: ActionStep[]): {

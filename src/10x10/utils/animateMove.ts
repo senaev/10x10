@@ -7,7 +7,7 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
 import {
     AnimationScript,
-} from '../js/MoveMap';
+} from '../js/createMoveMap';
 
 import { animateCubesFromSideToMainField } from './animateCubesFromSideToMainField';
 

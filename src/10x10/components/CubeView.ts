@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 import { combineSignalsIntoNewOne } from 'senaev-utils/src/utils/Signal/combineSignalsIntoNewOne/combineSignalsIntoNewOne';
+import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 import { subscribeSignalAndCallWithCurrentValue } from 'senaev-utils/src/utils/Signal/subscribeSignalAndCallWithCurrentValue/subscribeSignalAndCallWithCurrentValue';
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
@@ -13,7 +13,7 @@ import {
 } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
-import { CubeAnimation } from '../js/MoveMap';
+import { CubeAnimation } from '../js/createMoveMap';
 import { TenOnTen } from '../js/TenOnTen';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';

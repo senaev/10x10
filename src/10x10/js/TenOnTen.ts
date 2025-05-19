@@ -35,6 +35,7 @@ import { getStartCubesParameters } from '../utils/getStartCubesParameters';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 import { getSideCubeLineId } from '../utils/SideCubesLineIndicator';
 
+import { createMoveMap } from './createMoveMap';
 import {
     createSideCubesMaskWithNullValues,
     CubeAddress,
@@ -43,7 +44,6 @@ import {
     findCubeInSideCubes,
     SideCubeAddress,
 } from './Cubes';
-import { MoveMap } from './MoveMap';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;
@@ -85,7 +85,6 @@ export class TenOnTen {
     public level: number;
     public readonly cubes: Cubes;
 
-    public moveMap: MoveMap | undefined;
     public end: string | null;
 
     private readonly undoButton: UndoButton;
@@ -428,15 +427,18 @@ export class TenOnTen {
             mainFieldCubes.push(cube);
         });
 
-        const moveMap = new MoveMap({
+        const moveMap = createMoveMap({
             startCubesParameters,
             mainFieldCubes,
             app: this,
             sideCubesMask: this.cubes.sideCubesMask,
         });
-        this.moveMap = moveMap;
 
-        const { cubesMove } = moveMap;
+        const {
+            cubesToMove,
+            toSideActions,
+            animationsScript,
+        } = moveMap;
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
@@ -444,14 +446,14 @@ export class TenOnTen {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        const animationLength = cubesMove.cubesToMove[0].moving.steps.length;
+        const animationLength = cubesToMove[0].moving.steps.length;
 
         // пошаговый запуск анимации
         animateMove({
             firstCubeAddress: clickedSideCubeAddress,
             startCubesCount: startCubesParameters.count,
             sideCubesMask: this.cubes.sideCubesMask,
-            animationsScript: this.moveMap.animationsScript,
+            animationsScript,
             animationLength,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
@@ -477,9 +479,9 @@ export class TenOnTen {
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
         // в реальную коллекцию cubes
         this.cubes._mergeMoveMap({
-            movingCubes: cubesMove.cubesToMove.map(({ moving }) => moving),
+            movingCubes: cubesToMove.map(({ moving }) => moving),
             startCubes,
-            toSideActions: this.moveMap.toSideActions.map(({ movingCube }) => movingCube),
+            toSideActions: toSideActions.map(({ movingCube }) => movingCube),
         });
 
         this.checkStepEnd();

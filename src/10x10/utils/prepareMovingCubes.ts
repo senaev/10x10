@@ -2,8 +2,8 @@ import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertO
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { CubeToMove } from '../js/createMoveMap';
 import { SideCubesMask } from '../js/Cubes';
-import { CubesMove, CubeToMove } from '../js/MoveMap';
 import { MovingCube } from '../js/MovingCube';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
@@ -22,7 +22,7 @@ export function prepareMovingCubes({
     startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
     mainFieldCubes: CubeView[];
-}): CubesMove {
+}): CubeToMove[] {
     const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
 
     // Основной массив со значениями
@@ -92,10 +92,8 @@ export function prepareMovingCubes({
         });
     });
 
-    return {
-        cubesToMove: [
-            ...startMovingCubes,
-            ...movingCubesInMainField,
-        ],
-    };
+    return [
+        ...startMovingCubes,
+        ...movingCubesInMainField,
+    ];
 }

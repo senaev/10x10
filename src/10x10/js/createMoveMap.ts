@@ -4,7 +4,7 @@ import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
-import { CubeAnimationName, CubeView } from '../components/CubeView';
+import { CubeAnimationName } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
@@ -16,14 +16,16 @@ import {
 } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
-import { SideCubeAddress, SideCubesMask } from './CubesViews';
+import {
+    CubeCoordinates, SideCubeAddress, SideCubesMask,
+} from './CubesViews';
 import {
     CubeAddressString,
     getCubeAddressString,
     MovingCube,
     MovingCubeStepAction,
 } from './MovingCube';
-import { TenOnTen } from './TenOnTen';
+import { MainFieldCubeStateValue, TenOnTen } from './TenOnTen';
 
 export type CubeAnimation = {
     action: CubeAnimationName | null;
@@ -53,7 +55,7 @@ export type AnimationScript = Map<CubeAddressString, CubeAnimation[]>;
 export function createMoveMap (params: {
     startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
-    mainFieldCubes: CubeView[];
+    mainFieldCubes: (MainFieldCubeStateValue & CubeCoordinates)[];
     app: TenOnTen;
 }): {
         animationsScript: AnimationScript;
@@ -73,15 +75,7 @@ export function createMoveMap (params: {
     const cubesToMove = prepareMovingCubes({
         startCubesParameters,
         sideCubesMask,
-        mainFieldCubes: mainFieldCubes.map((cube) => {
-            return {
-                color: cube.color.value(),
-                direction: cube.direction.value(),
-                toMineOrder: cube.toMineOrder!,
-                x: cube.x,
-                y: cube.y,
-            };
-        }),
+        mainFieldCubes,
     });
 
     const startCubeAddresses = getStartCubesByStartCubesParameters({

@@ -443,7 +443,15 @@ export class TenOnTen {
             animationsScript,
         } = createMoveMap({
             startCubesParameters,
-            mainFieldCubes,
+            mainFieldCubes: mainFieldCubes.map((cube) => {
+                return {
+                    color: cube.color.value(),
+                    direction: cube.direction.value(),
+                    toMineOrder: cube.toMineOrder!,
+                    x: cube.x,
+                    y: cube.y,
+                };
+            }),
             app: this,
             sideCubesMask: this.cubes.sideCubesMask,
         });

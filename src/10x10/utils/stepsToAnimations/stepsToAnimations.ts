@@ -1,7 +1,6 @@
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 
 import { CubeAnimationName } from '../../components/CubeView';
-import { MOVE_ACTION_TO_MOVE_ANIMATION_MAP } from '../../const/MOVE_ACTION_TO_MOVE_ANIMATION_MAP';
 import { CubeAnimation } from '../../js/MoveMap';
 import { ActionStep, MoveAction } from '../../js/MovingCube';
 
@@ -29,17 +28,10 @@ export function stepsToAnimations(steps: ActionStep[]): {
         const lastAction = actions.at(-1)!;
 
         if (step === null) {
-            const moveAnimation = MOVE_ACTION_TO_MOVE_ANIMATION_MAP[lastAction.action! as keyof typeof MOVE_ACTION_TO_MOVE_ANIMATION_MAP];
-
-            if (moveAnimation) {
-                lastAction.action = moveAnimation;
-                lastAction.duration++;
-            } else {
-                actions.push({
-                    action: null,
-                    duration: 1,
-                });
-            }
+            actions.push({
+                action: null,
+                duration: 1,
+            });
         } else if (step === lastAction.action) {
         // Если это такой же шаг, как и предыдущий, увеличиваем его продолжительность
             lastAction.duration++;
@@ -69,9 +61,9 @@ export function stepsToAnimations(steps: ActionStep[]): {
             duration,
         } = actions[key];
 
-        if (action === 'sb' || action === 'sl' || action === 'sr' || action === 'st') {
-            throw new Error('one move action should be removed during animation creation');
-        }
+        // if (action === 'sb' || action === 'sl' || action === 'sr' || action === 'st') {
+        //     throw new Error('one move action should be removed during animation creation');
+        // }
 
         if (action !== null) {
             nullToDelayActions.push({

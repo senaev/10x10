@@ -1,5 +1,5 @@
+import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
-import { isNumber } from 'senaev-utils/src/utils/Number/Number';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
@@ -7,17 +7,17 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
-import { getOppositeFieldCubeAddress } from '../utils/getOppositeFieldCubeAddress/getOppositeFieldCubeAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
-import { reverseDirection } from '../utils/reverseDirection';
 import {
-    createSideCubesLineIndicator,
-    SideCubesLineIndicator,
+    createSideCubesLineId,
+    parseSideCubesLineId,
+    SideCubesLineId,
 } from '../utils/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
 import { SideCubeAddress } from './Cubes';
 import {
+    ActionStep,
     MovingCube,
 } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
@@ -96,13 +96,15 @@ export class MoveMap {
             });
         });
 
-        generateMoveSteps(cubesToMove.map(({ moving }) => moving));
+        const {
+            sideLinesMovementSteps,
+        } = generateMoveSteps(cubesToMove.map(({ moving }) => moving));
 
         // Массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
         // в последовательности,  в которой они туда попали
         const toSideActions: ToSideAction[] = [];
 
-        // Проходимся в цикле по всем кубикам
+        // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
         for (const { original, moving } of cubesToMove) {
             const steps = moving.steps;
 
@@ -129,12 +131,29 @@ export class MoveMap {
             this.animationsScript.set(original, animations);
         }
 
+        for (const [
+            sideCubesLineId,
+            toSideTimes,
+        ] of sideLinesMovementSteps.entries()) {
+            const sideCubeLineId = parseSideCubesLineId(sideCubesLineId);
+
+            const action = DIRECTION_TO_ANIMATION[sideCubeLineId.field];
+            const actions: ActionStep[] = createArray(toSideTimes.at(-1)!, null);
+            for (const stepId of toSideTimes) {
+                actions[stepId] = action;
+            }
+
+            const { animations } = stepsToAnimations(actions);
+
+            console.log(animations);
+        }
+
         // Сортируем попавшие в боковое поле м-кубики по времени попадания
         toSideActions.sort(function (a, b) {
             return a.toSideParams.time - b.toSideParams.time;
         });
 
-        const linesShifts: Record<SideCubesLineIndicator, {
+        const linesShifts: Record<SideCubesLineId, {
             time: UnsignedInteger;
             cube: CubeView;
         }[]> = {};
@@ -145,7 +164,7 @@ export class MoveMap {
                 time,
             },
         }) => {
-            const sideCubesLineIndicator = createSideCubesLineIndicator(sideCubeAddress);
+            const sideCubesLineIndicator = createSideCubesLineId(sideCubeAddress);
 
             if (linesShifts[sideCubesLineIndicator] === undefined) {
                 linesShifts[sideCubesLineIndicator] = [];

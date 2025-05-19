@@ -5,7 +5,6 @@ import { subscribeSignalAndCallWithCurrentValue } from 'senaev-utils/src/utils/S
 import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { animateCubeMovement } from '../animations/animateCubeMovement';
-import { animateCubeMovementWithBump } from '../animations/animateCubeMovementWithBump';
 import { animateElementPivotWithChange, PivotAnimationType } from '../animations/animateElementPivotWithChange';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
@@ -20,10 +19,10 @@ import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalI
 import { reverseDirection } from '../utils/reverseDirection';
 
 export type CubeAnimations = {
-    srBump: {};
-    sbBump: {};
-    slBump: {};
-    stBump: {};
+    sr: {};
+    sb: {};
+    sl: {};
+    st: {};
     nearer: {};
     further: {};
     boom: {};
@@ -271,35 +270,35 @@ export class CubeView {
 
         switch (action) {
         // Движение вправо со столкновением
-        case 'srBump':
-            await animateCubeMovementWithBump({
+        case 'sr':
+            await animateCubeMovement({
                 element: this.element,
                 isVertical: false,
-                distance: steps - 1,
+                distance: steps,
             });
             break;
             // Движение вниз со столкновением
-        case 'sbBump':
-            await animateCubeMovementWithBump({
+        case 'sb':
+            await animateCubeMovement({
                 element: this.element,
                 isVertical: true,
-                distance: steps - 1,
+                distance: steps,
             });
             break;
             // Движение влево со столкновением
-        case 'slBump':
-            await animateCubeMovementWithBump({
+        case 'sl':
+            await animateCubeMovement({
                 element: this.element,
                 isVertical: false,
-                distance: 1 - steps,
+                distance: - steps,
             });
             break;
             // Движение вверх со столкновением
-        case 'stBump':
-            await animateCubeMovementWithBump({
+        case 'st':
+            await animateCubeMovement({
                 element: this.element,
                 isVertical: true,
-                distance: 1 - steps,
+                distance: - steps,
             });
             break;
             // Передвигаем кубик в боковом поле ближе к mainField

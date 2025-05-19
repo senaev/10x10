@@ -17,7 +17,6 @@ export class MovingCube {
     public color: string;
     public direction: Direction | null;
     public steps: ActionStep[];
-
     public cube: CubeView;
 
     public constructor(o: {

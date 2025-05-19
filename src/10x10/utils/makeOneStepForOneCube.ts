@@ -35,9 +35,7 @@ export function getCubeInPosition(movingCubes: MovingCube[], coordinates: CubeCo
 /**
  * Один шаг для кубика, возвращает информацию о шаге для анимации
  */
-export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): ActionStep | {
-    field: Direction;
-} {
+export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): ActionStep | 'move_to_side' {
     const {
         direction,
         x,
@@ -58,9 +56,7 @@ export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[
 
     // если следующая позиция - одно из боковых полей - отправляем кубик туда
     if (!isPositionOnMainField(nextPosition)) {
-        return {
-            field: direction,
-        };
+        return 'move_to_side';
     }
 
     // если следующая клетка занята - кубик стоит на месте

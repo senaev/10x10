@@ -1,19 +1,28 @@
 import { separateArray } from 'senaev-utils/src/utils/Array/separateArray/separateArray';
-import { isObject } from 'senaev-utils/src/utils/Object/isObject/isObject';
+import { mapGetOrSet } from 'senaev-utils/src/utils/Map/mapGetOrSet/mapGetOrSet';
+import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { DIRECTION_TO_ANIMATION } from '../const/DIRECTION_TO_ANIMATION';
 import { MovingCube } from '../js/MovingCube';
 
+import { getOppositeFieldCubeAddress } from './getOppositeFieldCubeAddress/getOppositeFieldCubeAddress';
 import {
     getCubeInPosition, getCubeNextPosition, isPositionOnMainField, makeOneStepForOneCube,
 } from './makeOneStepForOneCube';
+import { reverseDirection } from './reverseDirection';
 import { searchAdjacentCubes } from './searchAdjacentCubes';
+import { createSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
 
 /**
  * Один ход для всех кубиков на доске
  */
-export function generateMoveSteps(movingCubes: MovingCube[]) {
+export function generateMoveSteps(movingCubes: MovingCube[]): {
+    sideLinesMovementSteps: Map<SideCubesLineId, UnsignedInteger[]>;
+} {
+    let stepId: UnsignedInteger = 0;
+    const sideLinesMovementSteps: Map<SideCubesLineId, UnsignedInteger[]> = new Map();
+
     while (true) {
         while (true) {
             // Индикатор конца движений, если что-то происходит во время шага анимации -
@@ -22,7 +31,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
             // либо вызываем подрыв этих кубиков и вызываем следующий шаг анимации
             let somethingHappened = false;
 
-            const movedToSide = [];
+            const movedOutOfMainField = new Set<MovingCube>();
 
             const [
                 cubesOnField,
@@ -32,8 +41,39 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
             for (const movingCube of cubesOnField) {
                 const step = makeOneStepForOneCube(movingCube, movingCubes);
 
-                if (isObject(step)) {
-                    movedToSide.push(movingCube);
+                if (step === 'move_to_side') {
+                    const direction = movingCube.direction;
+                    assertNonEmptyString(direction);
+
+                    let tempMovingCube = movingCube;
+
+                    while (true) {
+
+                        const nextCubePosition = getCubeNextPosition(tempMovingCube);
+
+                        const cubeInNextPosition = getCubeInPosition(cubesOutOfField, nextCubePosition);
+
+                        tempMovingCube.x = nextCubePosition.x;
+                        tempMovingCube.y = nextCubePosition.y;
+                        tempMovingCube.steps.push(DIRECTION_TO_ANIMATION[direction]);
+                        movedOutOfMainField.add(tempMovingCube);
+
+                        if (!cubeInNextPosition) {
+                            break;
+                        }
+
+                        tempMovingCube = cubeInNextPosition;
+                    }
+
+                    const oppositeFieldCubeAddress = getOppositeFieldCubeAddress({
+                        field: reverseDirection(direction),
+                        x: tempMovingCube.x,
+                        y: tempMovingCube.y,
+                    });
+                    const sideLineId = createSideCubesLineId(oppositeFieldCubeAddress);
+
+                    const sideLineMovements = mapGetOrSet(sideLinesMovementSteps, sideLineId, []);
+                    sideLineMovements.push(stepId);
                 } else {
                     movingCube.steps.push(step);
                 }
@@ -43,31 +83,8 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
                 }
             }
 
-            const movedOutOfField = new Set<MovingCube>();
-            movedToSide.forEach((movingCube) => {
-                while (true) {
-                    const direction = movingCube.direction;
-                    assertNonEmptyString(direction);
-
-                    const nextCubePosition = getCubeNextPosition(movingCube);
-
-                    const cubeInNextPosition = getCubeInPosition(cubesOutOfField, nextCubePosition);
-
-                    movingCube.x = nextCubePosition.x;
-                    movingCube.y = nextCubePosition.y;
-                    movingCube.steps.push(DIRECTION_TO_ANIMATION[direction]);
-                    movedOutOfField.add(movingCube);
-
-                    if (!cubeInNextPosition) {
-                        break;
-                    }
-
-                    movingCube = cubeInNextPosition;
-                }
-            });
-
             for (const movingCube of cubesOutOfField) {
-                if (!movedOutOfField.has(movingCube)) {
+                if (!movedOutOfMainField.has(movingCube)) {
                     movingCube.steps.push(null);
                 }
             }
@@ -76,14 +93,18 @@ export function generateMoveSteps(movingCubes: MovingCube[]) {
             if (!somethingHappened) {
                 break;
             }
+
+            stepId++;
         }
 
         // Ищем, появились ли у нас в результате хода смежные кубики
         // и если появились - делаем ещё один шаг хода, если нет - заканчиваем ход
         const adjacentCubes = searchAdjacentCubes(movingCubes);
         if (!adjacentCubes.length) {
-        // заканчиваем ход
-            return;
+            // заканчиваем ход
+            return {
+                sideLinesMovementSteps,
+            };
         }
 
         // Если такие группы кубиков имеются, подрываем их и запускаем

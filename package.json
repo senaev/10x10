@@ -46,7 +46,7 @@
         "lefthook": "^1.11.12",
         "postcss-loader": "^8.1.1",
         "prettier": "^3.5.3",
-        "senaev-utils": "github:senaev/senaev-utils#8993976160619c7e0aca0c93a6711a52e3454d13",
+        "senaev-utils": "github:senaev/senaev-utils#6a3a0f441ad8140f12e2d7e1703fbd1e069ec1f7",
         "style-loader": "^4.0.0",
         "ts-loader": "^9.5.2",
         "ts-node": "^10.9.2",

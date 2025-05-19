@@ -16,7 +16,7 @@ export async function animateCubeMovement({
     const duration = ANIMATION_TIME * Math.abs(distance);
 
     const prop = isVertical ? 'top' : 'left';
-    element.style.transition = `${prop} ${duration}ms cubic-bezier(.42, 0, 1, 1)`;
+    element.style.transition = `${prop} ${duration}ms linear`;
     forceRepaint(element);
 
     const currentPropValue = parseFloat(element.style[prop]);

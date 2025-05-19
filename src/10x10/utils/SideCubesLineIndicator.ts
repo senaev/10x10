@@ -1,13 +1,13 @@
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { SideCubeAddress } from '../js/Cubes';
 
-export type SideCubesLineIndicator = `${SideCubeAddress['field']},${SideCubeAddress['x']},${SideCubeAddress['y']}`;
+export type SideCubesLineId = `${SideCubeAddress['field']},${SideCubeAddress['x']},${SideCubeAddress['y']}`;
 
-export function createSideCubesLineIndicator({
+export function createSideCubesLineId({
     field,
     x,
     y,
-}: SideCubeAddress): SideCubesLineIndicator {
+}: SideCubeAddress): SideCubesLineId {
     if (!DIRECTIONS.includes(field)) {
         throw new Error('Invalid field');
     }
@@ -31,7 +31,7 @@ export function createSideCubesLineIndicator({
     return `${field},${x},${y}`;
 }
 
-export function parseSideCubesLineIndicator(indicator: SideCubesLineIndicator): SideCubeAddress {
+export function parseSideCubesLineId(indicator: SideCubesLineId): SideCubeAddress {
     const [
         field,
         x,

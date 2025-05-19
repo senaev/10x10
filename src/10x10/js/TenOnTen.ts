@@ -1,9 +1,9 @@
 import { PixelSize } from 'senaev-utils/src/types/PixelSize';
-import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleArray';
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { cloneObject } from 'senaev-utils/src/utils/Object/cloneObject/cloneObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
@@ -24,11 +24,10 @@ import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
+import { generateRandomStateForLevel } from '../utils/generateRandomStateForLevel';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
-import { getLevelCubesCount } from '../utils/getLevelCubesCount';
-import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
@@ -40,7 +39,6 @@ import { createMoveMap } from './createMoveMap';
 import {
     createSideCubesMaskWithNullValues,
     CubeAddress,
-    CubeCoordinates,
     CubesViews,
     findCubeInSideCubes,
     SideCubeAddress,
@@ -57,6 +55,8 @@ export type TenOnTenCallbacks = {
 
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
 const APP_WIDTH_IN_CUBES = 17;
+
+const START_LEVEL = 1;
 
 export type MainFieldCubeStateValue = {
     color: CubeColor;
@@ -75,8 +75,10 @@ export type SideCubesState = {
     bottom: SideFieldCubeStateValue[][];
 };
 
+export type MainFieldCubesState = (MainFieldCubeStateValue | null)[][];
+
 export type CubesState = SideCubesState & {
-    main: (MainFieldCubeStateValue | null)[][];
+    main: MainFieldCubesState;
 };
 
 export type TenOnTenState = {
@@ -103,6 +105,7 @@ export class TenOnTen {
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
     private blockApp: boolean;
 
+    private state: CubesState;
     private previousState: CubesState | null = null;
 
     private isNewLevel: Signal<boolean> = new Signal(false);
@@ -291,13 +294,18 @@ export class TenOnTen {
             container: mainMenuPanel,
         });
 
-        this.createSideCubes(initialState?.current ?? generateRandomSideCubesForLevel(this.level));
-
         if (initialState) {
+            this.state = initialState.current;
             this.setState(initialState);
         } else {
+            this.state = generateRandomStateForLevel({
+                level: this.level,
+            });
+
             this.generateMainCubes();
         }
+
+        this.createSideCubes(this.state);
 
         this.mainMenuOpen.subscribe((isOpen) => {
             if (isOpen) {
@@ -310,12 +318,14 @@ export class TenOnTen {
         return {
             level: this.level,
             previous: this.previousState,
-            current: this.generateMask(),
+            current: cloneObject(this.state),
             isNewLevel: this.isNewLevel.value(),
         };
     }
 
     public setState(state: TenOnTenState) {
+        this.state = state.current;
+
         this.setLevel(state.level);
         this.isNewLevel.next(state.isNewLevel);
 
@@ -342,6 +352,9 @@ export class TenOnTen {
         });
         setTimeout(
             () => {
+                this.state = generateRandomStateForLevel({
+                    level: this.level,
+                });
                 this.generateMainCubes();
                 setTimeout(
                     () => {
@@ -364,6 +377,10 @@ export class TenOnTen {
         if (getLevelColorsCount(this.level) > colorsCount) {
             this.plusColor();
         }
+
+        this.state = generateRandomStateForLevel({
+            level: this.level,
+        });
         this.generateMainCubes();
 
         this.previousState = null;
@@ -690,7 +707,11 @@ export class TenOnTen {
 
         this.createSideCubes(generateRandomSideCubesForLevel(this.level));
 
-        this.setLevel(1);
+        this.setLevel(START_LEVEL);
+
+        this.state = generateRandomStateForLevel({
+            level: this.level,
+        });
         this.generateMainCubes();
 
         this.previousState = null;
@@ -708,106 +729,23 @@ export class TenOnTen {
 
     // генерируем кубики на главном поле
     private generateMainCubes() {
-        const firstCubesPosition = getLevelCubesPositions(this.level);
-        let nullCells: { x: number; y: number }[] = [];
+        const mainFieldCubesState = this.state.main;
 
-        for (
-            let number = 0, len = getLevelCubesCount(this.level);
-            number < len;
-            number++
-        ) {
-            let cell: { x: number; y: number } | undefined;
-            let fPos = null;
-
-            if (firstCubesPosition[number] !== undefined) {
-                fPos = firstCubesPosition[number];
-            }
-
-            if (fPos === null) {
-                // создаем массив из свободных ячеек, перемешиваем его
-                if (nullCells === undefined) {
-                    nullCells = [];
-                    for (let x = 0; x < BOARD_SIZE; x++) {
-                        for (let y = 0; y < BOARD_SIZE; y++) {
-                            if (!this.cubes._getMainCube({
-                                x,
-                                y,
-                            })) {
-                                nullCells.push({
-                                    x,
-                                    y,
-                                });
-                            }
-                        }
-                    }
-
-                    shuffleArray(nullCells);
+        mainFieldCubesState.forEach((row, x) => {
+            row.forEach((cube, y) => {
+                if (cube) {
+                    this.createCube({
+                        x,
+                        y,
+                        field: 'main',
+                        color: cube.color,
+                        appearWithAnimation: true,
+                        direction: null,
+                        toMineOrder: cube.toMineOrder,
+                    });
                 }
-
-                // шанс попадания кубика в крайнее поле - чем больше, тем ниже
-                const chance = 2;
-                for (let key = 0; key < chance; key++) {
-                    cell = nullCells.shift()!;
-                    if (
-                        cell.x === 0 || cell.y === 0 || cell.x === BOARD_SIZE - 1 || cell.y === BOARD_SIZE - 1
-                    ) {
-                        nullCells.push(cell);
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                cell = {
-                    x: fPos[0],
-                    y: fPos[1],
-                };
-            }
-
-            // выстраиваем кубики так, чтобы не было соседних одноцветных кубиков
-            const colorsCount = getLevelColorsCount(this.level);
-
-            // цвета, которые есть в смежных кубиках
-            const appearanceColors: string[] = [];
-            for (let key = 0; key < 4; key++) {
-                const coordinates: CubeCoordinates = {
-                    x: cell!.x,
-                    y: cell!.y,
-                };
-
-                const prop: 'x' | 'y' = key % 2 == 0 ? 'x' : 'y';
-                coordinates[prop] = key < 2 ? coordinates[prop] + 1 : coordinates[prop] - 1;
-
-                if (
-                    coordinates.x > -1 && coordinates.y > -1 && coordinates.x < 10 && coordinates.y < 10
-                ) {
-                    const cube = this.cubes._getMainCube(coordinates);
-                    if (cube) {
-                        appearanceColors.push(cube.color.value());
-                    }
-                }
-            }
-
-            // цвета, которых нету в смежных
-            const noAppearanceColors: CubeColor[] = [];
-            for (let key = 0; key < colorsCount; key++) {
-                if (!appearanceColors.includes(CUBE_COLORS_ARRAY[key])) {
-                    noAppearanceColors.push(CUBE_COLORS_ARRAY[key]);
-                }
-            }
-
-            // получаем итоговый цвет
-            const color = noAppearanceColors[getRandomIntegerInARange(0, noAppearanceColors.length - 1)];
-
-            this.createCube({
-                x: cell!.x,
-                y: cell!.y,
-                field: 'main',
-                color,
-                appearWithAnimation: true,
-                direction: null,
-                toMineOrder: null,
             });
-        }
+        });
     }
 
     // проверяем в конце хода на конец уровня или конец игры

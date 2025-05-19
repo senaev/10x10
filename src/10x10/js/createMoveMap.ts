@@ -9,6 +9,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
+import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from '../utils/getStartCubesParameters';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
@@ -32,7 +33,6 @@ export type CubeAnimation = {
 };
 
 export type CubeToMove = {
-    isFromSide: boolean;
     original: CubeView;
     moving: MovingCube;
 };
@@ -87,11 +87,15 @@ export function createMoveMap (params: {
         mainFieldCubes,
     });
 
+    const startCubes = getStartCubesByStartCubesParameters({
+        startCubesParameters,
+        sideCubesMask,
+    });
+
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
     callTimes(startCubesCount, () => {
-        // ❗️ remove isFromSide property
-        cubesToMove.forEach(({ isFromSide, moving }) => {
-            if (isFromSide) {
+        cubesToMove.forEach(({ moving }) => {
+            if (startCubes.includes(moving.cube)) {
                 const { direction } = moving;
 
                 assertNonEmptyString(direction);

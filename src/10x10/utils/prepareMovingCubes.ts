@@ -42,7 +42,6 @@ export function prepareMovingCubes({
         movingCubesInMainField.push({
             moving: movingCube,
             original: cube,
-            isFromSide: false,
         });
     });
 
@@ -88,7 +87,6 @@ export function prepareMovingCubes({
         startMovingCubes.push({
             moving: movingCube,
             original: cube,
-            isFromSide: true,
         });
     });
 

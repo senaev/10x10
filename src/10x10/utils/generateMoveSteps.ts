@@ -18,6 +18,7 @@ import { createSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator
  */
 export function generateMoveSteps(movingCubes: MovingCube[]): {
     sideLinesMovementSteps: Map<SideCubesLineId, UnsignedInteger[]>;
+    stepsCount: UnsignedInteger;
 } {
     let stepId: UnsignedInteger = 0;
     const sideLinesMovementSteps: Map<SideCubesLineId, UnsignedInteger[]> = new Map();
@@ -88,12 +89,12 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
                 }
             }
 
+            stepId++;
+
             // Проверяем, произошло что-то или нет в конце каждого хода
             if (!somethingHappened) {
                 break;
             }
-
-            stepId++;
         }
 
         // Ищем, появились ли у нас в результате хода смежные кубики
@@ -103,6 +104,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
             // заканчиваем ход
             return {
                 sideLinesMovementSteps,
+                stepsCount: stepId,
             };
         }
 
@@ -121,6 +123,8 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
                     movingCube.steps.push(null);
                 }
             });
+
+            stepId++;
         });
     }
 }

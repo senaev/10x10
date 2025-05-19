@@ -98,6 +98,7 @@ export class MoveMap {
 
         // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
         callTimes(startCubesCount, () => {
+            // ❗️ remove isFromSide property
             cubesToMove.forEach(({ isFromSide, moving }) => {
                 if (isFromSide) {
                     const { direction } = moving;
@@ -113,6 +114,7 @@ export class MoveMap {
 
         const {
             sideLinesMovementSteps,
+            stepsCount,
         } = generateMoveSteps(cubesToMove.map(({ moving }) => moving));
 
         // Массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
@@ -125,27 +127,10 @@ export class MoveMap {
 
             const { animations } = stepsToAnimations(steps);
 
-            // if (isNumber(toSideTime)) {
-            //     const initialDirection = original.direction.value();
-
-            //     assertNonEmptyString(initialDirection);
-
-            //     toSideActions.push({
-            //         toSideParams: {
-            //             time: toSideTime,
-            //             sideCubeAddress: getOppositeFieldCubeAddress({
-            //                 field: reverseDirection(initialDirection),
-            //                 x: original.x,
-            //                 y: original.y,
-            //             }),
-            //         },
-            //         movingCube: moving,
-            //     });
-            // }
-
             this.animationsScript.set(original, animations);
         }
 
+        const compoundAnimationSteps = startCubesCount + stepsCount;
         for (const [
             sideCubesLineId,
             toSideTimes,
@@ -153,9 +138,9 @@ export class MoveMap {
             const sideCubeLineId = parseSideCubesLineId(sideCubesLineId);
 
             const action = sideCubeLineId.field;
-            const actions: ActionStep[] = createArray(toSideTimes.at(-1)!, null);
+            const actions: ActionStep[] = createArray(compoundAnimationSteps, null);
             for (const stepId of toSideTimes) {
-                actions[stepId] = action;
+                actions[startCubesCount + stepId] = action;
             }
 
             const { animations } = stepsToAnimations(actions);
@@ -198,100 +183,6 @@ export class MoveMap {
                 cube: movingCube.cube,
             });
         });
-
-        // getObjectEntries(linesShifts).forEach(([
-        //     sideCubesLineIndicator,
-        //     shifts,
-        // ]) => {
-        //     const sideCubeAddress = parseSideCubesLineIndicator(sideCubesLineIndicator);
-
-        //     type IntegerSequence = {
-        //         start: UnsignedInteger;
-        //         length: PositiveInteger;
-        //         cubes: CubeView[];
-        //     };
-
-        //     const sequences: IntegerSequence[] = [
-        //         {
-        //             start: shifts[0].time,
-        //             length: 1,
-        //             cubes: [shifts[0].cube],
-        //         },
-        //     ];
-
-        //     for (let i = 1; i < shifts.length; i += 1) {
-        //         const lastSequence = sequences.at(-1)!;
-
-        //         if (lastSequence.start + lastSequence.length === shifts[i].time) {
-        //             lastSequence.length += 1;
-        //             lastSequence.cubes.push(shifts[i].cube);
-        //         } else {
-        //             sequences.push({
-        //                 start: shifts[i].time,
-        //                 length: 1,
-        //                 cubes: [shifts[i].cube],
-        //             });
-        //         }
-        //     }
-
-        //     const cubesBefore: CubeView[] = [];
-        //     const affectedCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(sideCubeAddress);
-        //     const affectedCubes = affectedCubeAddresses.map((address) => getSideCubeViewByAddress(params.app.cubes.sideCubesMask, address));
-        //     sequences.forEach(({
-        //         start,
-        //         length,
-        //         cubes,
-        //     }, sequenceIndex) => {
-        //         affectedCubes.forEach((cube) => {
-        //             const animations = mapGetOrSetIfNotExists(this.animationsScript, cube, []);
-
-        //             animations.push({
-        //                 action: 'further',
-        //                 duration: length,
-        //                 delay: start,
-        //             });
-        //         });
-
-        //         cubes.forEach((cube, i) => {
-        //             const animations = this.animationsScript.get(cube);
-
-        //             assertObject(animations);
-
-        //             const lastAnimation = animations.at(-1);
-
-        //             assertObject(lastAnimation);
-
-        //             const additionalDuration = cubes.length - i - 1;
-        //             if (sequenceIndex === 0) {
-        //                 if (lastAnimation.action !== 'toSide') {
-        //                     throw new Error('last animation should be toSide');
-        //                 }
-
-        //                 lastAnimation.duration += additionalDuration;
-        //             } else {
-        //                 animations.push({
-        //                     action: 'further',
-        //                     duration: additionalDuration,
-        //                     delay: start,
-        //                 });
-
-        //                 cubesBefore.forEach((cube) => {
-        //                     const animations = this.animationsScript.get(cube);
-
-        //                     assertObject(animations);
-
-        //                     animations.push({
-        //                         action: 'further',
-        //                         duration: cubes.length,
-        //                         delay: start,
-        //                     });
-        //                 });
-        //             }
-        //         });
-
-        //         cubesBefore.push(...cubes);
-        //     });
-        // });
 
         this.toSideActions = toSideActions;
     }

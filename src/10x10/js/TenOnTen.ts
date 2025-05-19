@@ -3,6 +3,7 @@ import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleA
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
+import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
@@ -18,8 +19,7 @@ import {
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS_ARRAY, CubeColor } from '../const/CUBE_COLORS';
-import { Direction } from '../const/DIRECTIONS';
-import { FIELDS } from '../const/FIELDS';
+import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
@@ -57,23 +57,25 @@ export type TenOnTenCallbacks = {
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
 const APP_WIDTH_IN_CUBES = 17;
 
-export type MaskFieldValue = {
+export type MainFieldCubeStateValue = {
     color: CubeColor;
-    // ❗️ direction is not needed in side cubes
     direction: Direction | null;
-    // ❗️ toMineOrder is not needed in side cubes
-    toMineOrder: number | null;
+    toMineOrder: UnsignedInteger;
+};
+
+export type SideFieldCubeStateValue = {
+    color: CubeColor;
 };
 
 export type SideCubesState = {
-    left: MaskFieldValue[][];
-    right: MaskFieldValue[][];
-    top: MaskFieldValue[][];
-    bottom: MaskFieldValue[][];
+    left: SideFieldCubeStateValue[][];
+    right: SideFieldCubeStateValue[][];
+    top: SideFieldCubeStateValue[][];
+    bottom: SideFieldCubeStateValue[][];
 };
 
 export type CubesState = SideCubesState & {
-    main: (MaskFieldValue | null)[][];
+    main: (MainFieldCubeStateValue | null)[][];
 };
 
 export type TenOnTenState = {
@@ -867,33 +869,44 @@ export class TenOnTen {
         const mask: Partial<CubesState> = {};
         const cubesLocal = this.cubes;
 
-        for (const field of FIELDS) {
-            const fieldValue: (MaskFieldValue | null)[][] = [];
-            mask[field] = fieldValue as MaskFieldValue[][];
+        for (const field of DIRECTIONS) {
+            const fieldValue: SideFieldCubeStateValue[][] = [];
+            mask[field] = fieldValue;
             for (let x = 0; x < BOARD_SIZE; x++) {
                 fieldValue[x] = [];
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    const cube = field === 'main'
-                        ? cubesLocal._getMainCube({
-                            x,
-                            y,
-                        })
-                        : cubesLocal._getSideCube({
-                            field,
-                            x,
-                            y,
-                        });
+                    const cube = cubesLocal._getSideCube({
+                        field,
+                        x,
+                        y,
+                    });
 
-                    if (!cube) {
-                        fieldValue[x][y] = null;
-                    } else {
-                        const resultValue: MaskFieldValue = {
-                            color: cube.color.value(),
-                            direction: cube.direction.value(),
-                            toMineOrder: cube.toMineOrder,
-                        };
-                        fieldValue[x][y] = resultValue;
-                    }
+                    const resultValue: SideFieldCubeStateValue = {
+                        color: cube.color.value(),
+                    };
+                    fieldValue[x][y] = resultValue;
+                }
+            }
+        }
+
+        mask.main = [];
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            mask.main[x] = [];
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                const cube = cubesLocal._getMainCube({
+                    x,
+                    y,
+                });
+
+                if (cube) {
+                    const resultValue: MainFieldCubeStateValue = {
+                        color: cube.color.value(),
+                        direction: cube.direction.value(),
+                        toMineOrder: cube.toMineOrder!,
+                    };
+                    mask.main[x][y] = resultValue;
+                } else {
+                    mask.main[x][y] = null;
                 }
             }
         }

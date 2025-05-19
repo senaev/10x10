@@ -429,18 +429,15 @@ export class TenOnTen {
             mainFieldCubes.push(cube);
         });
 
-        const moveMap = createMoveMap({
+        const {
+            cubesToMove,
+            animationsScript,
+        } = createMoveMap({
             startCubesParameters,
             mainFieldCubes,
             app: this,
             sideCubesMask: this.cubes.sideCubesMask,
         });
-
-        const {
-            cubesToMove,
-            toSideActions,
-            animationsScript,
-        } = moveMap;
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
@@ -483,7 +480,7 @@ export class TenOnTen {
         this.cubes._mergeMoveMap({
             movingCubes: cubesToMove.map(({ moving }) => moving),
             startCubes,
-            toSideActions: toSideActions.map(({ movingCube }) => movingCube),
+            // toSideActions: toSideActions.map(({ movingCube }) => movingCube),
         });
 
         this.checkStepEnd();

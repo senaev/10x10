@@ -14,9 +14,7 @@ import { StartCubesParameters } from '../utils/getStartCubesParameters';
 import { isTheSameAddress } from '../utils/isTheSameAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
-    getSideCubeLineId,
     parseSideCubesLineId,
-    SideCubesLineId,
 } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
@@ -67,7 +65,6 @@ export function createMoveMap (params: {
     mainFieldCubes: CubeView[];
     app: TenOnTen;
 }): {
-        toSideActions: ToSideAction[];
         animationsScript: AnimationScript;
         cubesToMove: CubeToMove[];
     } {
@@ -122,10 +119,6 @@ export function createMoveMap (params: {
         stepsCount,
     } = generateMoveSteps(cubesToMove.map(({ moving }) => moving));
 
-    // Массив вхождений в боковые поля, в нём хранятся м-кубики, попавшие в боковые поля
-    // в последовательности,  в которой они туда попали
-    const toSideActions: ToSideAction[] = [];
-
     // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
     for (const { original, moving } of cubesToMove) {
         const steps = moving.steps;
@@ -164,36 +157,7 @@ export function createMoveMap (params: {
         }
     }
 
-    // Сортируем попавшие в боковое поле м-кубики по времени попадания
-    toSideActions.sort(function (a, b) {
-        return a.toSideParams.time - b.toSideParams.time;
-    });
-
-    const linesShifts: Record<SideCubesLineId, {
-        time: UnsignedInteger;
-        cube: CubeView;
-    }[]> = {};
-    toSideActions.forEach(({
-        movingCube,
-        toSideParams: {
-            sideCubeAddress,
-            time,
-        },
-    }) => {
-        const sideCubesLineIndicator = getSideCubeLineId(sideCubeAddress);
-
-        if (linesShifts[sideCubesLineIndicator] === undefined) {
-            linesShifts[sideCubesLineIndicator] = [];
-        }
-
-        linesShifts[sideCubesLineIndicator].push({
-            time,
-            cube: movingCube.cube,
-        });
-    });
-
     return {
-        toSideActions,
         animationsScript,
         cubesToMove,
     };

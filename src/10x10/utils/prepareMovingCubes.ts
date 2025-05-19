@@ -30,7 +30,7 @@ export function prepareMovingCubes({
 
     // создаем массив из всех кубиков, которые есть на доске
     mainFieldCubesSorted.forEach((cube) => {
-        const movingCube = new MovingCube({
+        const movingCube: MovingCube = {
             initialAddress: {
                 x: cube.x,
                 y: cube.y,
@@ -40,8 +40,8 @@ export function prepareMovingCubes({
             y: cube.y,
             color: cube.color.value(),
             direction: cube.direction.value(),
-            cube,
-        });
+            steps: [],
+        };
 
         movingCubesInMainField.push({
             moving: movingCube,
@@ -87,14 +87,15 @@ export function prepareMovingCubes({
             startMovingCubeY = cube.y;
         }
 
-        const movingCube = new MovingCube({
+        const movingCube: MovingCube = {
             initialAddress,
             x: startMovingCubeX,
             y: startMovingCubeY,
             color: cube.color.value(),
             direction: cube.direction.value(),
-            cube,
-        });
+            steps: [],
+        };
+
         startMovingCubes.push({
             moving: movingCube,
             original: cube,

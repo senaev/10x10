@@ -87,7 +87,7 @@ export function getStartCubesParameters({
     const line: SideCubesLineId = getSideCubeLineId(address);
 
     const dynamicPropValue = initialCubeAddress[dynamicProp];
-    const count = Math.min(countOfCubesThatCanBeMoved, isLeftOrTop ? BOARD_SIZE - dynamicPropValue : dynamicPropValue);
+    const count = Math.min(countOfCubesThatCanBeMoved, isLeftOrTop ? BOARD_SIZE - dynamicPropValue : dynamicPropValue + 1);
 
     return {
         line,

@@ -412,6 +412,11 @@ export class TenOnTen {
             return;
         }
 
+        const startCubes = getStartCubesByStartCubesParameters({
+            startCubesParameters,
+            sideCubesMask: this.cubes.sideCubesMask,
+        });
+
         this.isNewLevel.next(false);
 
         // создаем маску для возможности возврата хода
@@ -467,11 +472,6 @@ export class TenOnTen {
             }
 
             this.blockApp = false;
-        });
-
-        const startCubes = getStartCubesByStartCubesParameters({
-            startCubesParameters,
-            sideCubesMask: this.cubes.sideCubesMask,
         });
 
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap

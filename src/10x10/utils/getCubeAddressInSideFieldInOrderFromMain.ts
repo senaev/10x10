@@ -1,5 +1,5 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { SideCubeAddress } from '../js/Cubes';
+import { SideCubeAddress } from '../js/CubesViews';
 
 import { parseSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 

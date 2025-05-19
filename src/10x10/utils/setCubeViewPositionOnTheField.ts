@@ -1,6 +1,6 @@
 import { CubeView } from '../components/CubeView';
 import { FIELD_OFFSETS } from '../const/FIELD_OFFSETS';
-import { CubeAddress } from '../js/Cubes';
+import { CubeAddress } from '../js/CubesViews';
 
 /**
  * Задаем html-элементу кубика положение на доске

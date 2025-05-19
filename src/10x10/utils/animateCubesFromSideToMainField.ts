@@ -1,6 +1,6 @@
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 
-import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
+import { SideCubeAddress, SideCubesMask } from '../js/CubesViews';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';

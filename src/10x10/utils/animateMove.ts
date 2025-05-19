@@ -4,7 +4,7 @@ import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/pro
 
 import { CubeAnimationName } from '../components/CubeView';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
-import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
+import { SideCubeAddress, SideCubesMask } from '../js/CubesViews';
 import {
     AnimationScript,
 } from '../js/createMoveMap';

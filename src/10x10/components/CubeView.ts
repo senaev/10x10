@@ -15,7 +15,6 @@ import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAnimation } from '../js/createMoveMap';
 import { TenOnTen } from '../js/TenOnTen';
-import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { reverseDirection } from '../utils/reverseDirection';
 
 export type CubeAnimations = {
@@ -165,11 +164,6 @@ export class CubeView {
         this.element.addEventListener('mousedown', () => {
             params.onClick(this);
         });
-
-        // Время попадания в поле майн
-        if (this.field.value() === 'main') {
-            this.toMineOrder = getIncrementalIntegerForMainFieldOrder();
-        }
 
         if (this.appearWithAnimation) {
             $(this.element)

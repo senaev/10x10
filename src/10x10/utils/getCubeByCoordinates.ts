@@ -1,4 +1,4 @@
-import { CubeCoordinates } from '../js/Cubes';
+import { CubeCoordinates } from '../js/CubesViews';
 
 export function getCubeByCoordinates<T extends CubeCoordinates>(coordinates: CubeCoordinates, cubes: Set<T>): T | undefined {
     for (const cube of cubes) {

@@ -3,7 +3,6 @@ import { shuffleArray } from 'senaev-utils/src/utils/Array/shuffleArray/shuffleA
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
-import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
@@ -20,9 +19,10 @@ import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CUBE_COLORS_ARRAY, CubeColor } from '../const/CUBE_COLORS';
 import { Direction } from '../const/DIRECTIONS';
-import { Field, FIELDS } from '../const/FIELDS';
+import { FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
+import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
@@ -40,10 +40,10 @@ import {
     createSideCubesMaskWithNullValues,
     CubeAddress,
     CubeCoordinates,
-    Cubes,
+    CubesViews,
     findCubeInSideCubes,
     SideCubeAddress,
-} from './Cubes';
+} from './CubesViews';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;
@@ -59,21 +59,27 @@ const APP_WIDTH_IN_CUBES = 17;
 
 export type MaskFieldValue = {
     color: CubeColor;
+    // ❗️ direction is not needed in side cubes
     direction: Direction | null;
+    // ❗️ toMineOrder is not needed in side cubes
     toMineOrder: number | null;
 };
-export type CubesPositions = {
+
+export type SideCubesState = {
     left: MaskFieldValue[][];
     right: MaskFieldValue[][];
     top: MaskFieldValue[][];
     bottom: MaskFieldValue[][];
+};
+
+export type CubesState = SideCubesState & {
     main: (MaskFieldValue | null)[][];
 };
 
 export type TenOnTenState = {
     level: PositiveInteger;
-    previous: CubesPositions | null;
-    current: CubesPositions;
+    previous: CubesState | null;
+    current: CubesState;
     isNewLevel: boolean;
 };
 
@@ -83,7 +89,7 @@ export class TenOnTen {
     public readonly cubesContainer: HTMLDivElement;
 
     public level: number;
-    public readonly cubes: Cubes;
+    public readonly cubes: CubesViews;
 
     public end: string | null;
 
@@ -93,7 +99,9 @@ export class TenOnTen {
 
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
     private blockApp: boolean;
-    private previousStepMap: CubesPositions | null = null;
+
+    private state: CubesState;
+    private previousState: CubesState | null = null;
 
     private isNewLevel: Signal<boolean> = new Signal(false);
 
@@ -173,7 +181,7 @@ export class TenOnTen {
 
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
         // которому эти кубики принадлежат
-        this.cubes = new Cubes({ app: this });
+        this.cubes = new CubesViews({ app: this });
 
         // индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
@@ -281,7 +289,7 @@ export class TenOnTen {
             container: mainMenuPanel,
         });
 
-        this.createSideCubes(initialState);
+        this.createSideCubes(initialState?.current ?? generateRandomSideCubesForLevel(this.level));
 
         if (initialState) {
             this.setState(initialState);
@@ -299,7 +307,7 @@ export class TenOnTen {
     public getState(): TenOnTenState {
         return {
             level: this.level,
-            previous: this.previousStepMap,
+            previous: this.previousState,
             current: this.generateMask(),
             isNewLevel: this.isNewLevel.value(),
         };
@@ -307,10 +315,10 @@ export class TenOnTen {
 
     public setState(state: TenOnTenState) {
         this.setLevel(state.level);
-
         this.isNewLevel.next(state.isNewLevel);
 
-        this.previousStepMap = state.previous;
+        this.previousState = state.previous;
+
         this.applyCubesState(state.current);
     }
 
@@ -356,7 +364,7 @@ export class TenOnTen {
         }
         this.generateMainCubes();
 
-        this.previousStepMap = null;
+        this.previousState = null;
         this.isNewLevel.next(true);
         this.canUndo.next(false);
 
@@ -384,11 +392,11 @@ export class TenOnTen {
         this.canUndo.next(false);
 
         // пробегаем в массиве по каждому кубику предыдущего массива
-        const previousStepMap = this.previousStepMap!;
+        const previousStepMap = this.previousState!;
 
         this.applyCubesState(previousStepMap);
 
-        this.previousStepMap = null;
+        this.previousState = null;
     };
 
     public async run(clickedSideCubeAddress: SideCubeAddress) {
@@ -421,7 +429,7 @@ export class TenOnTen {
         this.isNewLevel.next(false);
 
         // создаем маску для возможности возврата хода
-        this.previousStepMap = this.generateMask();
+        this.previousState = this.generateMask();
 
         // Создаем массив из всех кубиков, которые есть на доске
         const mainFieldCubes: CubeView[] = [];
@@ -445,7 +453,7 @@ export class TenOnTen {
 
         // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
         // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        const animationLength = cubesToMove[0].moving.steps.length;
+        const animationLength = cubesToMove[0].moving.stepActions.length;
 
         // пошаговый запуск анимации
         animateMove({
@@ -540,150 +548,42 @@ export class TenOnTen {
          */
     }
 
-    private applyCubesState(previousStepMap: CubesPositions) {
-        // массив, в котором описаны все различия между текущим и предыдущим состоянием
-        const changed: {
-            field: Field;
-            x: number;
-            y: number;
-            pCube: MaskFieldValue | null;
-            cube: CubeView | null;
-            action: string;
-        }[] = [];
-        if (previousStepMap) {
-            for (const fieldName in previousStepMap) {
-                for (const x in previousStepMap[fieldName as Field]) {
-                    for (const y in previousStepMap[fieldName as Field][x]) {
-                        const xNumber = parseInt(x);
-                        const yNumber = parseInt(y);
-                        const pCube: MaskFieldValue | null = previousStepMap[fieldName as Field][xNumber][yNumber];
+    private applyCubesState(state: CubesState) {
+        this.state = state;
 
-                        // берем соответствующее значение текущей маски для сравнения
-                        const cube = fieldName === 'main'
-                            ? this.cubes._getMainCube({
-                                x: xNumber,
-                                y: yNumber,
-                            })
-                            : this.cubes._getSideCube({
-                                field: fieldName as Direction,
-                                x: xNumber,
-                                y: yNumber,
-                            });
-                        // если предыдущее - null
-                        if (!pCube) {
-                            // а новое - что-то другое
-                            // удаляем кубик из нового значения
-                            if (cube) {
-                                changed.push({
-                                    field: fieldName as Field,
-                                    x: xNumber,
-                                    y: yNumber,
-                                    pCube: null,
-                                    cube: cube ?? null,
-                                    action: 'remove',
-                                });
-                            }
-                        } else {
-                            // если же раньше тут тоже был кубик
-                            // а сейчас кубика нету
-                            // заполняем клетку кубиком
-                            if (!cube) {
-                                changed.push({
-                                    field: fieldName as Field,
-                                    x: xNumber,
-                                    y: yNumber,
-                                    pCube,
-                                    cube: null,
-                                    action: 'add',
-                                });
-                            } else {
-                            // если и раньше и сейчас - нужно сравнить эти значения
-                                // пробегаемся по каждому параметру
-                                for (const prop in pCube) {
-                                    // если какие-то параметры различаются,
-                                    // меняем параметры кубика
-                                    if (
-                                        cube[prop as keyof CubeView] !== pCube[prop as keyof MaskFieldValue]
-                                    ) {
-                                        changed.push({
-                                            field: fieldName as Field,
-                                            x: xNumber,
-                                            y: yNumber,
-                                            pCube,
-                                            cube,
-                                            action: 'change',
-                                        });
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+        this.cubes.sideEach((cube) => {
+            cube.removeElementFromDOM();
+        });
+
+        this.cubes.mainCubesMask.forEach((cube) => {
+            cube.removeElementFromDOM();
+        });
+
+        this.cubes.mainCubesMask.clear();
+
+        this.createSideCubes(state);
+
+        state.main.forEach((row, x) => {
+            row.forEach((cube, y) => {
+                if (cube) {
+                    this.createCube({
+                        x,
+                        y,
+                        field: 'main',
+                        color: cube.color,
+                        appearWithAnimation: false,
+                        direction: cube.direction,
+                        toMineOrder: cube.toMineOrder,
+                    });
                 }
-            }
-        }
-
-        for (const key in changed) {
-            let cube = changed[key].cube;
-            switch (changed[key].action) {
-            case 'add':
-                // создаем новый кубик с теми же параметрами и подменяем им предыдущий
-                cube = this.createCube({
-                    x: changed[key].x,
-                    y: changed[key].y,
-                    field: changed[key].field,
-                    color: changed[key]!.pCube!.color,
-                    direction: changed[key]!.pCube!.direction!,
-                    appearWithAnimation: true,
-                    toMineOrder: null,
-                });
-                // console.log(cube);
-                break;
-            case 'remove':
-                if (changed[key].field !== 'main') {
-                    throw new Error('only main field cube is able to be removed');
-                }
-                // удаляем нафиг кубик
-                this.cubes._removeMainCube({
-                    x: changed[key].x,
-                    y: changed[key].y,
-                });
-
-                assertObject(cube);
-
-                cube.animate({
-                    animation: 'remove',
-                    steps: 4,
-                });
-                break;
-            case 'change':
-                cube!.changeColor(changed[key].pCube!.color);
-                break;
-            default:
-                throw new Error(`Неизвестное значение в changed[key].action: ${changed[key].action}`);
-            }
-        }
-
-        // меняем значения toMineOrder всех кубиков на поле
-        const mainField = previousStepMap.main;
-        for (const x in mainField) {
-            const row = mainField[x];
-            for (const y in row) {
-                const value = row[y];
-                if (value !== null) {
-                    this.cubes._getMainCube({
-                        x: Number(x),
-                        y: Number(y),
-                    })!.toMineOrder = value.toMineOrder!;
-                }
-            }
-        }
+            });
+        });
     }
 
-    private createSideCubes(initialState?: TenOnTenState) {
+    private createSideCubes(state: SideCubesState) {
         // запускаем инициализацию приложения
         // генерируем кубики в боковых панелях
-        this.cubes._sideEach((cube, field, x, y) => {
+        this.cubes.sideEach((cube, field, x, y) => {
             if (cube) {
                 cube.removeElementFromDOM();
             }
@@ -692,9 +592,7 @@ export class TenOnTen {
                 x,
                 y,
                 field,
-                color: initialState
-                    ? initialState.current[field as Direction][x][y].color
-                    : getRandomColorForCubeLevel(this.level),
+                color: state[field][x][y].color,
                 appearWithAnimation: false,
                 direction: null,
                 toMineOrder: null,
@@ -779,12 +677,12 @@ export class TenOnTen {
         this.clearMainField();
         this.cubes.sideCubesMask = createSideCubesMaskWithNullValues();
 
-        this.createSideCubes();
+        this.createSideCubes(generateRandomSideCubesForLevel(this.level));
 
         this.setLevel(1);
         this.generateMainCubes();
 
-        this.previousStepMap = null;
+        this.previousState = null;
         this.isNewLevel.next(true);
         this.canUndo.next(false);
         callFunctions(this.callbacks.onAfterNewGameStarted);
@@ -959,7 +857,7 @@ export class TenOnTen {
     private plusColor() {
         const colorsCount = getLevelColorsCount(this.level);
         const newColor = CUBE_COLORS_ARRAY[colorsCount - 1];
-        this.cubes._sideEach((cube) => {
+        this.cubes.sideEach((cube) => {
             if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
                 cube.changeColor(newColor);
             }
@@ -967,8 +865,8 @@ export class TenOnTen {
     }
 
     // генерируем маску для предыдущего хода
-    private generateMask(): CubesPositions {
-        const mask: Partial<CubesPositions> = {};
+    private generateMask(): CubesState {
+        const mask: Partial<CubesState> = {};
         const cubesLocal = this.cubes;
 
         for (const field of FIELDS) {
@@ -1002,7 +900,7 @@ export class TenOnTen {
             }
         }
 
-        return mask as CubesPositions;
+        return mask as CubesState;
     }
 
     private createCube(params: CubeAddress & {

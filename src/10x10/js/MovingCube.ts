@@ -1,8 +1,10 @@
+import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+
 import { Direction } from '../const/DIRECTIONS';
 
-import { CubeAddress } from './Cubes';
+import { CubeAddress } from './CubesViews';
 
-export type ActionStep = 'boom' | Direction | null;
+export type MovingCubeStepAction = 'boom' | Direction | null;
 
 /**
  * Мутабельный объект кубика со всеми
@@ -14,7 +16,8 @@ export type MovingCube = {
     readonly initialAddress: Readonly<CubeAddress>;
     readonly color: string;
     readonly direction: Direction | null;
-    readonly steps: ActionStep[];
+    readonly stepActions: MovingCubeStepAction[];
+    readonly toMineOrder: UnsignedInteger;
     x: number;
     y: number;
 };

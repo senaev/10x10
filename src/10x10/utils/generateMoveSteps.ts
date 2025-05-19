@@ -55,7 +55,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
 
                         tempMovingCube.x = nextCubePosition.x;
                         tempMovingCube.y = nextCubePosition.y;
-                        tempMovingCube.steps.push(direction);
+                        tempMovingCube.stepActions.push(direction);
                         movedOutOfMainField.add(tempMovingCube);
 
                         if (!cubeInNextPosition) {
@@ -75,7 +75,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
                     const sideLineMovements = mapGetOrSet(sideLinesMovementSteps, sideLineId, []);
                     sideLineMovements.push(stepId);
                 } else {
-                    movingCube.steps.push(step);
+                    movingCube.stepActions.push(step);
                 }
 
                 if (step !== null) {
@@ -85,7 +85,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
 
             for (const movingCube of cubesOutOfField) {
                 if (!movedOutOfMainField.has(movingCube)) {
-                    movingCube.steps.push(null);
+                    movingCube.stepActions.push(null);
                 }
             }
 
@@ -113,13 +113,13 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
         adjacentCubesGroups.forEach((adjacentCubesGroup) => {
             movingCubes.forEach((movingCube) => {
                 if (adjacentCubesGroup.includes(movingCube)) {
-                    movingCube.steps.push('boom');
+                    movingCube.stepActions.push('boom');
                     // взорвавшимся м-кубикам присваиваем координаты -1 -1,
                     // чтобы в дальнейшей анимации они не участвовали
                     movingCube.x = -1;
                     movingCube.y = -1;
                 } else {
-                    movingCube.steps.push(null);
+                    movingCube.stepActions.push(null);
                 }
             });
 

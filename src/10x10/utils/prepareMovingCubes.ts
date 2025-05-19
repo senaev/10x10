@@ -1,7 +1,9 @@
+import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
+
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CubeToMove } from '../js/createMoveMap';
-import { SideCubesMask } from '../js/Cubes';
+import { SideCubesMask } from '../js/CubesViews';
 import { MovingCube } from '../js/MovingCube';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
@@ -30,17 +32,22 @@ export function prepareMovingCubes({
 
     // создаем массив из всех кубиков, которые есть на доске
     mainFieldCubesSorted.forEach((cube) => {
+        const toMineOrder = cube.toMineOrder;
+
+        assertInteger(toMineOrder);
+
         const movingCube: MovingCube = {
             initialAddress: {
                 x: cube.x,
                 y: cube.y,
                 field: cube.field.value(),
             },
+            toMineOrder,
             x: cube.x,
             y: cube.y,
             color: cube.color.value(),
             direction: cube.direction.value(),
-            steps: [],
+            stepActions: [],
         };
 
         movingCubesInMainField.push({
@@ -54,51 +61,52 @@ export function prepareMovingCubes({
         sideCubesMask,
     });
 
-    const startCubes = startCubesAddresses.map((address) => getSideCubeViewByAddress(sideCubesMask, address));
+    const startCubeViews = startCubesAddresses.map((address) => getSideCubeViewByAddress(sideCubesMask, address));
 
     // добавляем в маску кубик, с которого начинаем анимацию
     // кубики сразу добавляем на главное поле для расчетов движения
     const startMovingCubes: CubeToMove[] = [];
-    startCubes.forEach((cube, i) => {
+    startCubeViews.forEach((cubeView, i) => {
         const initialAddress = {
-            x: cube.x,
-            y: cube.y,
-            field: cube.field.value(),
+            x: cubeView.x,
+            y: cubeView.y,
+            field: cubeView.field.value(),
         };
 
-        cube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
+        const toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
-        const field = cube.field.value();
+        const field = cubeView.field.value();
         let startMovingCubeX;
         let startMovingCubeY;
         if (field === 'top' || field === 'bottom') {
-            startMovingCubeX = cube.x;
+            startMovingCubeX = cubeView.x;
             if (field === 'top') {
-                startMovingCubeY = startCubes.length - i - 1;
+                startMovingCubeY = startCubeViews.length - i - 1;
             } else {
-                startMovingCubeY = BOARD_SIZE - startCubes.length + i;
+                startMovingCubeY = BOARD_SIZE - startCubeViews.length + i;
             }
         } else {
             if (field === 'left') {
-                startMovingCubeX = startCubes.length - i - 1;
+                startMovingCubeX = startCubeViews.length - i - 1;
             } else {
-                startMovingCubeX = BOARD_SIZE - startCubes.length + i;
+                startMovingCubeX = BOARD_SIZE - startCubeViews.length + i;
             }
-            startMovingCubeY = cube.y;
+            startMovingCubeY = cubeView.y;
         }
 
         const movingCube: MovingCube = {
             initialAddress,
             x: startMovingCubeX,
             y: startMovingCubeY,
-            color: cube.color.value(),
-            direction: cube.direction.value(),
-            steps: [],
+            color: cubeView.color.value(),
+            direction: cubeView.direction.value(),
+            stepActions: [],
+            toMineOrder,
         };
 
         startMovingCubes.push({
             moving: movingCube,
-            original: cube,
+            original: cubeView,
         });
     });
 

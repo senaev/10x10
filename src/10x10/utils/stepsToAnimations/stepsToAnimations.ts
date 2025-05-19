@@ -3,9 +3,9 @@ import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { CubeAnimationName } from '../../components/CubeView';
 import { Direction } from '../../const/DIRECTIONS';
 import { CubeAnimation } from '../../js/createMoveMap';
-import { ActionStep } from '../../js/MovingCube';
+import { MovingCubeStepAction } from '../../js/MovingCube';
 
-export function stepsToAnimations(steps: ActionStep[]): {
+export function stepsToAnimations(steps: MovingCubeStepAction[]): {
     animations: CubeAnimation[];
 } {
     // массив с действиями одного кубика

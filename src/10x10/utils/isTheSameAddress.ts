@@ -1,4 +1,4 @@
-import { CubeAddress } from '../js/Cubes';
+import { CubeAddress } from '../js/CubesViews';
 
 export function isTheSameAddress(a: CubeAddress, b: CubeAddress): boolean {
     if (a.field !== b.field) {

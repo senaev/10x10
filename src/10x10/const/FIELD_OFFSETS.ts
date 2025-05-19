@@ -1,4 +1,4 @@
-import { CubeCoordinates } from '../js/Cubes';
+import { CubeCoordinates } from '../js/CubesViews';
 
 import { Field } from './FIELDS';
 

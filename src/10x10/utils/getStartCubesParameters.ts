@@ -2,7 +2,7 @@ import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CubeCoordinates, SideCubeAddress } from '../js/Cubes';
+import { CubeCoordinates, SideCubeAddress } from '../js/CubesViews';
 
 import { getCubeByCoordinates } from './getCubeByCoordinates';
 import { SideCubesLineId, getSideCubeLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';

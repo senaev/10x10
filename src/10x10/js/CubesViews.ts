@@ -1,15 +1,11 @@
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
-import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
-import { Field, FIELDS } from '../const/FIELDS';
-import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
+import { Field } from '../const/FIELDS';
 import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
-import { reverseDirection } from '../utils/reverseDirection';
-import { getSideCubeLineId } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
@@ -87,7 +83,7 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
     };
 }
 
-export class Cubes {
+export class CubesViews {
     public readonly _app: TenOnTen;
     public sideCubesMask: SideCubesMask;
     public mainCubesMask: Set<CubeView> = new Set();
@@ -145,14 +141,10 @@ export class Cubes {
         this.sideCubesMask[field][x][y] = value;
     }
 
-    // пробегаемся по всем элементам боковых полей, выполняем переданную функцию
+    // Пробегаемся по всем элементам боковых полей, выполняем переданную функцию
     // с каждым кубиком
-    public _sideEach(func: (cube: CubeView, field: Direction, x: number, y: number) => void) {
-        FIELDS.forEach((field) => {
-            if (field === 'main') {
-                return;
-            }
-
+    public sideEach(func: (cube: CubeView, field: Direction, x: number, y: number) => void) {
+        DIRECTIONS.forEach((field) => {
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
                     func(this.sideCubesMask[field][x][y]!, field, x, y);

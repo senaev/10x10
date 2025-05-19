@@ -1,4 +1,4 @@
-import { SideCubeAddress } from '../../js/Cubes';
+import { SideCubeAddress } from '../../js/CubesViews';
 import { reverseDirection } from '../reverseDirection';
 
 export function getOppositeFieldCubeAddress(sideCubeAddress: SideCubeAddress): SideCubeAddress {

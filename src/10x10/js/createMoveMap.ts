@@ -18,10 +18,10 @@ import {
 } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
-import { SideCubeAddress, SideCubesMask } from './Cubes';
+import { SideCubeAddress, SideCubesMask } from './CubesViews';
 import {
-    ActionStep,
     MovingCube,
+    MovingCubeStepAction,
 } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
@@ -107,9 +107,9 @@ export function createMoveMap (params: {
 
                 assertNonEmptyString(direction);
 
-                moving.steps.push(direction);
+                moving.stepActions.push(direction);
             } else {
-                moving.steps.push(null);
+                moving.stepActions.push(null);
             }
         });
     });
@@ -121,7 +121,7 @@ export function createMoveMap (params: {
 
     // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
     for (const { original, moving } of cubesToMove) {
-        const steps = moving.steps;
+        const steps = moving.stepActions;
 
         const { animations } = stepsToAnimations(steps);
 
@@ -136,7 +136,7 @@ export function createMoveMap (params: {
         const sideCubeLineId = parseSideCubesLineId(sideCubesLineId);
 
         const action = sideCubeLineId.field;
-        const actions: ActionStep[] = createArray(compoundAnimationSteps, null);
+        const actions: MovingCubeStepAction[] = createArray(compoundAnimationSteps, null);
         for (const stepId of toSideTimes) {
             actions[startCubesCount + stepId] = action;
         }

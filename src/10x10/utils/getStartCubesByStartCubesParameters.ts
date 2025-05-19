@@ -1,7 +1,7 @@
 import {
     SideCubeAddress,
     SideCubesMask,
-} from '../js/Cubes';
+} from '../js/CubesViews';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { StartCubesParameters } from './getStartCubesParameters';

@@ -1,7 +1,7 @@
 import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { Direction } from '../const/DIRECTIONS';
-import { CubeCoordinates } from '../js/Cubes';
-import { ActionStep, MovingCube } from '../js/MovingCube';
+import { CubeCoordinates } from '../js/CubesViews';
+import { MovingCube, MovingCubeStepAction } from '../js/MovingCube';
 
 export function isPositionOnMainField(position: CubeCoordinates): boolean {
     return position.x >= 0 && position.x <= 9 && position.y >= 0 && position.y <= 9;
@@ -34,7 +34,7 @@ export function getCubeInPosition(movingCubes: MovingCube[], coordinates: CubeCo
 /**
  * Один шаг для кубика, возвращает информацию о шаге для анимации
  */
-export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): ActionStep | 'move_to_side' {
+export function makeOneStepForOneCube(cube: MovingCube, movingCubes: MovingCube[]): MovingCubeStepAction | 'move_to_side' {
     const {
         direction,
         x,

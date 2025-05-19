@@ -9,6 +9,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
+import { StartCubesParameters } from '../utils/getStartCubesParameters';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
     getSideCubeLineId,
@@ -66,8 +67,7 @@ export class MoveMap {
     public readonly cubesMove: CubesMove;
 
     public constructor(params: {
-        startCubes: CubeView[];
-        // startCubesParameters: StartCubesParameters;
+        startCubesParameters: StartCubesParameters;
         sideCubesMask: SideCubesMask;
         mainFieldCubes: CubeView[];
         app: TenOnTen;
@@ -75,23 +75,15 @@ export class MoveMap {
         const {
             mainFieldCubes,
             sideCubesMask,
-            startCubes,
+            startCubesParameters,
         } = params;
 
-        const startCubesField = startCubes[0].field.value();
-        if (startCubesField === 'main') {
-            throw new Error('startCubesField should not be main');
-        }
-
-        const startCubesLineId = getSideCubeLineId({
-            x: startCubes[0].x,
-            y: startCubes[0].y,
-            field: startCubesField,
-        });
-        const startCubesCount = startCubes.length;
+        const startCubesLineId = startCubesParameters.line;
+        const startCubesCount = startCubesParameters.count;
 
         this.cubesMove = prepareMovingCubes({
-            startCubes,
+            startCubesParameters,
+            sideCubesMask,
             mainFieldCubes,
         });
 

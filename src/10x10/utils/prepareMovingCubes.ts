@@ -1,19 +1,26 @@
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
+
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { SideCubesMask } from '../js/Cubes';
 import { CubesMove, CubeToMove } from '../js/MoveMap';
 import { MovingCube } from '../js/MovingCube';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
+import { getStartCubesByStartCubesParameters } from './getStartCubesByStartCubesParameters';
+import { StartCubesParameters } from './getStartCubesParameters';
 
 /**
  * Собираем все кубики, которые будут принимать участие в движении по главному полю
  * В том числе выставляем на доску кубики из боковой линии
  */
 export function prepareMovingCubes({
-    startCubes,
+    startCubesParameters,
+    sideCubesMask,
     mainFieldCubes,
 }: {
-    startCubes: CubeView[];
+    startCubesParameters: StartCubesParameters;
+    sideCubesMask: SideCubesMask;
     mainFieldCubes: CubeView[];
 }): CubesMove {
     const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder! - b.toMineOrder!);
@@ -38,6 +45,13 @@ export function prepareMovingCubes({
             isFromSide: false,
         });
     });
+
+    const startCubes = getStartCubesByStartCubesParameters({
+        startCubesParameters,
+        sideCubesMask,
+    });
+
+    assertObject(startCubes);
 
     // добавляем в маску кубик, с которого начинаем анимацию
     // кубики сразу добавляем на главное поле для расчетов движения

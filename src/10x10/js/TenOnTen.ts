@@ -23,7 +23,6 @@ import { Direction } from '../const/DIRECTIONS';
 import { Field, FIELDS } from '../const/FIELDS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
-import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
@@ -31,6 +30,8 @@ import { getLevelCubesCount } from '../utils/getLevelCubesCount';
 import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
+import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
+import { getStartCubesParameters } from '../utils/getStartCubesParameters';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 import { getSideCubeLineId } from '../utils/SideCubesLineIndicator';
 
@@ -394,14 +395,13 @@ export class TenOnTen {
     public async run(clickedSideCubeAddress: SideCubeAddress) {
         // Если по боковому полю - ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
-        const startCubes = getStartCubesByStartCubesParameters({
+        const startCubesParameters = getStartCubesParameters({
             mainCubes: this.cubes.mainCubesMask,
-            sideCubesMask: this.cubes.sideCubesMask,
             sideCubeAddress: clickedSideCubeAddress,
         });
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
-        if (startCubes === undefined) {
+        if (startCubesParameters === undefined) {
             const cube = getSideCubeViewByAddress(this.cubes.sideCubesMask, clickedSideCubeAddress);
 
             animateCubeBump({
@@ -424,7 +424,7 @@ export class TenOnTen {
         });
 
         const moveMap = new MoveMap({
-            startCubes,
+            startCubesParameters,
             mainFieldCubes,
             app: this,
             sideCubesMask: this.cubes.sideCubesMask,
@@ -444,7 +444,7 @@ export class TenOnTen {
         // пошаговый запуск анимации
         animateMove({
             firstCubeAddress: clickedSideCubeAddress,
-            startCubesCount: startCubes.length,
+            startCubesCount: startCubesParameters.count,
             sideCubesMask: this.cubes.sideCubesMask,
             animationsScript: this.moveMap.animationsScript,
             animationLength,
@@ -467,6 +467,11 @@ export class TenOnTen {
             }
 
             this.blockApp = false;
+        });
+
+        const startCubes = getStartCubesByStartCubesParameters({
+            startCubesParameters,
+            sideCubesMask: this.cubes.sideCubesMask,
         });
 
         // подытоживание - внесение изменений, произошедших в абстрактном moveMap
@@ -747,15 +752,19 @@ export class TenOnTen {
             return;
         }
 
-        const allToFirstInLine = getStartCubesByStartCubesParameters({
+        const startCubesParameters = getStartCubesParameters({
             mainCubes: this.cubes.mainCubesMask,
-            sideCubesMask: this.cubes.sideCubesMask,
             sideCubeAddress,
         });
 
-        if (allToFirstInLine === undefined) {
+        if (!startCubesParameters) {
             return;
         }
+
+        const allToFirstInLine = getStartCubesByStartCubesParameters({
+            startCubesParameters,
+            sideCubesMask: this.cubes.sideCubesMask,
+        });
 
         for (const cube of allToFirstInLine) {
             cube.setReadyToMove(isHovered);

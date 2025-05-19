@@ -1,34 +1,22 @@
 import { CubeView } from '../components/CubeView';
 import {
-    SideCubeAddress,
     SideCubesMask,
 } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
-import { getStartCubesParameters } from './getStartCubesParameters';
+import { StartCubesParameters } from './getStartCubesParameters';
 
 /**
  * Находим все кубики от этого до ближнего к майн в линии относительно этого
  */
 export function getStartCubesByStartCubesParameters({
-    mainCubes,
+    startCubesParameters,
     sideCubesMask,
-    sideCubeAddress: initialCubeAddress,
 }: {
-    mainCubes: Set<CubeView>;
-    sideCubeAddress: SideCubeAddress;
+    startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
-}): CubeView[] | undefined {
-    const startCubesParameters = getStartCubesParameters({
-        mainCubes,
-        sideCubeAddress: initialCubeAddress,
-    });
-
-    if (!startCubesParameters) {
-        return undefined;
-    }
-
+}): CubeView[] {
     const {
         line,
         count,

@@ -7,6 +7,8 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
+import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
+import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
     createSideCubesLineId,
@@ -15,7 +17,7 @@ import {
 } from '../utils/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
-import { SideCubeAddress } from './Cubes';
+import { SideCubeAddress, SideCubesMask } from './Cubes';
 import {
     ActionStep,
     MovingCube,
@@ -65,12 +67,15 @@ export class MoveMap {
 
     public constructor(params: {
         startCubes: CubeView[];
+        sideCubesMask: SideCubesMask;
         mainFieldCubes: CubeView[];
         app: TenOnTen;
     }) {
-        const mainFieldCubes = params.mainFieldCubes;
-
-        const startCubes = params.startCubes;
+        const {
+            mainFieldCubes,
+            sideCubesMask,
+            startCubes,
+        } = params;
 
         const startCubesField = startCubes[0].field.value();
         if (startCubesField === 'main') {
@@ -159,9 +164,11 @@ export class MoveMap {
                 ? BOARD_SIZE - startCubesCount
                 : BOARD_SIZE;
 
-            console.log({
-                cubesCountToAnimate,
-            });
+            const cubeAddressesToMove = getCubeAddressInSideFieldInOrderFromMain(sideCubesLineId).slice(0, cubesCountToAnimate);
+            for (const cubeAddress of cubeAddressesToMove) {
+                const cube = getSideCubeViewByAddress(sideCubesMask, cubeAddress);
+                this.animationsScript.set(cube, animations);
+            }
         }
 
         // Сортируем попавшие в боковое поле м-кубики по времени попадания

@@ -400,8 +400,6 @@ export class TenOnTen {
             originCubeAddress: clickedSideCubeAddress,
         });
 
-        console.log(startCubes);
-
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
             const cube = getSideCubeViewByAddress(this.cubes.sideCubesMask, clickedSideCubeAddress);
@@ -429,6 +427,7 @@ export class TenOnTen {
             startCubes,
             mainFieldCubes,
             app: this,
+            sideCubesMask: this.cubes.sideCubesMask,
         });
         this.moveMap = moveMap;
 

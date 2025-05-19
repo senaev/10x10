@@ -33,7 +33,7 @@ import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getStartCubesParameters } from '../utils/getStartCubesParameters';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
-import { getSideCubeLineId } from '../utils/SideCubesLineIndicator';
+import { getSideCubeLineId } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 
 import { createMoveMap } from './createMoveMap';
 import {

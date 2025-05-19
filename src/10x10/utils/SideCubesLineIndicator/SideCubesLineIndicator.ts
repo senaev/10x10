@@ -1,5 +1,5 @@
-import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
-import { SideCubeAddress } from '../js/Cubes';
+import { Direction, DIRECTIONS } from '../../const/DIRECTIONS';
+import { SideCubeAddress } from '../../js/Cubes';
 
 export type SideCubesLineId = `${SideCubeAddress['field']},${SideCubeAddress['x']},${SideCubeAddress['y']}`;
 

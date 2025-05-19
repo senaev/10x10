@@ -9,7 +9,7 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
-import { getSideCubeLineId } from '../utils/SideCubesLineIndicator';
+import { getSideCubeLineId } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';

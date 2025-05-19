@@ -1,7 +1,7 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { SideCubeAddress } from '../js/Cubes';
 
-import { parseSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
+import { parseSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 
 /**
  * Получаем массив координат кубиков линии в порядке от ближнего к main field до дальнего

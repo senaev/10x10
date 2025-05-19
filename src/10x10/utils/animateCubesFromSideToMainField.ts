@@ -4,7 +4,7 @@ import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
-import { getSideCubeLineId } from './SideCubesLineIndicator';
+import { getSideCubeLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 
 export function animateCubesFromSideToMainField({
     firstCubeAddress: {

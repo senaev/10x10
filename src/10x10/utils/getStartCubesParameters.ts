@@ -5,7 +5,7 @@ import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CubeCoordinates, SideCubeAddress } from '../js/Cubes';
 
 import { getCubeByCoordinates } from './getCubeByCoordinates';
-import { SideCubesLineId, getSideCubeLineId } from './SideCubesLineIndicator';
+import { SideCubesLineId, getSideCubeLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 
 export type StartCubesParameters = {
     line: SideCubesLineId;

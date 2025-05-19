@@ -11,7 +11,7 @@ import {
 } from './makeOneStepForOneCube';
 import { reverseDirection } from './reverseDirection';
 import { searchAdjacentCubes } from './searchAdjacentCubes';
-import { getSideCubeLineId, SideCubesLineId } from './SideCubesLineIndicator';
+import { getSideCubeLineId, SideCubesLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 
 /**
  * Один ход для всех кубиков на доске

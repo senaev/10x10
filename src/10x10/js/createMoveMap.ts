@@ -15,7 +15,7 @@ import {
     getSideCubeLineId,
     parseSideCubesLineId,
     SideCubesLineId,
-} from '../utils/SideCubesLineIndicator';
+} from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
 import { SideCubeAddress, SideCubesMask } from './Cubes';

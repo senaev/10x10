@@ -11,7 +11,7 @@ import {
 } from './makeOneStepForOneCube';
 import { reverseDirection } from './reverseDirection';
 import { searchAdjacentCubes } from './searchAdjacentCubes';
-import { createSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
+import { getSideCubeLineId, SideCubesLineId } from './SideCubesLineIndicator';
 
 /**
  * Один ход для всех кубиков на доске
@@ -70,7 +70,7 @@ export function generateMoveSteps(movingCubes: MovingCube[]): {
                         x: tempMovingCube.x,
                         y: tempMovingCube.y,
                     });
-                    const sideLineId = createSideCubesLineId(oppositeFieldCubeAddress);
+                    const sideLineId = getSideCubeLineId(oppositeFieldCubeAddress);
 
                     const sideLineMovements = mapGetOrSet(sideLinesMovementSteps, sideLineId, []);
                     sideLineMovements.push(stepId);

@@ -12,12 +12,22 @@ import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSide
 import { getCubeByCoordinates } from './getCubeByCoordinates';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { isTheSameAddress } from './isTheSameAddress';
-import { createSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
+import { getSideCubeLineId, SideCubesLineId } from './SideCubesLineIndicator';
 
 export type StartCubesParameters = {
     line: SideCubesLineId;
     count: UnsignedInteger;
 };
+
+// export function getStartCubesParameters({
+//     mainCubes,
+//     sideCubeAddress,
+// }: {
+//     mainCubes: Set<CubeView>;
+//     sideCubeAddress: SideCubeAddress;
+// }): StartCubesParameters | undefined {
+
+// }
 
 /**
  * Находим все кубики от этого до ближнего к майн в линии относительно этого
@@ -25,14 +35,14 @@ export type StartCubesParameters = {
 export function getAllCubesInCursorPositionThatCouldGoToMain({
     mainCubes,
     sideCubesMask,
-    originCubeAddress,
+    sideCubeAddress: initialCubeAddress,
 }: {
     mainCubes: Set<CubeView>;
+    sideCubeAddress: SideCubeAddress;
     sideCubesMask: SideCubesMask;
-    originCubeAddress: SideCubeAddress;
-}): CubeView[] | 'empty' | 'block' {
-    const isVertical = originCubeAddress.field === 'top' || originCubeAddress.field === 'bottom';
-    const isLeftOrTop = originCubeAddress.field === 'left' || originCubeAddress.field === 'top';
+}): CubeView[] | undefined {
+    const isVertical = initialCubeAddress.field === 'top' || initialCubeAddress.field === 'bottom';
+    const isLeftOrTop = initialCubeAddress.field === 'left' || initialCubeAddress.field === 'top';
     const statProp: 'x' | 'y' = isVertical ? 'x' : 'y';
     const dynamicProp: 'x' | 'y' = isVertical ? 'y' : 'x';
 
@@ -54,10 +64,10 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
         : END_OF_ARRAY;
 
     const mainFieldAddress: CubeCoordinates = {
-        x: isVertical ? originCubeAddress.x : 0,
-        y: isVertical ? 0 : originCubeAddress.y,
+        x: isVertical ? initialCubeAddress.x : 0,
+        y: isVertical ? 0 : initialCubeAddress.y,
     };
-    mainFieldAddress[statProp] = originCubeAddress[statProp];
+    mainFieldAddress[statProp] = initialCubeAddress[statProp];
     let countOfCubesThatCanBeMoved = 0;
     for (const key in cellsMain) {
         mainFieldAddress[dynamicProp] = cellsMain[key];
@@ -81,23 +91,22 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
 
     // Если все нули в линии - возвращаем индикатор пустоты
     if (allNullInLine) {
-        return 'empty';
+        return undefined;
     }
 
     // Если сразу за полем кубик - ничего не возвращаем
     if (countOfCubesThatCanBeMoved === 0) {
-        return 'block';
+        return undefined;
     }
 
     const address: SideCubeAddress = {
-        field: originCubeAddress.field,
+        field: initialCubeAddress.field,
         x: 0,
         y: 0,
     };
-    address[statProp] = originCubeAddress[statProp];
-    address[dynamicProp] = originCubeAddress.field === 'top' || originCubeAddress.field === 'left' ? 9 : 0;
+    address[statProp] = initialCubeAddress[statProp];
 
-    const line: SideCubesLineId = createSideCubesLineId(address);
+    const line: SideCubesLineId = getSideCubeLineId(address);
 
     const sideCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(line);
 
@@ -107,7 +116,7 @@ export function getAllCubesInCursorPositionThatCouldGoToMain({
         const cube = getSideCubeViewByAddress(sideCubesMask, sideCubeAddress);
         cubes.push(cube);
 
-        if (isTheSameAddress(originCubeAddress, sideCubeAddress)) {
+        if (isTheSameAddress(initialCubeAddress, sideCubeAddress)) {
             break;
         }
     }

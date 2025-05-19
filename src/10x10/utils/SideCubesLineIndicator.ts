@@ -3,7 +3,7 @@ import { SideCubeAddress } from '../js/Cubes';
 
 export type SideCubesLineId = `${SideCubeAddress['field']},${SideCubeAddress['x']},${SideCubeAddress['y']}`;
 
-export function createSideCubesLineId({
+export function getSideCubeLineId({
     field,
     x,
     y,
@@ -12,23 +12,26 @@ export function createSideCubesLineId({
         throw new Error('Invalid field');
     }
 
+    let resultX = x;
+    let resultY = y;
+
     if (field === 'top' && y !== 9) {
-        throw new Error('Invalid y for top field');
+        resultY = 9;
     }
 
     if (field === 'bottom' && y !== 0) {
-        throw new Error('Invalid y for bottom field');
+        resultY = 0;
     }
 
     if (field === 'left' && x !== 9) {
-        throw new Error('Invalid x for left field');
+        resultX = 9;
     }
 
     if (field === 'right' && x !== 0) {
-        throw new Error('Invalid x for right field');
+        resultX = 0;
     }
 
-    return `${field},${x},${y}`;
+    return `${field},${resultX},${resultY}`;
 }
 
 export function parseSideCubesLineId(indicator: SideCubesLineId): SideCubeAddress {

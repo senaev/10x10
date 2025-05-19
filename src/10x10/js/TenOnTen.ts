@@ -32,7 +32,7 @@ import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
-import { createSideCubesLineId } from '../utils/SideCubesLineIndicator';
+import { getSideCubeLineId } from '../utils/SideCubesLineIndicator';
 
 import {
     createSideCubesMaskWithNullValues,
@@ -397,11 +397,11 @@ export class TenOnTen {
         const startCubes = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubesMask,
             sideCubesMask: this.cubes.sideCubesMask,
-            originCubeAddress: clickedSideCubeAddress,
+            sideCubeAddress: clickedSideCubeAddress,
         });
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
-        if (typeof startCubes === 'string') {
+        if (startCubes === undefined) {
             const cube = getSideCubeViewByAddress(this.cubes.sideCubesMask, clickedSideCubeAddress);
 
             animateCubeBump({
@@ -497,7 +497,7 @@ export class TenOnTen {
         }
 
         // Получаем линию
-        const line = getCubeAddressInSideFieldInOrderFromMain(createSideCubesLineId({
+        const line = getCubeAddressInSideFieldInOrderFromMain(getSideCubeLineId({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field,
@@ -750,10 +750,10 @@ export class TenOnTen {
         const allToFirstInLine = getAllCubesInCursorPositionThatCouldGoToMain({
             mainCubes: this.cubes.mainCubesMask,
             sideCubesMask: this.cubes.sideCubesMask,
-            originCubeAddress: sideCubeAddress,
+            sideCubeAddress,
         });
 
-        if (typeof allToFirstInLine === 'string') {
+        if (allToFirstInLine === undefined) {
             return;
         }
 

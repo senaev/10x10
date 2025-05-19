@@ -11,7 +11,7 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
-    createSideCubesLineId,
+    getSideCubeLineId,
     parseSideCubesLineId,
     SideCubesLineId,
 } from '../utils/SideCubesLineIndicator';
@@ -67,6 +67,7 @@ export class MoveMap {
 
     public constructor(params: {
         startCubes: CubeView[];
+        // startCubesParameters: StartCubesParameters;
         sideCubesMask: SideCubesMask;
         mainFieldCubes: CubeView[];
         app: TenOnTen;
@@ -82,7 +83,7 @@ export class MoveMap {
             throw new Error('startCubesField should not be main');
         }
 
-        const startCubesLineId = createSideCubesLineId({
+        const startCubesLineId = getSideCubeLineId({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field: startCubesField,
@@ -175,7 +176,7 @@ export class MoveMap {
                 time,
             },
         }) => {
-            const sideCubesLineIndicator = createSideCubesLineId(sideCubeAddress);
+            const sideCubesLineIndicator = getSideCubeLineId(sideCubeAddress);
 
             if (linesShifts[sideCubesLineIndicator] === undefined) {
                 linesShifts[sideCubesLineIndicator] = [];

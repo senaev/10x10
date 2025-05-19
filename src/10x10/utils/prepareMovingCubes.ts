@@ -1,14 +1,18 @@
 import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
 
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CubeCoordinates, SideCubesMask } from '../js/CubesViews';
+import { CubeColor } from '../const/CUBE_COLORS';
+import { Direction } from '../const/DIRECTIONS';
+import { CubeCoordinates } from '../js/CubesViews';
 import { getCubeAddressString, MovingCube } from '../js/MovingCube';
-import { MainFieldCubeStateValue } from '../js/TenOnTen';
+import {
+    MainFieldCubeStateValue, SideCubesState,
+} from '../js/TenOnTen';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
-import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from './getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from './getStartCubesParameters';
+import { reverseDirection } from './reverseDirection';
 
 /**
  * Собираем все кубики, которые будут принимать участие в движении по главному полю
@@ -16,11 +20,11 @@ import { StartCubesParameters } from './getStartCubesParameters';
  */
 export function prepareMovingCubes({
     startCubesParameters,
-    sideCubesMask,
+    sideCubesState,
     mainFieldCubes,
 }: {
     startCubesParameters: StartCubesParameters;
-    sideCubesMask: SideCubesMask;
+    sideCubesState: SideCubesState;
     mainFieldCubes: (MainFieldCubeStateValue & CubeCoordinates)[];
 }): MovingCube[] {
     const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder - b.toMineOrder);
@@ -54,10 +58,19 @@ export function prepareMovingCubes({
 
     const startCubesAddresses = getStartCubesByStartCubesParameters({
         startCubesParameters,
-        sideCubesMask,
     });
 
-    const startCubeViews = startCubesAddresses.map((address) => getSideCubeViewByAddress(sideCubesMask, address));
+    const startCubeViews: ({
+        color: CubeColor;
+        field: Direction;
+    } & CubeCoordinates)[] = startCubesAddresses.map((address) => {
+        return {
+            color: sideCubesState[address.field][address.x][address.y].color,
+            x: address.x,
+            y: address.y,
+            field: address.field,
+        };
+    });
 
     // добавляем в маску кубик, с которого начинаем анимацию
     // кубики сразу добавляем на главное поле для расчетов движения
@@ -66,12 +79,12 @@ export function prepareMovingCubes({
         const initialAddress = {
             x: cubeView.x,
             y: cubeView.y,
-            field: cubeView.field.value(),
+            field: cubeView.field,
         };
 
         const toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
-        const field = cubeView.field.value();
+        const field = cubeView.field;
         let startMovingCubeX;
         let startMovingCubeY;
         if (field === 'top' || field === 'bottom') {
@@ -94,8 +107,8 @@ export function prepareMovingCubes({
             initialAddress: getCubeAddressString(initialAddress),
             x: startMovingCubeX,
             y: startMovingCubeY,
-            color: cubeView.color.value(),
-            direction: cubeView.direction.value(),
+            color: cubeView.color,
+            direction: reverseDirection(cubeView.field),
             stepActions: [],
             toMineOrder,
         };

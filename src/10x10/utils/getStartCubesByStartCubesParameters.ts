@@ -1,6 +1,5 @@
 import {
     SideCubeAddress,
-    SideCubesMask,
 } from '../js/CubesViews';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
@@ -13,7 +12,6 @@ export function getStartCubesByStartCubesParameters({
     startCubesParameters,
 }: {
     startCubesParameters: StartCubesParameters;
-    sideCubesMask: SideCubesMask;
 }): SideCubeAddress[] {
     const {
         line,

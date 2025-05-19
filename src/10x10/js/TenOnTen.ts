@@ -5,6 +5,7 @@ import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
+import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
@@ -422,7 +423,6 @@ export class TenOnTen {
 
         const startCubesAddresses = getStartCubesByStartCubesParameters({
             startCubesParameters,
-            sideCubesMask: this.cubes.sideCubesMask,
         });
         const startCubes = startCubesAddresses
             .map((address) => getSideCubeViewByAddress(this.cubes.sideCubesMask, address));
@@ -453,7 +453,11 @@ export class TenOnTen {
                 };
             }),
             app: this,
-            sideCubesMask: this.cubes.sideCubesMask,
+            sideCubesState: mapObjectValues(this.cubes.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cube) => {
+                return {
+                    color: cube.color.value(),
+                };
+            }))),
         });
 
         // блокируем приложение от начала до конца анимации
@@ -670,7 +674,6 @@ export class TenOnTen {
 
         const allToFirstInLineAddresses = getStartCubesByStartCubesParameters({
             startCubesParameters,
-            sideCubesMask: this.cubes.sideCubesMask,
         });
 
         const allToFirstInLine = allToFirstInLineAddresses

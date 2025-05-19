@@ -17,7 +17,7 @@ import {
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
 import {
-    CubeCoordinates, SideCubeAddress, SideCubesMask,
+    CubeCoordinates, SideCubeAddress,
 } from './CubesViews';
 import {
     CubeAddressString,
@@ -25,7 +25,10 @@ import {
     MovingCube,
     MovingCubeStepAction,
 } from './MovingCube';
-import { MainFieldCubeStateValue, TenOnTen } from './TenOnTen';
+import {
+    MainFieldCubeStateValue, SideCubesState,
+    TenOnTen,
+} from './TenOnTen';
 
 export type CubeAnimation = {
     action: CubeAnimationName | null;
@@ -54,7 +57,7 @@ export type AnimationScript = Map<CubeAddressString, CubeAnimation[]>;
  */
 export function createMoveMap (params: {
     startCubesParameters: StartCubesParameters;
-    sideCubesMask: SideCubesMask;
+    sideCubesState: SideCubesState;
     mainFieldCubes: (MainFieldCubeStateValue & CubeCoordinates)[];
     app: TenOnTen;
 }): {
@@ -65,7 +68,7 @@ export function createMoveMap (params: {
 
     const {
         mainFieldCubes,
-        sideCubesMask,
+        sideCubesState,
         startCubesParameters,
     } = params;
 
@@ -74,13 +77,12 @@ export function createMoveMap (params: {
 
     const cubesToMove = prepareMovingCubes({
         startCubesParameters,
-        sideCubesMask,
+        sideCubesState,
         mainFieldCubes,
     });
 
     const startCubeAddresses = getStartCubesByStartCubesParameters({
         startCubesParameters,
-        sideCubesMask,
     });
 
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации

@@ -11,6 +11,7 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from '../utils/getStartCubesParameters';
+import { isTheSameAddress } from '../utils/isTheSameAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
     getSideCubeLineId,
@@ -87,7 +88,7 @@ export function createMoveMap (params: {
         mainFieldCubes,
     });
 
-    const startCubes = getStartCubesByStartCubesParameters({
+    const startCubeAddresses = getStartCubesByStartCubesParameters({
         startCubesParameters,
         sideCubesMask,
     });
@@ -95,7 +96,16 @@ export function createMoveMap (params: {
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
     callTimes(startCubesCount, () => {
         cubesToMove.forEach(({ moving }) => {
-            if (startCubes.includes(moving.cube)) {
+            const isOneOfStartCubes = startCubeAddresses
+                .find((startCubeAddress) => {
+                    if (!moving.direction) {
+                        return false;
+                    }
+
+                    return isTheSameAddress(moving.initialAddress, startCubeAddress);
+                });
+
+            if (isOneOfStartCubes) {
                 const { direction } = moving;
 
                 assertNonEmptyString(direction);

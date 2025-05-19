@@ -1,6 +1,8 @@
 import { CubeView } from '../components/CubeView';
 import { Direction } from '../const/DIRECTIONS';
 
+import { CubeAddress } from './Cubes';
+
 export type ActionStep = 'boom' | Direction | null;
 
 /**
@@ -10,6 +12,7 @@ export type ActionStep = 'boom' | Direction | null;
  * анимации этого хода, м-кубики хранятся в массиве mainMask.arr
  */
 export class MovingCube {
+    public readonly initialAddress: CubeAddress;
     public x: number;
     public y: number;
     public color: string;
@@ -18,12 +21,14 @@ export class MovingCube {
     public cube: CubeView;
 
     public constructor(o: {
+        initialAddress: CubeAddress;
         x: number;
         y: number;
         color: string;
         direction: Direction | null;
         cube: CubeView;
     }) {
+        this.initialAddress = o.initialAddress;
         this.x = o.x;
         this.y = o.y;
         this.color = o.color;

@@ -411,10 +411,12 @@ export class TenOnTen {
             return;
         }
 
-        const startCubes = getStartCubesByStartCubesParameters({
+        const startCubesAddresses = getStartCubesByStartCubesParameters({
             startCubesParameters,
             sideCubesMask: this.cubes.sideCubesMask,
         });
+        const startCubes = startCubesAddresses
+            .map((address) => getSideCubeViewByAddress(this.cubes.sideCubesMask, address));
 
         this.isNewLevel.next(false);
 
@@ -763,10 +765,13 @@ export class TenOnTen {
             return;
         }
 
-        const allToFirstInLine = getStartCubesByStartCubesParameters({
+        const allToFirstInLineAddresses = getStartCubesByStartCubesParameters({
             startCubesParameters,
             sideCubesMask: this.cubes.sideCubesMask,
         });
+
+        const allToFirstInLine = allToFirstInLineAddresses
+            .map((address) => getSideCubeViewByAddress(this.cubes.sideCubesMask, address));
 
         for (const cube of allToFirstInLine) {
             cube.setReadyToMove(isHovered);

@@ -1,10 +1,9 @@
-import { CubeView } from '../components/CubeView';
 import {
+    SideCubeAddress,
     SideCubesMask,
 } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
-import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { StartCubesParameters } from './getStartCubesParameters';
 
 /**
@@ -12,11 +11,10 @@ import { StartCubesParameters } from './getStartCubesParameters';
  */
 export function getStartCubesByStartCubesParameters({
     startCubesParameters,
-    sideCubesMask,
 }: {
     startCubesParameters: StartCubesParameters;
     sideCubesMask: SideCubesMask;
-}): CubeView[] {
+}): SideCubeAddress[] {
     const {
         line,
         count,
@@ -24,11 +22,10 @@ export function getStartCubesByStartCubesParameters({
 
     const sideCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(line);
 
-    const cubes: CubeView[] = [];
+    const cubes: SideCubeAddress[] = [];
     for (let key = 0; key < count; key++) {
         const sideCubeAddress = sideCubeAddresses[key];
-        const cube = getSideCubeViewByAddress(sideCubesMask, sideCubeAddress);
-        cubes.push(cube);
+        cubes.push(sideCubeAddress);
     }
 
     return cubes;

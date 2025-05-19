@@ -1,5 +1,3 @@
-import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
-
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CubeToMove } from '../js/createMoveMap';
@@ -7,6 +5,7 @@ import { SideCubesMask } from '../js/Cubes';
 import { MovingCube } from '../js/MovingCube';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
+import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from './getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from './getStartCubesParameters';
 
@@ -32,6 +31,11 @@ export function prepareMovingCubes({
     // создаем массив из всех кубиков, которые есть на доске
     mainFieldCubesSorted.forEach((cube) => {
         const movingCube = new MovingCube({
+            initialAddress: {
+                x: cube.x,
+                y: cube.y,
+                field: cube.field.value(),
+            },
             x: cube.x,
             y: cube.y,
             color: cube.color.value(),
@@ -45,17 +49,23 @@ export function prepareMovingCubes({
         });
     });
 
-    const startCubes = getStartCubesByStartCubesParameters({
+    const startCubesAddresses = getStartCubesByStartCubesParameters({
         startCubesParameters,
         sideCubesMask,
     });
 
-    assertObject(startCubes);
+    const startCubes = startCubesAddresses.map((address) => getSideCubeViewByAddress(sideCubesMask, address));
 
     // добавляем в маску кубик, с которого начинаем анимацию
     // кубики сразу добавляем на главное поле для расчетов движения
     const startMovingCubes: CubeToMove[] = [];
     startCubes.forEach((cube, i) => {
+        const initialAddress = {
+            x: cube.x,
+            y: cube.y,
+            field: cube.field.value(),
+        };
+
         cube.toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
         const field = cube.field.value();
@@ -78,6 +88,7 @@ export function prepareMovingCubes({
         }
 
         const movingCube = new MovingCube({
+            initialAddress,
             x: startMovingCubeX,
             y: startMovingCubeY,
             color: cube.color.value(),

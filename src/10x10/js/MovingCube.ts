@@ -6,6 +6,12 @@ import { CubeAddress } from './CubesViews';
 
 export type MovingCubeStepAction = 'boom' | Direction | null;
 
+export type CubeAddressString = `${CubeAddress['field']}:${CubeAddress['x']}:${CubeAddress['y']}`;
+
+export function getCubeAddressString(cubeAddress: CubeAddress): CubeAddressString {
+    return `${cubeAddress.field}:${cubeAddress.x}:${cubeAddress.y}`;
+}
+
 /**
  * Мутабельный объект кубика со всеми
  * необходимыми данными для построения карты хода
@@ -13,7 +19,7 @@ export type MovingCubeStepAction = 'boom' | Direction | null;
  * Во время каждого шага параметры кубика могут меняться и добавляется новый шаг
  */
 export type MovingCube = {
-    readonly initialAddress: Readonly<CubeAddress>;
+    readonly initialAddress: CubeAddressString;
     readonly color: string;
     readonly direction: Direction | null;
     readonly stepActions: MovingCubeStepAction[];

@@ -11,7 +11,6 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from '../utils/getStartCubesParameters';
-import { isTheSameAddress } from '../utils/isTheSameAddress';
 import { prepareMovingCubes } from '../utils/prepareMovingCubes';
 import {
     parseSideCubesLineId,
@@ -20,6 +19,7 @@ import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations'
 
 import { SideCubeAddress, SideCubesMask } from './CubesViews';
 import {
+    getCubeAddressString,
     MovingCube,
     MovingCubeStepAction,
 } from './MovingCube';
@@ -99,7 +99,7 @@ export function createMoveMap (params: {
                         return false;
                     }
 
-                    return isTheSameAddress(moving.initialAddress, startCubeAddress);
+                    return moving.initialAddress === getCubeAddressString(startCubeAddress);
                 });
 
             if (isOneOfStartCubes) {

@@ -4,7 +4,7 @@ import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CubeToMove } from '../js/createMoveMap';
 import { SideCubesMask } from '../js/CubesViews';
-import { MovingCube } from '../js/MovingCube';
+import { getCubeAddressString, MovingCube } from '../js/MovingCube';
 
 import { getIncrementalIntegerForMainFieldOrder } from './getIncrementalIntegerForMainFieldOrder';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
@@ -37,11 +37,11 @@ export function prepareMovingCubes({
         assertInteger(toMineOrder);
 
         const movingCube: MovingCube = {
-            initialAddress: {
+            initialAddress: getCubeAddressString({
                 x: cube.x,
                 y: cube.y,
                 field: cube.field.value(),
-            },
+            }),
             toMineOrder,
             x: cube.x,
             y: cube.y,
@@ -95,7 +95,7 @@ export function prepareMovingCubes({
         }
 
         const movingCube: MovingCube = {
-            initialAddress,
+            initialAddress: getCubeAddressString(initialAddress),
             x: startMovingCubeX,
             y: startMovingCubeY,
             color: cubeView.color.value(),

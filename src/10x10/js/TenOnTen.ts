@@ -100,7 +100,6 @@ export class TenOnTen {
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
     private blockApp: boolean;
 
-    private state: CubesState;
     private previousState: CubesState | null = null;
 
     private isNewLevel: Signal<boolean> = new Signal(false);
@@ -549,8 +548,6 @@ export class TenOnTen {
     }
 
     private applyCubesState(state: CubesState) {
-        this.state = state;
-
         this.cubes.sideEach((cube) => {
             cube.removeElementFromDOM();
         });

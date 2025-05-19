@@ -9,6 +9,7 @@ import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddres
 import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { reverseDirection } from '../utils/reverseDirection';
+import { createSideCubesLineId } from '../utils/SideCubesLineIndicator';
 
 import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
@@ -220,12 +221,13 @@ export class Cubes {
             cube.field.next(direction);
             cube.direction.next(reverseDirection(direction));
 
-            // Получаем линию, в которую вставим кубик
-            const line = getCubeAddressInSideFieldInOrderFromMain({
+            const lineId = createSideCubesLineId({
                 x: cube.x,
                 y: cube.y,
                 field: direction,
             });
+            // Получаем линию, в которую вставим кубик
+            const line = getCubeAddressInSideFieldInOrderFromMain(lineId);
 
             // Присваиваем значения координат в поле кубику
             cube.x = line[line.length - 1].x;

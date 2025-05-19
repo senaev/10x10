@@ -4,6 +4,7 @@ import { SideCubeAddress, SideCubesMask } from '../js/Cubes';
 
 import { getCubeAddressInSideFieldInOrderFromMain } from './getCubeAddressInSideFieldInOrderFromMain';
 import { getSideCubeViewByAddress } from './getSideCubeViewByAddress';
+import { createSideCubesLineId } from './SideCubesLineIndicator';
 
 export function animateCubesFromSideToMainField({
     firstCubeAddress: {
@@ -20,11 +21,11 @@ export function animateCubesFromSideToMainField({
 }): void {
     // Получаем линию кубика
     // Коллекция пока в начальном состоянии (до хода)
-    const line = getCubeAddressInSideFieldInOrderFromMain({
+    const line = getCubeAddressInSideFieldInOrderFromMain(createSideCubesLineId({
         x,
         y,
         field,
-    });
+    }));
 
     for (let cubeIndexInLine = 0; cubeIndexInLine < (line.length - startCubesCount); cubeIndexInLine++) {
         const address = line[cubeIndexInLine];

@@ -1,11 +1,15 @@
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { SideCubeAddress } from '../js/Cubes';
 
+import { parseSideCubesLineId, SideCubesLineId } from './SideCubesLineIndicator';
+
 /**
  * Получаем массив координат кубиков линии в порядке от дальнего (относительно main field)
  * до ближайшего
  */
-export function getCubeAddressInSideFieldInOrderFromMain(address: SideCubeAddress): SideCubeAddress[] {
+export function getCubeAddressInSideFieldInOrderFromMain(sideCubesLineId: SideCubesLineId): SideCubeAddress[] {
+    const address = parseSideCubesLineId(sideCubesLineId);
+
     let staticProp: 'x' | 'y';
     let dynamicProp: 'x' | 'y';
     let line: SideCubeAddress[] = [];
@@ -42,5 +46,6 @@ export function getCubeAddressInSideFieldInOrderFromMain(address: SideCubeAddres
             line.push(coords);
         }
     }
+
     return line;
 }

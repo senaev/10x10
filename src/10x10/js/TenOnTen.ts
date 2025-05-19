@@ -32,6 +32,7 @@ import { getLevelCubesPositions } from '../utils/getLevelCubesPositions';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
+import { createSideCubesLineId } from '../utils/SideCubesLineIndicator';
 
 import {
     createSideCubesMaskWithNullValues,
@@ -399,6 +400,8 @@ export class TenOnTen {
             originCubeAddress: clickedSideCubeAddress,
         });
 
+        console.log(startCubes);
+
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (typeof startCubes === 'string') {
             const cube = getSideCubeViewByAddress(this.cubes.sideCubesMask, clickedSideCubeAddress);
@@ -495,11 +498,11 @@ export class TenOnTen {
         }
 
         // Получаем линию
-        const line = getCubeAddressInSideFieldInOrderFromMain({
+        const line = getCubeAddressInSideFieldInOrderFromMain(createSideCubesLineId({
             x: startCubes[0].x,
             y: startCubes[0].y,
             field,
-        });
+        }));
 
         // пробегаемся, меняем значения в коллекции
         for (let key = line.length - 1; key >= startCubes.length; key--) {

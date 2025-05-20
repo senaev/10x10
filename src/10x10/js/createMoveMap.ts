@@ -3,10 +3,13 @@ import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
+import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
+import { getSideFieldByMainFieldCubeAddress } from '../../utils/getSideFieldByMainFieldCubeAddress';
 import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
 import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
@@ -244,6 +247,7 @@ export function createMoveMap ({
     }) => {
         const cubeIsStillOnMainField = x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
         if (cubeIsStillOnMainField) {
+            // Кубик остается на главном поле
             nextMainFieldCubesState[x][y] = {
                 color,
                 direction,
@@ -252,14 +256,22 @@ export function createMoveMap ({
             return;
         }
 
-        // ❗️
+        if (x === -1 && y === -1) {
+            // Кубик взорван
+            return;
+        }
+
+        const sideField = getSideFieldByMainFieldCubeAddress({
+            x,
+            y,
+        });
     });
 
-    const nextSideFieldsCubesState: SideFieldsCubesState = createEmptyFields();
+    const nextSideFieldsCubesState = mapObjectValues(DIRECTION_STEPS, () => createEmptyFields());
 
     return {
         animationsScript,
-        sideFieldsCubesState: nextSideFieldsCubesState,
+        sideFieldsCubesState: nextSideFieldsCubesState as unknown as SideFieldsCubesState,
         mainFieldCubesState: nextMainFieldCubesState,
     };
 }

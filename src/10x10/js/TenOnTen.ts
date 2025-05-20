@@ -513,6 +513,7 @@ export class TenOnTen {
         const {
             animationsScript,
             mainFieldCubesState,
+            sideFieldsCubesState,
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.state.main,
@@ -521,6 +522,10 @@ export class TenOnTen {
                     color: cube.color.value(),
                 };
             }))),
+        });
+
+        DIRECTIONS.forEach((direction) => {
+            this.state[direction] = sideFieldsCubesState[direction];
         });
 
         this.state.main = mainFieldCubesState;

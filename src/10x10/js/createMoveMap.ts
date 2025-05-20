@@ -66,22 +66,24 @@ export function createMoveMap ({
     mainFieldCubesState: MainFieldCubesState;
 }): {
         animationsScript: AnimationScript;
-        cubesToMove: MovingCube[];
+        movingCubes: MovingCube[];
     } {
-    const mainFieldCubes = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
-        .sort((a, b) => a.toMineOrder - b.toMineOrder);
-    const movingCubesInMainField: MovingCube[] = mainFieldCubes.map((cube) => {
-        return {
-            ...cube,
-            initialAddress: getCubeAddressString({
-                x: cube.x,
-                y: cube.y,
-                field: 'main',
-            }),
-            stepActions: [],
-        };
-    });
+    // Собираем кубики, которые уже на главном поле
+    const movingCubesInMainField: MovingCube[] = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
+        .sort((a, b) => a.toMineOrder - b.toMineOrder)
+        .map((cube) => {
+            return {
+                ...cube,
+                initialAddress: getCubeAddressString({
+                    x: cube.x,
+                    y: cube.y,
+                    field: 'main',
+                }),
+                stepActions: [],
+            };
+        });
 
+    // Находим стартовые кубики
     const {
         startCubes,
         otherCubes: otherCubesInStartLine,
@@ -92,53 +94,47 @@ export function createMoveMap ({
     const startCubesCount = startCubesParameters.count;
 
     // Стартовые кубики сразу добавляем на главное поле для расчетов движения
-    const startMovingCubes: MovingCube[] = [];
-    startCubes.forEach((cube, i) => {
+    const startMovingCubes: MovingCube[] = startCubes.map((cube, i) => {
         const color = sideCubesState[cube.field][cube.x][cube.y].color;
 
         const toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
         const field = cube.field;
-        let startMovingCubeX;
-        let startMovingCubeY;
-        if (field === 'top' || field === 'bottom') {
-            startMovingCubeX = cube.x;
-            if (field === 'top') {
-                startMovingCubeY = startCubesCount - i - 1;
-            } else {
-                startMovingCubeY = BOARD_SIZE - startCubesCount + i;
-            }
+        const coordinates = {
+            x: cube.x,
+            y: cube.y,
+        };
+        const mainOffset = startCubesCount - i - 1;
+        const secondaryOffset = BOARD_SIZE - startCubesCount + i;
+        if (field === 'top') {
+            coordinates.y = mainOffset;
+        } else if (field === 'bottom') {
+            coordinates.y = secondaryOffset;
+        } else if (field === 'left') {
+            coordinates.x = mainOffset;
         } else {
-            if (field === 'left') {
-                startMovingCubeX = startCubesCount - i - 1;
-            } else {
-                startMovingCubeX = BOARD_SIZE - startCubesCount + i;
-            }
-            startMovingCubeY = cube.y;
+            coordinates.x = secondaryOffset;
         }
 
-        const movingCube: MovingCube = {
+        return {
             initialAddress: getCubeAddressString(cube),
-            x: startMovingCubeX,
-            y: startMovingCubeY,
+            x: coordinates.x,
+            y: coordinates.y,
             color,
             direction: reverseDirection(cube.field),
             stepActions: [],
             toMineOrder,
         };
-
-        startMovingCubes.push(movingCube);
     });
 
-    const cubesToMove = [
+    const movingCubes = [
         ...startMovingCubes,
         ...movingCubesInMainField,
     ];
 
-    const animationsScript: AnimationScript = {};
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
     callTimes(startCubesCount, () => {
-        cubesToMove.forEach((moving) => {
+        movingCubes.forEach((moving) => {
             const isOneOfStartCubes = startCubes
                 .find((startCubeAddress) => {
                     if (!moving.direction) {
@@ -160,21 +156,25 @@ export function createMoveMap ({
         });
     });
 
+    // Генерируем шаги анимации для всех кубиков на главном поле
+    // Заодно высчитываем вхождения кубиков в боковые линии, чтобы позже сгенерировать анимации для них
     const {
         sideLinesMovementSteps,
         stepsCount: mainAnimationStepsCount,
-    } = generateMoveSteps(cubesToMove);
+    } = generateMoveSteps(movingCubes);
 
-    // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
-    for (const moving of cubesToMove) {
+    // Проходимся в цикле по всем кубикам, которые анимировались на главном поле и создаем для них анимации
+    const animationsScript: AnimationScript = {};
+    for (const moving of movingCubes) {
         const steps = moving.stepActions;
 
-        const { animations } = stepsToAnimations(steps);
-
+        const animations = stepsToAnimations(steps);
         animationsScript[moving.initialAddress] = animations;
     }
 
     const sideCubesActions: Record<CubeAddressString, MovingCubeStepAction[]> = {};
+    // Создаем массив с действиями для кубиков, которые будут двигаться
+    // в сторону главного поля из боковой линии вместе со стартовыми кубиками
     otherCubesInStartLine.forEach((cube) => {
         const cubeAddressString = getCubeAddressString(cube);
 
@@ -186,6 +186,8 @@ export function createMoveMap ({
         });
     });
 
+    // Двигаем кубики, которые находятся в боковых линиях дальше вбок в те моменты,
+    // когда кубики с главного поля уезжают в боковую линию
     const compoundAnimationStepsCount = startCubesCount + mainAnimationStepsCount;
     for (const [
         sideCubesLineId,
@@ -217,16 +219,17 @@ export function createMoveMap ({
         }
     }
 
+    // Создаем анимации для кубиков в боковых линиях
     for (const [
         cubeAddressString,
         actions,
     ] of getObjectEntries(sideCubesActions)) {
-        const { animations } = stepsToAnimations(actions);
+        const animations = stepsToAnimations(actions);
         animationsScript[cubeAddressString] = animations;
     }
 
     return {
         animationsScript,
-        cubesToMove,
+        movingCubes,
     };
 }

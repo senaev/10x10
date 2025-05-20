@@ -20,8 +20,11 @@ import {
 } from '../components/UndoButton';
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { CUBE_COLORS_ARRAY, CubeColor } from '../const/CUBE_COLORS';
+import {
+    CUBE_COLORS, CUBE_COLORS_ARRAY, CubeColor,
+} from '../const/CUBE_COLORS';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
+import { FIELD_OFFSETS } from '../const/FIELD_OFFSETS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
@@ -95,6 +98,44 @@ export type TenOnTenState = {
     isNewLevel: boolean;
 };
 
+function repaintDebugPanel({
+    state,
+    element,
+}: {
+    state: CubesState;
+    element: HTMLElement;
+}) {
+    element.innerHTML = '';
+    getObjectEntries(state).forEach(([
+        field,
+        cubes,
+    ]) => {
+        cubes.forEach((row, x) => {
+            row.forEach((cube, y) => {
+                if (!cube) {
+                    return;
+                }
+
+                const cubeElement = document.createElement('div');
+                cubeElement.classList.add('debugPanelCube');
+                cubeElement.style.backgroundColor = CUBE_COLORS[cube.color];
+
+                const oneCubeSize = 100 / (BOARD_SIZE * 3);
+                const position = {
+                    left: FIELD_OFFSETS[field].x + x + BOARD_SIZE,
+                    top: FIELD_OFFSETS[field].y + y + BOARD_SIZE,
+                };
+
+                cubeElement.style.left = `${position.left * oneCubeSize}%`;
+                cubeElement.style.top = `${position.top * oneCubeSize}%`;
+
+                element.appendChild(cubeElement);
+            });
+        });
+
+    });
+}
+
 export class TenOnTen {
     public readonly tenOnTenContainer: HTMLElement;
     public readonly levelInfoPanel: HTMLDivElement;
@@ -153,6 +194,19 @@ export class TenOnTen {
         this.cubesContainer = document.createElement('div');
         this.cubesContainer.classList.add('cubesContainer');
         this.tenOnTenContainer.appendChild(this.cubesContainer);
+
+        if (localStorage.show_debug_panel) {
+            const debugPanel = document.createElement('div');
+            debugPanel.classList.add('debugPanel');
+            container.appendChild(debugPanel);
+
+            setInterval(() => {
+                repaintDebugPanel({
+                    state: this.state,
+                    element: debugPanel,
+                });
+            }, 1000);
+        }
 
         function getBodySizeValue(): PixelSize {
             return {
@@ -463,7 +517,7 @@ export class TenOnTen {
         });
 
         const {
-            cubesToMove,
+            movingCubes: cubesToMove,
             animationsScript,
         } = createMoveMap({
             startCubesParameters,

@@ -5,9 +5,7 @@ import { Direction } from '../../const/DIRECTIONS';
 import { CubeAnimation } from '../../js/createMoveMap';
 import { MovingCubeStepAction } from '../../js/MovingCube';
 
-export function stepsToAnimations(steps: MovingCubeStepAction[]): {
-    animations: CubeAnimation[];
-} {
+export function stepsToAnimations(steps: MovingCubeStepAction[]): CubeAnimation[] {
     // массив с действиями одного кубика
     const actions: {
         action: CubeAnimationName | Direction | null;
@@ -54,7 +52,7 @@ export function stepsToAnimations(steps: MovingCubeStepAction[]): {
 
     // итоговый массив, в котором продолжительность анимаций
     // и задержки выстроены, как надо
-    const nullToDelayActions: CubeAnimation[] = [];
+    const animations: CubeAnimation[] = [];
     let delay = 0;
     for (let key = 0; key < actions.length; key++) {
         const {
@@ -62,12 +60,8 @@ export function stepsToAnimations(steps: MovingCubeStepAction[]): {
             duration,
         } = actions[key];
 
-        // if (action === 'sb' || action === 'sl' || action === 'sr' || action === 'st') {
-        //     throw new Error('one move action should be removed during animation creation');
-        // }
-
         if (action !== null) {
-            nullToDelayActions.push({
+            animations.push({
                 action,
                 duration,
                 delay,
@@ -78,7 +72,5 @@ export function stepsToAnimations(steps: MovingCubeStepAction[]): {
         delay += duration;
     }
 
-    return {
-        animations: nullToDelayActions,
-    };
+    return animations;
 };

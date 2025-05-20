@@ -20,6 +20,23 @@ body {
     align-items: center;
 }
 
+.debugPanel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 150px;
+    height: 150px;
+    background-color: #00000022;
+    opacity: 0.8;
+}
+
+.debugPanelCube {
+    position: absolute;
+    width: calc(100% / 30);
+    height: calc(100% / 30);
+}
+
+
 .cubesContainer {
     position: absolute;
 

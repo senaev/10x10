@@ -115,7 +115,7 @@ export class CubesViews {
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
-    public _getSideCube(address: SideCubeAddress): CubeView {
+    public getSideCube(address: SideCubeAddress): CubeView {
         return getSideCubeViewByAddress(this.sideCubesMask, address)!;
     }
 

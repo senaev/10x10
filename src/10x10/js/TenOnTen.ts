@@ -528,7 +528,7 @@ export class TenOnTen {
         const shiftedCubesToRemove: CubeView[] = [];
         moves.forEach((move) => {
             if (move.type === 'shift') {
-                const cube = this.cubesViews._getSideCube(move.initialAddress);
+                const cube = this.cubesViews.getSideCube(move.initialAddress);
                 shiftedCubesToRemove.push(cube);
                 return;
             }
@@ -555,7 +555,7 @@ export class TenOnTen {
             if (address.field === 'main') {
                 cube = this.cubesViews._getMainCube(address)!;
             } else {
-                cube = this.cubesViews._getSideCube(address as SideCubeAddress);
+                cube = this.cubesViews.getSideCube(address as SideCubeAddress);
             }
 
             animationScriptWithViews.set(cube, animations);
@@ -617,7 +617,7 @@ export class TenOnTen {
 
         // пробегаемся, меняем значения в коллекции
         for (let key = line.length - 1; key >= startCubes.length; key--) {
-            const prevCube = this.cubesViews._getSideCube(line[key - startCubes.length])!;
+            const prevCube = this.cubesViews.getSideCube(line[key - startCubes.length])!;
             this.cubesViews._setSideCube(line[key], prevCube);
             prevCube.x = line[key].x;
             prevCube.y = line[key].y;
@@ -884,7 +884,7 @@ export class TenOnTen {
             for (let x = 0; x < BOARD_SIZE; x++) {
                 fieldValue[x] = [];
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    const cube = cubesLocal._getSideCube({
+                    const cube = cubesLocal.getSideCube({
                         field,
                         x,
                         y,

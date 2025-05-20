@@ -1,3 +1,5 @@
+import { separateArray } from 'senaev-utils/src/utils/Array/separateArray/separateArray';
+
 import {
     SideCubeAddress,
 } from '../js/CubesViews';
@@ -12,7 +14,10 @@ export function getStartCubesByStartCubesParameters({
     startCubesParameters,
 }: {
     startCubesParameters: StartCubesParameters;
-}): SideCubeAddress[] {
+}): {
+        startCubes: SideCubeAddress[];
+        otherCubes: SideCubeAddress[];
+    } {
     const {
         line,
         count,
@@ -20,11 +25,13 @@ export function getStartCubesByStartCubesParameters({
 
     const sideCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(line);
 
-    const cubes: SideCubeAddress[] = [];
-    for (let key = 0; key < count; key++) {
-        const sideCubeAddress = sideCubeAddresses[key];
-        cubes.push(sideCubeAddress);
-    }
+    const [
+        startCubes,
+        otherCubes,
+    ] = separateArray(sideCubeAddresses, (_, i) => i < count);
 
-    return cubes;
+    return {
+        startCubes,
+        otherCubes,
+    };
 }

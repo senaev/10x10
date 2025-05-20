@@ -1,23 +1,30 @@
 import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
+import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
-import { CubeAnimationName } from '../components/CubeView';
+import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { CubeColor } from '../const/CUBE_COLORS';
+import { Direction } from '../const/DIRECTIONS';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
+import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
+import { getMainFieldCubesWithCoordinatesFromState } from '../utils/getMainFieldCubesWithCoordinatesFromState';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { StartCubesParameters } from '../utils/getStartCubesParameters';
-import { prepareMovingCubes } from '../utils/prepareMovingCubes';
+import { reverseDirection } from '../utils/reverseDirection';
 import {
     parseSideCubesLineId,
 } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 import { stepsToAnimations } from '../utils/stepsToAnimations/stepsToAnimations';
 
 import {
-    CubeCoordinates, SideCubeAddress,
+    CubeCoordinates,
+    SideCubeAddress,
 } from './CubesViews';
 import {
     CubeAddressString,
@@ -26,8 +33,8 @@ import {
     MovingCubeStepAction,
 } from './MovingCube';
 import {
-    MainFieldCubeStateValue, SideCubesState,
-    TenOnTen,
+    MainFieldCubesState,
+    SideCubesState,
 } from './TenOnTen';
 
 export type CubeAnimation = {
@@ -46,7 +53,8 @@ export type ToSideAction = {
     movingCube: MovingCube;
 };
 
-export type AnimationScript = Map<CubeAddressString, CubeAnimation[]>;
+export type AnimationScript = Record<CubeAddressString, CubeAnimation[]>;
+export type AnimationScriptWithViews = Map<CubeView, CubeAnimation[]>;
 
 /**
  * Класс для удобной работы с абстрактным классом MainMask.
@@ -55,40 +63,121 @@ export type AnimationScript = Map<CubeAddressString, CubeAnimation[]>;
  * Предоставляет удобный интерфейс для доступа к методам построения хода
  * для основного приложения.
  */
-export function createMoveMap (params: {
+export function createMoveMap ({
+    sideCubesState,
+    startCubesParameters,
+    mainFieldCubesState,
+}: {
     startCubesParameters: StartCubesParameters;
     sideCubesState: SideCubesState;
-    mainFieldCubes: (MainFieldCubeStateValue & CubeCoordinates)[];
-    app: TenOnTen;
+    mainFieldCubesState: MainFieldCubesState;
 }): {
         animationsScript: AnimationScript;
         cubesToMove: MovingCube[];
     } {
-    const animationsScript: AnimationScript = new Map();
+    const mainFieldCubes = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState);
 
-    const {
-        mainFieldCubes,
-        sideCubesState,
+    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder - b.toMineOrder);
+
+    // Основной массив со значениями
+    // Сюда будут попадать м-кубики, участвующие в анимации
+    const movingCubesInMainField: MovingCube[] = [];
+
+    // создаем массив из всех кубиков, которые есть на доске
+    mainFieldCubesSorted.forEach((cube) => {
+        const toMineOrder = cube.toMineOrder;
+
+        assertInteger(toMineOrder);
+
+        const movingCube: MovingCube = {
+            initialAddress: getCubeAddressString({
+                x: cube.x,
+                y: cube.y,
+                field: 'main',
+            }),
+            toMineOrder,
+            x: cube.x,
+            y: cube.y,
+            color: cube.color,
+            direction: cube.direction,
+            stepActions: [],
+        };
+
+        movingCubesInMainField.push(movingCube);
+    });
+
+    const { startCubes, otherCubes: otherCubesInStartLine } = getStartCubesByStartCubesParameters({
         startCubesParameters,
-    } = params;
+    });
+
+    const startCubeViews: ({
+        color: CubeColor;
+        field: Direction;
+    } & CubeCoordinates)[] = startCubes.map((address) => {
+        return {
+            color: sideCubesState[address.field][address.x][address.y].color,
+            x: address.x,
+            y: address.y,
+            field: address.field,
+        };
+    });
+
+    // Стартовые кубики сразу добавляем на главное поле для расчетов движения
+    const startMovingCubes: MovingCube[] = [];
+    startCubeViews.forEach((cubeView, i) => {
+        const initialAddress = {
+            x: cubeView.x,
+            y: cubeView.y,
+            field: cubeView.field,
+        };
+
+        const toMineOrder = getIncrementalIntegerForMainFieldOrder();
+
+        const field = cubeView.field;
+        let startMovingCubeX;
+        let startMovingCubeY;
+        if (field === 'top' || field === 'bottom') {
+            startMovingCubeX = cubeView.x;
+            if (field === 'top') {
+                startMovingCubeY = startCubeViews.length - i - 1;
+            } else {
+                startMovingCubeY = BOARD_SIZE - startCubeViews.length + i;
+            }
+        } else {
+            if (field === 'left') {
+                startMovingCubeX = startCubeViews.length - i - 1;
+            } else {
+                startMovingCubeX = BOARD_SIZE - startCubeViews.length + i;
+            }
+            startMovingCubeY = cubeView.y;
+        }
+
+        const movingCube: MovingCube = {
+            initialAddress: getCubeAddressString(initialAddress),
+            x: startMovingCubeX,
+            y: startMovingCubeY,
+            color: cubeView.color,
+            direction: reverseDirection(cubeView.field),
+            stepActions: [],
+            toMineOrder,
+        };
+
+        startMovingCubes.push(movingCube);
+    });
+
+    const cubesToMove = [
+        ...startMovingCubes,
+        ...movingCubesInMainField,
+    ];
 
     const startCubesLineId = startCubesParameters.line;
     const startCubesCount = startCubesParameters.count;
 
-    const cubesToMove = prepareMovingCubes({
-        startCubesParameters,
-        sideCubesState,
-        mainFieldCubes,
-    });
-
-    const startCubeAddresses = getStartCubesByStartCubesParameters({
-        startCubesParameters,
-    });
-
+    const animationsScript: AnimationScript = {};
     // Добавим шаги анимации для выплывающих из боковой линии кубиков в начало анимации
     callTimes(startCubesCount, () => {
         cubesToMove.forEach((moving) => {
-            const isOneOfStartCubes = startCubeAddresses
+            const isOneOfStartCubes = startCubes
                 .find((startCubeAddress) => {
                     if (!moving.direction) {
                         return false;
@@ -111,7 +200,7 @@ export function createMoveMap (params: {
 
     const {
         sideLinesMovementSteps,
-        stepsCount,
+        stepsCount: mainAnimationStepsCount,
     } = generateMoveSteps(cubesToMove);
 
     // Проходимся в цикле по всем кубикам, которые анимировались на главном поле
@@ -120,24 +209,27 @@ export function createMoveMap (params: {
 
         const { animations } = stepsToAnimations(steps);
 
-        animationsScript.set(moving.initialAddress, animations);
+        animationsScript[moving.initialAddress] = animations;
     }
 
-    const compoundAnimationSteps = startCubesCount + stepsCount;
+    const sideCubesActions: Record<CubeAddressString, MovingCubeStepAction[]> = {};
+    otherCubesInStartLine.forEach((cube) => {
+        const cubeAddressString = getCubeAddressString(cube);
+
+        const actions: MovingCubeStepAction[] = [];
+        sideCubesActions[cubeAddressString] = actions;
+
+        callTimes(startCubesCount, () => {
+            actions.push(reverseDirection(cube.field));
+        });
+    });
+
+    const compoundAnimationStepsCount = startCubesCount + mainAnimationStepsCount;
     for (const [
         sideCubesLineId,
         toSideTimes,
     ] of sideLinesMovementSteps.entries()) {
         const sideCubeLineId = parseSideCubesLineId(sideCubesLineId);
-
-        const action = sideCubeLineId.field;
-        const actions: MovingCubeStepAction[] = createArray(compoundAnimationSteps, null);
-        for (const stepId of toSideTimes) {
-            actions[startCubesCount + stepId] = action;
-        }
-
-        const { animations } = stepsToAnimations(actions);
-
         const cubesCountToAnimate = sideCubesLineId === startCubesLineId
             ? BOARD_SIZE - startCubesCount
             : BOARD_SIZE;
@@ -148,8 +240,27 @@ export function createMoveMap (params: {
 
         for (const cubeAddress of cubeAddressesToMove) {
             const cubeAddressString = getCubeAddressString(cubeAddress);
-            animationsScript.set(cubeAddressString, animations);
+            let actions: MovingCubeStepAction[] = sideCubesActions[cubeAddressString];
+            if (!actions) {
+                actions = [];
+                sideCubesActions[cubeAddressString] = actions;
+            }
+
+            const nullActions = createArray(compoundAnimationStepsCount - actions.length, null);
+            actions.push(...nullActions);
+            const action = sideCubeLineId.field;
+            for (const stepId of toSideTimes) {
+                actions[startCubesCount + stepId] = action;
+            }
         }
+    }
+
+    for (const [
+        cubeAddressString,
+        actions,
+    ] of getObjectEntries(sideCubesActions)) {
+        const { animations } = stepsToAnimations(actions);
+        animationsScript[cubeAddressString] = animations;
     }
 
     return {

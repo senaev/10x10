@@ -5,6 +5,7 @@ import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { cloneObject } from 'senaev-utils/src/utils/Object/cloneObject/cloneObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
+import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
 import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
@@ -35,14 +36,18 @@ import { getStartCubesParameters } from '../utils/getStartCubesParameters';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
 import { getSideCubeLineId } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 
-import { createMoveMap } from './createMoveMap';
+import {
+    AnimationScriptWithViews, createMoveMap, CubeAnimation,
+} from './createMoveMap';
 import {
     createSideCubesMaskWithNullValues,
     CubeAddress,
+    CubeCoordinates,
     CubesViews,
     findCubeInSideCubes,
     SideCubeAddress,
 } from './CubesViews';
+import { parseCubeAddressString } from './MovingCube';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;
@@ -64,6 +69,10 @@ export type MainFieldCubeStateValue = {
     toMineOrder: UnsignedInteger;
 };
 
+export type MainFieldCubeWithCoordinates = MainFieldCubeStateValue & CubeCoordinates;
+
+export type MainFieldCubesState = (MainFieldCubeStateValue | null)[][];
+
 export type SideFieldCubeStateValue = {
     color: CubeColor;
 };
@@ -74,8 +83,6 @@ export type SideCubesState = {
     top: SideFieldCubeStateValue[][];
     bottom: SideFieldCubeStateValue[][];
 };
-
-export type MainFieldCubesState = (MainFieldCubeStateValue | null)[][];
 
 export type CubesState = SideCubesState & {
     main: MainFieldCubesState;
@@ -438,7 +445,7 @@ export class TenOnTen {
             return;
         }
 
-        const startCubesAddresses = getStartCubesByStartCubesParameters({
+        const { startCubes: startCubesAddresses } = getStartCubesByStartCubesParameters({
             startCubesParameters,
         });
         const startCubes = startCubesAddresses
@@ -460,16 +467,7 @@ export class TenOnTen {
             animationsScript,
         } = createMoveMap({
             startCubesParameters,
-            mainFieldCubes: mainFieldCubes.map((cube) => {
-                return {
-                    color: cube.color.value(),
-                    direction: cube.direction.value(),
-                    toMineOrder: cube.toMineOrder!,
-                    x: cube.x,
-                    y: cube.y,
-                };
-            }),
-            app: this,
+            mainFieldCubesState: this.state.main,
             sideCubesState: mapObjectValues(this.cubesViews.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cube) => {
                 return {
                     color: cube.color.value(),
@@ -481,18 +479,26 @@ export class TenOnTen {
         // минус один - потому, что в последний такт обычно анимация чисто символическая
         this.blockApp = true;
 
-        // поскольку у каждого кубика одинаковое число шагов анимации, чтобы
-        // узнать общую продолжительность анимации, просто берем длину шагов первого попавшегося кубика
-        const animationLength = cubesToMove[0].stepActions.length;
+        const animationScriptWithViews: AnimationScriptWithViews = new Map<CubeView, CubeAnimation[]>();
+
+        getObjectEntries(animationsScript).forEach(([
+            cubeAddressString,
+            animations,
+        ]) => {
+            const address = parseCubeAddressString(cubeAddressString);
+            let cube: CubeView;
+            if (address.field === 'main') {
+                cube = this.cubesViews._getMainCube(address)!;
+            } else {
+                cube = this.cubesViews._getSideCube(address as SideCubeAddress);
+            }
+
+            animationScriptWithViews.set(cube, animations);
+        });
 
         // пошаговый запуск анимации
         animateMove({
-            firstCubeAddress: clickedSideCubeAddress,
-            startCubesCount: startCubesParameters.count,
-            sideCubesMask: this.cubesViews.sideCubesMask,
-            animationsScript,
-            animationLength,
-            cubes: this.cubesViews,
+            animationScriptWithViews,
         }).then(() => {
             // разблокируем кнопку назад, если не случился переход на новый уровень
             // иначе - блокируем
@@ -682,7 +688,7 @@ export class TenOnTen {
             return;
         }
 
-        const allToFirstInLineAddresses = getStartCubesByStartCubesParameters({
+        const { startCubes: allToFirstInLineAddresses } = getStartCubesByStartCubesParameters({
             startCubesParameters,
         });
 

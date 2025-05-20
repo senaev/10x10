@@ -86,11 +86,21 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
 export class CubesViews {
     public readonly _app: TenOnTen;
     public sideCubesMask: SideCubesMask;
-    public mainCubesMask: Set<CubeView> = new Set();
+    public mainCubesSet: Set<CubeView> = new Set();
 
     public constructor({ app }: { app: TenOnTen }) {
         this._app = app;
         this.sideCubesMask = createSideCubesMaskWithNullValues();
+    }
+
+    public clear() {
+        this.sideEach((cube) => {
+            cube?.removeElementFromDOM();
+        });
+
+        this.mainCubesSet.forEach((cube) => {
+            cube.removeElementFromDOM();
+        });
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
@@ -114,22 +124,22 @@ export class CubesViews {
         return getCubeByCoordinates({
             x,
             y,
-        }, this.mainCubesMask);
+        }, this.mainCubesSet);
     }
 
     public _addMainCube(cube: CubeView) {
-        this.mainCubesMask.add(cube);
+        this.mainCubesSet.add(cube);
     }
 
     public _removeMainCube({ x, y }: CubeCoordinates) {
         const cube = getCubeByCoordinates({
             x,
             y,
-        }, this.mainCubesMask);
+        }, this.mainCubesSet);
 
         assertObject(cube, 'cannot delete cube from mainCubes');
 
-        this.mainCubesMask.delete(cube);
+        this.mainCubesSet.delete(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек

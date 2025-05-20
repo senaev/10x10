@@ -238,6 +238,7 @@ export function createMoveMap ({
 
     // Высчитываем новый стейт приложения
     const nextMainFieldCubesState: MainFieldCubesState = createEmptyFields();
+    const nextSideFieldsCubesState = mapObjectValues(DIRECTION_STEPS, () => createEmptyFields()) as unknown as SideFieldsCubesState;
     movingCubes.forEach(({
         x,
         y,
@@ -265,13 +266,15 @@ export function createMoveMap ({
             x,
             y,
         });
-    });
 
-    const nextSideFieldsCubesState = mapObjectValues(DIRECTION_STEPS, () => createEmptyFields());
+        nextSideFieldsCubesState[sideField.field][sideField.x][sideField.y] = {
+            color,
+        };
+    });
 
     return {
         animationsScript,
-        sideFieldsCubesState: nextSideFieldsCubesState as unknown as SideFieldsCubesState,
+        sideFieldsCubesState: nextSideFieldsCubesState,
         mainFieldCubesState: nextMainFieldCubesState,
     };
 }

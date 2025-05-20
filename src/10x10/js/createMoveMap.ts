@@ -30,7 +30,7 @@ import {
 } from './MovingCube';
 import {
     MainFieldCubesState,
-    SideCubesState,
+    SideFieldsCubesState,
 } from './TenOnTen';
 
 export type CubeAnimation = {
@@ -52,21 +52,26 @@ export type ToSideAction = {
 export type AnimationScript = Record<CubeAddressString, CubeAnimation[]>;
 export type AnimationScriptWithViews = Map<CubeView, CubeAnimation[]>;
 
+function createEmptyFields(): null[][] {
+    return createArray(BOARD_SIZE).map(() => createArray(BOARD_SIZE, null));
+}
+
 /**
  * На вход дается текущий стейт и параметры хода
  * На выходе данные об изменениях стейта по кубикам и список анимаций для каждого кубика
  */
 export function createMoveMap ({
-    sideCubesState,
+    sideFieldsCubesState,
     startCubesParameters,
     mainFieldCubesState,
 }: {
     startCubesParameters: StartCubesParameters;
-    sideCubesState: SideCubesState;
+    sideFieldsCubesState: SideFieldsCubesState;
     mainFieldCubesState: MainFieldCubesState;
 }): {
         animationsScript: AnimationScript;
-        movingCubes: MovingCube[];
+        sideFieldsCubesState: SideFieldsCubesState;
+        mainFieldCubesState: MainFieldCubesState;
     } {
     // Собираем кубики, которые уже на главном поле
     const movingCubesInMainField: MovingCube[] = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
@@ -95,7 +100,7 @@ export function createMoveMap ({
 
     // Стартовые кубики сразу добавляем на главное поле для расчетов движения
     const startMovingCubes: MovingCube[] = startCubes.map((cube, i) => {
-        const color = sideCubesState[cube.field][cube.x][cube.y].color;
+        const color = sideFieldsCubesState[cube.field][cube.x][cube.y].color;
 
         const toMineOrder = getIncrementalIntegerForMainFieldOrder();
 
@@ -228,8 +233,33 @@ export function createMoveMap ({
         animationsScript[cubeAddressString] = animations;
     }
 
+    // Высчитываем новый стейт приложения
+    const nextMainFieldCubesState: MainFieldCubesState = createEmptyFields();
+    movingCubes.forEach(({
+        x,
+        y,
+        color,
+        direction,
+        toMineOrder,
+    }) => {
+        const cubeIsStillOnMainField = x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
+        if (cubeIsStillOnMainField) {
+            nextMainFieldCubesState[x][y] = {
+                color,
+                direction,
+                toMineOrder,
+            };
+            return;
+        }
+
+        // ❗️
+    });
+
+    const nextSideFieldsCubesState: SideFieldsCubesState = createEmptyFields();
+
     return {
         animationsScript,
-        movingCubes,
+        sideFieldsCubesState: nextSideFieldsCubesState,
+        mainFieldCubesState: nextMainFieldCubesState,
     };
 }

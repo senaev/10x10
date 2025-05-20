@@ -80,14 +80,14 @@ export type SideFieldCubeStateValue = {
     color: CubeColor;
 };
 
-export type SideCubesState = {
+export type SideFieldsCubesState = {
     left: SideFieldCubeStateValue[][];
     right: SideFieldCubeStateValue[][];
     top: SideFieldCubeStateValue[][];
     bottom: SideFieldCubeStateValue[][];
 };
 
-export type CubesState = SideCubesState & {
+export type CubesState = SideFieldsCubesState & {
     main: MainFieldCubesState;
 };
 
@@ -499,12 +499,6 @@ export class TenOnTen {
             return;
         }
 
-        const { startCubes: startCubesAddresses } = getStartCubesByStartCubesParameters({
-            startCubesParameters,
-        });
-        const startCubes = startCubesAddresses
-            .map((address) => getSideCubeViewByAddress(this.cubesViews.sideCubesMask, address));
-
         this.isNewLevel.next(false);
 
         // создаем маску для возможности возврата хода
@@ -517,17 +511,19 @@ export class TenOnTen {
         });
 
         const {
-            movingCubes: cubesToMove,
             animationsScript,
+            mainFieldCubesState,
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.state.main,
-            sideCubesState: mapObjectValues(this.cubesViews.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cube) => {
+            sideFieldsCubesState: mapObjectValues(this.cubesViews.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cube) => {
                 return {
                     color: cube.color.value(),
                 };
             }))),
         });
+
+        this.state.main = mainFieldCubesState;
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
@@ -572,14 +568,6 @@ export class TenOnTen {
             }
 
             this.blockApp = false;
-        });
-
-        // подытоживание - внесение изменений, произошедших в абстрактном moveMap
-        // в реальную коллекцию cubes
-        this.cubesViews._mergeMoveMap({
-            movingCubes: cubesToMove,
-            startCubes,
-            // toSideActions: toSideActions.map(({ movingCube }) => movingCube),
         });
 
         this.checkStepEnd();
@@ -662,7 +650,7 @@ export class TenOnTen {
         });
     }
 
-    private createSideCubes(state: SideCubesState) {
+    private createSideCubes(state: SideFieldsCubesState) {
         // запускаем инициализацию приложения
         // генерируем кубики в боковых панелях
         this.cubesViews.sideEach((cube, field, x, y) => {

@@ -1,5 +1,6 @@
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 
+import { CubeColor } from '../const/CUBE_COLORS';
 import { Direction } from '../const/DIRECTIONS';
 
 import { CubeAddress } from './CubesViews';
@@ -33,7 +34,7 @@ export function parseCubeAddressString(cubeAddressString: CubeAddressString): Cu
  */
 export type MovingCube = {
     readonly initialAddress: CubeAddressString;
-    readonly color: string;
+    readonly color: CubeColor;
     readonly direction: Direction | null;
     readonly stepActions: MovingCubeStepAction[];
     readonly toMineOrder: UnsignedInteger;

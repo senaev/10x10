@@ -7,7 +7,6 @@ import { Field } from '../const/FIELDS';
 import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 
-import { MovingCube } from './MovingCube';
 import { TenOnTen } from './TenOnTen';
 
 export type CubesFieldOptional = (CubeView | null)[][];
@@ -162,85 +161,4 @@ export class CubesViews {
             }
         });
     }
-
-    public _mergeMoveMap({
-        movingCubes,
-        startCubes,
-    }: {
-        movingCubes: MovingCube[];
-        startCubes: CubeView[];
-    }) {
-
-        // // Извлекаем startCube из боковой панели, все дальнейшие значения field кубиков
-        // // могут меняться только при вхождении их в боковую панель
-        // // Вытаскиваем кубик из боковой панели коллекции
-        // this._app.cutCubesFromLineAndFillByNewOnes(startCubes);
-
-        // // Меняем значение field
-        // for (const key in startCubes) {
-        //     startCubes[key].field.next('main');
-        // }
-
-        // // Пробегаемся по массиву м-кубиков и если м-кубик вошел в боковое поле,
-        // // Меняем его свойства direction, field, x, y в соответствии со значениями
-        // // м-кубика и стороной поля, также перемещаем все кубики в линии, в которую вошел
-        // // данный кубик
-        // movingCubes.forEach((movingCube) => {
-        //     if (movingCube.x > -1 && movingCube.x < 10 && movingCube.y > -1 && movingCube.y < 10) {
-        //         // Кубик просто перемещается и не входит не в какую панель
-        //         // Устанавливаем кубик в новую клетку
-
-        //         if (!this.mainCubesMask.has(movingCube.cube)) {
-        //             this.mainCubesMask.add(movingCube.cube);
-        //         }
-
-        //         movingCube.cube.x = movingCube.x;
-        //         movingCube.cube.y = movingCube.y;
-        //     } else if (movingCube.x === -1 && movingCube.y === -1) {
-        //         // если кубик взорвался во время хода, убираем его с доски
-
-        //         this.mainCubesMask.delete(movingCube.cube);
-        //     }
-        // });
-
-        // // Убираем в боковые поля кубики, которые ушли туда во время хода
-        // toSideActions.forEach((movingCube) => {
-        //     if (this.mainCubesMask.has(movingCube.cube)) {
-        //         this.mainCubesMask.delete(movingCube.cube);
-        //     } else {
-        //         // Кубик из боковой панели в боковую панель
-        //         // (что-то взрывается и кубик, с которого стартовали, пролетает насквозь)
-        //     }
-
-        //     const cube = movingCube.cube;
-        //     const direction = cube.direction.value();
-
-        //     assertNonEmptyString(direction);
-
-        //     // Меняем значения кубика
-        //     cube.field.next(direction);
-        //     cube.direction.next(reverseDirection(direction));
-
-        //     const lineId = getSideCubeLineId({
-        //         x: cube.x,
-        //         y: cube.y,
-        //         field: direction,
-        //     });
-        //     // Получаем линию, в которую вставим кубик
-        //     const line = getCubeAddressInSideFieldInOrderFromMain(lineId).reverse();
-
-        //     // Присваиваем значения координат в поле кубику
-        //     cube.x = line[line.length - 1].x;
-        //     cube.y = line[line.length - 1].y;
-
-        //     // Сдвигаем линию на одну клетку от mainField
-        //     for (let key = 0; key < line.length - 1; key++) {
-        //         this._setSideCube(line[key], this._getSideCube(line[key + 1]));
-        //     }
-
-        //     // Устанавливаем значение первой клетки
-        //     this._setSideCube(line[line.length - 1], cube);
-        // });
-    }
-
 };

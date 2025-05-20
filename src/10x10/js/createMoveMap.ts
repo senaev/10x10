@@ -1,13 +1,16 @@
 import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
+import { Integer } from 'senaev-utils/src/utils/Number/Integer';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { forOwn } from 'senaev-utils/src/utils/Object/forOwn/forOwn';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
 import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyString/NonEmptyString';
 
 import { getSideFieldByMainFieldCubeAddress } from '../../utils/getSideFieldByMainFieldCubeAddress';
 import { CubeAnimationName, CubeView } from '../components/CubeView';
+import { ALL_SIDE_LINES } from '../const/ALL_SIDE_LINES';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
@@ -33,6 +36,7 @@ import {
 } from './MovingCube';
 import {
     MainFieldCubesState,
+    SideFieldCubeStateValue,
     SideFieldsCubesState,
 } from './TenOnTen';
 
@@ -238,7 +242,7 @@ export function createMoveMap ({
 
     // Высчитываем новый стейт приложения
     const nextMainFieldCubesState: MainFieldCubesState = createEmptyFields();
-    const nextSideFieldsCubesState = mapObjectValues(DIRECTION_STEPS, () => createEmptyFields()) as unknown as SideFieldsCubesState;
+    const nextSideFieldsCubesState = mapObjectValues(DIRECTION_STEPS, () => createEmptyFields() as (SideFieldCubeStateValue | null)[][]);
     movingCubes.forEach(({
         x,
         y,
@@ -272,9 +276,57 @@ export function createMoveMap ({
         };
     });
 
+    forOwn(ALL_SIDE_LINES, (sideLines) => {
+        sideLines.forEach((sideCubesLineId) => {
+            // Сколько кубиков со стороны главного поля отрезать
+            let shifts: Integer = 0;
+            if (sideCubesLineId === startCubesLineId) {
+                shifts += startCubesCount;
+            }
+
+            // Сдвиг боковой линии, плюс - от главного поля
+            let pops: Integer = 0;
+            const sideLineMovementSteps = sideLinesMovementSteps.get(sideCubesLineId);
+            if (Array.isArray(sideLineMovementSteps)) {
+                pops += sideLineMovementSteps.length;
+            }
+
+            const sideLineCubeAddresses = getCubeAddressInSideFieldInOrderFromMain(sideCubesLineId);
+            const sideLineCubes: (SideFieldCubeStateValue | null)[] = sideLineCubeAddresses
+                .map((cubeAddress) => sideFieldsCubesState[cubeAddress.field][cubeAddress.x][cubeAddress.y]);
+
+            callTimes(shifts, () => {
+                sideLineCubes.shift();
+                sideLineCubes.push(null);
+            });
+
+            callTimes(pops, () => {
+                sideLineCubes.pop();
+                sideLineCubes.unshift(null);
+            });
+
+            if (pops && shifts) {
+                console.log(sideCubesLineId, {
+                    pops,
+                    shifts,
+                }, sideLineCubes);
+            }
+
+            sideLineCubeAddresses.forEach((cubeAddress, i) => {
+                const cube = sideLineCubes[i];
+
+                if (cube === null) {
+                    return;
+                }
+
+                nextSideFieldsCubesState[cubeAddress.field][cubeAddress.x][cubeAddress.y] = cube;
+            });
+        });
+    });
+
     return {
         animationsScript,
-        sideFieldsCubesState: nextSideFieldsCubesState,
+        sideFieldsCubesState: nextSideFieldsCubesState as SideFieldsCubesState,
         mainFieldCubesState: nextMainFieldCubesState,
     };
 }

@@ -1,7 +1,7 @@
-import { BOARD_SIZE } from '../10x10/const/BOARD_SIZE';
-import { CubeCoordinates, SideCubeAddress } from '../10x10/js/CubesViews';
+import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { CubeCoordinates, SideCubeAddress } from '../js/CubesViews';
 
-export function getSideFieldByMainFieldCubeAddress({
+export function getSideAddressByMainFieldCubeAddress({
     x, y,
 }: CubeCoordinates): SideCubeAddress {
     if (x < 0) {

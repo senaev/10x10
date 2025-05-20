@@ -24,8 +24,8 @@ body {
     position: absolute;
     right: 0;
     top: 0;
-    width: 150px;
-    height: 150px;
+    width: 10rem;
+    height: 10rem;
     background-color: #00000022;
     opacity: 0.8;
 }

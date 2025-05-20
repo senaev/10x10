@@ -27,6 +27,7 @@ import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { FIELD_OFFSETS } from '../const/FIELD_OFFSETS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
+import { parseCubeAddressString } from '../utils/CubeAddressString';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
 import { generateRandomStateForLevel } from '../utils/generateRandomStateForLevel';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
@@ -50,7 +51,6 @@ import {
     findCubeInSideCubes,
     SideCubeAddress,
 } from './CubesViews';
-import { parseCubeAddressString } from './MovingCube';
 
 export type TenOnTenCallbacks = {
     onAfterMove: () => void;
@@ -514,6 +514,7 @@ export class TenOnTen {
             animationsScript,
             mainFieldCubesState,
             sideFieldsCubesState,
+            moves,
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.state.main,
@@ -522,6 +523,15 @@ export class TenOnTen {
                     color: cube.color.value(),
                 };
             }))),
+        });
+
+        const shiftedCubesToRemove: CubeView[] = [];
+        moves.forEach((move) => {
+            if (move.type === 'shift') {
+                const cube = this.cubesViews._getSideCube(move.initialAddress);
+                shiftedCubesToRemove.push(cube);
+                return;
+            }
         });
 
         DIRECTIONS.forEach((direction) => {
@@ -573,6 +583,10 @@ export class TenOnTen {
             }
 
             this.blockApp = false;
+
+            shiftedCubesToRemove.forEach((cube) => {
+                cube.removeElementFromDOM();
+            });
         });
 
         this.checkStepEnd();

@@ -1,6 +1,5 @@
 import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { callTimes } from 'senaev-utils/src/utils/Function/callTimes/callTimes';
-import { assertInteger } from 'senaev-utils/src/utils/Number/Integer';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
@@ -57,11 +56,8 @@ export type AnimationScript = Record<CubeAddressString, CubeAnimation[]>;
 export type AnimationScriptWithViews = Map<CubeView, CubeAnimation[]>;
 
 /**
- * Класс для удобной работы с абстрактным классом MainMask.
- * Абстрагирует функции, связанные с анимацией от этого класса.
- * Сочетает в себе как функцию генерации хода, так и генерации анимации.
- * Предоставляет удобный интерфейс для доступа к методам построения хода
- * для основного приложения.
+ * На вход дается текущий стейт и параметры хода
+ * На выходе данные об изменениях стейта по кубикам и список анимаций для каждого кубика
  */
 export function createMoveMap ({
     sideCubesState,
@@ -75,35 +71,18 @@ export function createMoveMap ({
         animationsScript: AnimationScript;
         cubesToMove: MovingCube[];
     } {
-    const mainFieldCubes = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState);
-
-    const mainFieldCubesSorted = [...mainFieldCubes].sort((a, b) => a.toMineOrder - b.toMineOrder);
-
-    // Основной массив со значениями
-    // Сюда будут попадать м-кубики, участвующие в анимации
-    const movingCubesInMainField: MovingCube[] = [];
-
-    // создаем массив из всех кубиков, которые есть на доске
-    mainFieldCubesSorted.forEach((cube) => {
-        const toMineOrder = cube.toMineOrder;
-
-        assertInteger(toMineOrder);
-
-        const movingCube: MovingCube = {
+    const mainFieldCubes = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
+        .sort((a, b) => a.toMineOrder - b.toMineOrder);
+    const movingCubesInMainField: MovingCube[] = mainFieldCubes.map((cube) => {
+        return {
+            ...cube,
             initialAddress: getCubeAddressString({
                 x: cube.x,
                 y: cube.y,
                 field: 'main',
             }),
-            toMineOrder,
-            x: cube.x,
-            y: cube.y,
-            color: cube.color,
-            direction: cube.direction,
             stepActions: [],
         };
-
-        movingCubesInMainField.push(movingCube);
     });
 
     const { startCubes, otherCubes: otherCubesInStartLine } = getStartCubesByStartCubesParameters({

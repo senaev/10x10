@@ -305,13 +305,6 @@ export function createMoveMap ({
                 sideLineCubes.unshift(null);
             });
 
-            if (pops && shifts) {
-                console.log(sideCubesLineId, {
-                    pops,
-                    shifts,
-                }, sideLineCubes);
-            }
-
             sideLineCubeAddresses.forEach((cubeAddress, i) => {
                 const cube = sideLineCubes[i];
 

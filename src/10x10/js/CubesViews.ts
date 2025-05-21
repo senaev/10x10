@@ -7,8 +7,6 @@ import { Field } from '../const/FIELDS';
 import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 
-import { TenOnTen } from './TenOnTen';
-
 export type CubesFieldOptional = (CubeView | null)[][];
 export type CubesFieldRequired = CubeView[][];
 export type CubesFields = Record<Field, CubesFieldOptional>;
@@ -83,12 +81,10 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
 }
 
 export class CubesViews {
-    public readonly _app: TenOnTen;
     public sideCubesMask: SideCubesMask;
-    public mainCubesSet: Set<CubeView> = new Set();
+    public readonly mainCubesSet: Set<CubeView> = new Set();
 
-    public constructor({ app }: { app: TenOnTen }) {
-        this._app = app;
+    public constructor() {
         this.sideCubesMask = createSideCubesMaskWithNullValues();
     }
 

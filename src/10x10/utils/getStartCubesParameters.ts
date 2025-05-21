@@ -1,10 +1,9 @@
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
 
-import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { CubeCoordinates, SideCubeAddress } from '../js/CubesViews';
+import { MainFieldCubesState } from '../js/TenOnTen';
 
-import { getCubeByCoordinates } from './getCubeByCoordinates';
 import { SideCubesLineId, getSideCubeLineId } from './SideCubesLineIndicator/SideCubesLineIndicator';
 
 export type StartCubesParameters = {
@@ -13,10 +12,10 @@ export type StartCubesParameters = {
 };
 
 export function getStartCubesParameters({
-    mainCubes,
+    mainFieldCubesState,
     sideCubeAddress: initialCubeAddress,
 }: {
-    mainCubes: Set<CubeView>;
+    mainFieldCubesState: MainFieldCubesState;
     sideCubeAddress: SideCubeAddress;
 }): StartCubesParameters | undefined {
     const isVertical = initialCubeAddress.field === 'top' || initialCubeAddress.field === 'bottom';
@@ -50,10 +49,13 @@ export function getStartCubesParameters({
     for (const key in cellsMain) {
         mainFieldAddress[dynamicProp] = cellsMain[key];
 
-        if (!getCubeByCoordinates(mainFieldAddress, mainCubes)) {
-            countOfCubesThatCanBeMoved++;
-        } else {
+        const mainCube = mainFieldCubesState[mainFieldAddress.x][mainFieldAddress.y];
+
+        if (mainCube) {
+            // Упираемся в кубик на главном поле
             break;
+        } else {
+            countOfCubesThatCanBeMoved++;
         }
     }
 
@@ -61,7 +63,8 @@ export function getStartCubesParameters({
     let allNullInLine = true;
     for (let key = 0; key < BOARD_SIZE; key++) {
         mainFieldAddress[dynamicProp] = key;
-        if (getCubeByCoordinates(mainFieldAddress, mainCubes)) {
+        const mainCube = mainFieldCubesState[mainFieldAddress.x][mainFieldAddress.y];
+        if (mainCube) {
             allNullInLine = false;
             break;
         }

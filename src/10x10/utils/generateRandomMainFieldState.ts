@@ -12,11 +12,7 @@ import { getLevelColorsCount } from './getLevelColorsCount';
 import { getLevelCubesCount } from './getLevelCubesCount';
 import { getLevelCubesPositions } from './getLevelCubesPositions';
 
-export function generateRandomMainFieldState({
-    level,
-}: {
-    level: UnsignedInteger;
-}) {
+export function generateRandomMainFieldState(level: UnsignedInteger) {
 
     const firstCubesPositions = getLevelCubesPositions(level);
     const nullCells: { x: number; y: number }[] = [];

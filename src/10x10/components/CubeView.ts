@@ -52,19 +52,12 @@ export class CubeView {
     public readonly field: Signal<Field>;
     public readonly color: Signal<CubeColor>;
     public readonly readyToMove: Signal<boolean> = new Signal(false);
-    public x: number;
-    public y: number;
-    public toMineOrder: number | null;
     private readonly container: HTMLElement;
 
     private readonly app: TenOnTen;
-    private appearWithAnimation: boolean;
 
     public constructor(params: {
-        x: number;
-        y: number;
         appearWithAnimation: boolean;
-        toMineOrder: number | null;
         field: Field;
         app: TenOnTen;
         direction: Direction| null;
@@ -73,13 +66,7 @@ export class CubeView {
         onClick: (cube: CubeView) => void;
         onHover: (cube: CubeView, isHovered: boolean) => void;
     }) {
-        this.x = params.x;
-        this.y = params.y;
         this.container = params.container;
-        this.appearWithAnimation = params.appearWithAnimation;
-
-        // Время попадания в главное поле
-        this.toMineOrder = params.toMineOrder;
 
         this.field = new Signal<Field>(params.field);
         // Указатель на игру, к которой кубик привязан
@@ -165,18 +152,7 @@ export class CubeView {
             params.onClick(this);
         });
 
-        if (this.appearWithAnimation) {
-            $(this.element)
-                .css({ scale: 0 })
-                .appendTo(this.container)
-                .transition({
-                    scale: 1,
-                    duration: ANIMATION_TIME * 10,
-                });
-            this.appearWithAnimation = false;
-        } else {
-            this.container.appendChild(this.element);
-        }
+        this.container.appendChild(this.element);
     }
 
     public setReadyToMove(readyToMove: boolean) {

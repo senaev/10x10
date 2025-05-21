@@ -21,24 +21,20 @@ import {
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import {
-    CUBE_COLORS, CUBE_COLORS_ARRAY, CubeColor,
+    CUBE_COLORS_ARRAY, CubeColor,
 } from '../const/CUBE_COLORS';
-import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
-import { FIELD_OFFSETS } from '../const/FIELD_OFFSETS';
+import { Direction } from '../const/DIRECTIONS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
 import { parseCubeAddressString } from '../utils/CubeAddressString';
+import { generateRandomMainFieldState } from '../utils/generateRandomMainFieldState';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
-import { generateRandomStateForLevel } from '../utils/generateRandomStateForLevel';
-import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
-import { getIncrementalIntegerForMainFieldOrder } from '../utils/getIncrementalIntegerForMainFieldOrder';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
-import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getStartCubesParameters } from '../utils/getStartCubesParameters';
+import { repaintDebugPanel } from '../utils/repaintDebugPanel';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
-import { getSideCubeLineId } from '../utils/SideCubesLineIndicator/SideCubesLineIndicator';
 
 import {
     AnimationScriptWithViews, createMoveMap, CubeAnimation,
@@ -98,51 +94,13 @@ export type TenOnTenState = {
     isNewLevel: boolean;
 };
 
-function repaintDebugPanel({
-    state,
-    element,
-}: {
-    state: CubesState;
-    element: HTMLElement;
-}) {
-    element.innerHTML = '';
-    getObjectEntries(state).forEach(([
-        field,
-        cubes,
-    ]) => {
-        cubes.forEach((row, x) => {
-            row.forEach((cube, y) => {
-                if (!cube) {
-                    return;
-                }
-
-                const cubeElement = document.createElement('div');
-                cubeElement.classList.add('debugPanelCube');
-                cubeElement.style.backgroundColor = CUBE_COLORS[cube.color];
-
-                const oneCubeSize = 100 / (BOARD_SIZE * 3);
-                const position = {
-                    left: FIELD_OFFSETS[field].x + x + BOARD_SIZE,
-                    top: FIELD_OFFSETS[field].y + y + BOARD_SIZE,
-                };
-
-                cubeElement.style.left = `${position.left * oneCubeSize}%`;
-                cubeElement.style.top = `${position.top * oneCubeSize}%`;
-
-                element.appendChild(cubeElement);
-            });
-        });
-
-    });
-}
-
 export class TenOnTen {
     public readonly tenOnTenContainer: HTMLElement;
     public readonly levelInfoPanel: HTMLDivElement;
     public readonly cubesContainer: HTMLDivElement;
 
     public level: number;
-    public cubesViews: CubesViews;
+    public readonly cubesViews: CubesViews;
 
     public end: string | null;
 
@@ -153,7 +111,12 @@ export class TenOnTen {
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
     private blockApp: boolean;
 
-    private state: CubesState;
+    private mainFieldCubesState: MainFieldCubesState;
+    private sideFieldCubesState: SideFieldsCubesState;
+
+    /**
+     * Стейт, который используется для возврата хода
+     */
     private previousState: CubesState | null = null;
 
     private isNewLevel: Signal<boolean> = new Signal(false);
@@ -202,7 +165,8 @@ export class TenOnTen {
 
             setInterval(() => {
                 repaintDebugPanel({
-                    state: this.state,
+                    mainFieldCubesState: this.mainFieldCubesState,
+                    sideFieldCubesState: this.sideFieldCubesState,
                     element: debugPanel,
                 });
             }, 1000);
@@ -247,7 +211,7 @@ export class TenOnTen {
 
         // получаем коллекцию кубиков и устанавливаем в параметрах проложение,
         // которому эти кубики принадлежат
-        this.cubesViews = new CubesViews({ app: this });
+        this.cubesViews = new CubesViews();
 
         // индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
         this.blockApp = false;
@@ -301,7 +265,7 @@ export class TenOnTen {
         this.canUndo.next(initialState?.previous ? true : false);
 
         this.refreshButton = new RefreshButton({
-            onClick: this.refresh,
+            onClick: this.refreshMainCubesOnTheStartOfTheLevel,
             container: actionButtons,
         });
         this.isNewLevel.subscribe((isNewLevel) => {
@@ -356,17 +320,22 @@ export class TenOnTen {
         });
 
         if (initialState) {
-            this.state = initialState.current;
+            this.mainFieldCubesState = initialState.current.main;
+            this.sideFieldCubesState = {
+                left: initialState.current.left,
+                right: initialState.current.right,
+                top: initialState.current.top,
+                bottom: initialState.current.bottom,
+            };
             this.setState(initialState);
         } else {
-            this.state = generateRandomStateForLevel({
-                level: this.level,
-            });
+            this.mainFieldCubesState = generateRandomMainFieldState(this.level);
+            this.sideFieldCubesState = generateRandomSideCubesForLevel(this.level);
 
             this.generateMainCubes();
         }
 
-        this.createSideCubes(this.state);
+        this.createSideCubes(this.sideFieldCubesState);
 
         this.mainMenuOpen.subscribe((isOpen) => {
             if (isOpen) {
@@ -379,13 +348,22 @@ export class TenOnTen {
         return {
             level: this.level,
             previous: this.previousState,
-            current: cloneObject(this.state),
+            current: cloneObject({
+                main: this.mainFieldCubesState,
+                ...this.sideFieldCubesState,
+            }),
             isNewLevel: this.isNewLevel.value(),
         };
     }
 
     public setState(state: TenOnTenState) {
-        this.state = state.current;
+        this.mainFieldCubesState = state.current.main;
+        this.sideFieldCubesState = {
+            left: state.current.left,
+            right: state.current.right,
+            top: state.current.top,
+            bottom: state.current.bottom,
+        };
 
         this.setLevel(state.level);
         this.isNewLevel.next(state.isNewLevel);
@@ -395,38 +373,36 @@ export class TenOnTen {
         this.applyCubesState(state.current);
     }
 
-    // даем возможность пользователю при переходе на новый уровень выбрать из случайных
-    // комбинаций начальную
-    public refresh = () => {
-        this.blockApp = true;
-        const cubesLocal = this.cubesViews;
-        // Удаляем нафиг кубики с главного поля
-        cubesLocal.mainCubesSet.forEach((cube) => {
-            cubesLocal._removeMainCube({
-                x: cube.x,
-                y: cube.y,
-            });
-            cube.animate({
-                animation: 'remove',
-                steps: 4,
-            });
-        });
-        setTimeout(
-            () => {
-                this.state = generateRandomStateForLevel({
-                    level: this.level,
-                });
-                this.generateMainCubes();
-                setTimeout(
-                    () => {
-                        this.blockApp = false;
-                        callFunctions(this.callbacks.onAfterNextLevelRefresh);
-                    },
-                    ANIMATION_TIME * 8
-                );
-            },
-            ANIMATION_TIME
-        );
+    // Даем возможность пользователю при переходе на новый уровень выбрать из случайных
+    // комбинаций начальных кубиков
+    public refreshMainCubesOnTheStartOfTheLevel = () => {
+        // this.blockApp = true;
+        // const cubesLocal = this.cubesViews;
+        // // Удаляем нафиг кубики с главного поля
+        // cubesLocal.mainCubesSet.forEach((cube) => {
+        //     cubesLocal._removeMainCube({
+        //         x: cube.x,
+        //         y: cube.y,
+        //     });
+        //     cube.animate({
+        //         animation: 'remove',
+        //         steps: 4,
+        //     });
+        // });
+        // setTimeout(
+        //     () => {
+        //         this.mainFieldCubesState = generateRandomMainFieldState(this.level);
+        //         this.generateMainCubes();
+        //         setTimeout(
+        //             () => {
+        //                 this.blockApp = false;
+        //                 callFunctions(this.callbacks.onAfterNextLevelRefresh);
+        //             },
+        //             ANIMATION_TIME * 8
+        //         );
+        //     },
+        //     ANIMATION_TIME
+        // );
     };
 
     // переводим игру на следующий уровень
@@ -439,9 +415,8 @@ export class TenOnTen {
             this.plusColor();
         }
 
-        this.state = generateRandomStateForLevel({
-            level: this.level,
-        });
+        this.mainFieldCubesState = generateRandomMainFieldState(this.level);
+        this.sideFieldCubesState = generateRandomSideCubesForLevel(this.level);
         this.generateMainCubes();
 
         this.previousState = null;
@@ -483,7 +458,7 @@ export class TenOnTen {
         // Если по боковому полю - ищем первые кубики в одной линии бокового поля с кубиком, по  которому щелкнули,
         // которые могут выйти из поля
         const startCubesParameters = getStartCubesParameters({
-            mainCubes: this.cubesViews.mainCubesSet,
+            mainFieldCubesState: this.mainFieldCubesState,
             sideCubeAddress: clickedSideCubeAddress,
         });
 
@@ -501,8 +476,7 @@ export class TenOnTen {
 
         this.isNewLevel.next(false);
 
-        // создаем маску для возможности возврата хода
-        this.previousState = this.generateMask();
+        this.previousState = this.getState().current;
 
         // Создаем массив из всех кубиков, которые есть на доске
         const mainFieldCubes: CubeView[] = [];
@@ -517,7 +491,7 @@ export class TenOnTen {
             moves,
         } = createMoveMap({
             startCubesParameters,
-            mainFieldCubesState: this.state.main,
+            mainFieldCubesState: this.mainFieldCubesState,
             sideFieldsCubesState: mapObjectValues(this.cubesViews.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cube) => {
                 return {
                     color: cube.color.value(),
@@ -534,11 +508,9 @@ export class TenOnTen {
             }
         });
 
-        DIRECTIONS.forEach((direction) => {
-            this.state[direction] = sideFieldsCubesState[direction];
-        });
+        this.sideFieldCubesState = sideFieldsCubesState;
 
-        this.state.main = mainFieldCubesState;
+        this.mainFieldCubesState = mainFieldCubesState;
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
@@ -556,6 +528,10 @@ export class TenOnTen {
                 cube = this.cubesViews._getMainCube(address)!;
             } else {
                 cube = this.cubesViews.getSideCube(address as SideCubeAddress);
+            }
+
+            if (cube === undefined) {
+                debugger;
             }
 
             animationScriptWithViews.set(cube, animations);
@@ -598,58 +574,9 @@ export class TenOnTen {
         this.callbacks[event].push(callback);
     }
 
-    /**
-     * Вырезаем кубики из боковой линии и заполняем последние элементы в этой линии
-     */
-    public cutCubesFromLineAndFillByNewOnes(startCubes: CubeView[]) {
-        const field = startCubes[0].field.value();
-
-        if (field === 'main') {
-            throw new Error('cutCubesFromLineAndFillByNewOnes: startCubes[0].field === "main"');
-        }
-
-        // Получаем линию
-        const line = getCubeAddressInSideFieldInOrderFromMain(getSideCubeLineId({
-            x: startCubes[0].x,
-            y: startCubes[0].y,
-            field,
-        })).reverse();
-
-        // пробегаемся, меняем значения в коллекции
-        for (let key = line.length - 1; key >= startCubes.length; key--) {
-            const prevCube = this.cubesViews.getSideCube(line[key - startCubes.length])!;
-            this.cubesViews._setSideCube(line[key], prevCube);
-            prevCube.x = line[key].x;
-            prevCube.y = line[key].y;
-        }
-        // генерируем кубики для крайних значений в линии
-        for (let key = 0; key < startCubes.length; key++) {
-            this.cubesViews._setSideCube(
-                line[key],
-                this.createCube({
-                    x: line[key].x,
-                    y: line[key].y,
-                    field: line[key].field,
-                    toMineOrder: getIncrementalIntegerForMainFieldOrder(),
-                    color: getRandomColorForCubeLevel(this.level),
-                    appearWithAnimation: false,
-                    direction: null,
-                })
-            );
-        }
-
-        /**
-         * при отладке может возникать забавная ошибка, когда почему-то
-         * случайно добавляются не последние значения линии, а предыдущие из них
-         * не верьте вьюхам!!! верьте яваскрипту, дело в том, что новые кубики появляются,
-         * а старые вьюхи ни куда не деваются и одни других перекрывают :)
-         */
-    }
-
     private applyCubesState(state: CubesState) {
         this.cubesViews.clear();
 
-        this.cubesViews = new CubesViews({ app: this });
         this.createSideCubes(state);
 
         state.main.forEach((row, x) => {
@@ -741,7 +668,7 @@ export class TenOnTen {
         }
 
         const startCubesParameters = getStartCubesParameters({
-            mainCubes: this.cubesViews.mainCubesSet,
+            mainFieldCubesState: this.mainFieldCubesState,
             sideCubeAddress,
         });
 
@@ -769,9 +696,8 @@ export class TenOnTen {
 
         this.setLevel(START_LEVEL);
 
-        this.state = generateRandomStateForLevel({
-            level: this.level,
-        });
+        this.mainFieldCubesState = generateRandomMainFieldState(this.level);
+        this.sideFieldCubesState = generateRandomSideCubesForLevel(this.level);
         this.generateMainCubes();
 
         this.previousState = null;
@@ -789,7 +715,7 @@ export class TenOnTen {
 
     // генерируем кубики на главном поле
     private generateMainCubes() {
-        const mainFieldCubesState = this.state.main;
+        const mainFieldCubesState = this.mainFieldCubesState;
 
         mainFieldCubesState.forEach((row, x) => {
             row.forEach((cube, y) => {
@@ -871,56 +797,6 @@ export class TenOnTen {
                 cube.changeColor(newColor);
             }
         });
-    }
-
-    // генерируем маску для предыдущего хода
-    private generateMask(): CubesState {
-        const mask: Partial<CubesState> = {};
-        const cubesLocal = this.cubesViews;
-
-        for (const field of DIRECTIONS) {
-            const fieldValue: SideFieldCubeStateValue[][] = [];
-            mask[field] = fieldValue;
-            for (let x = 0; x < BOARD_SIZE; x++) {
-                fieldValue[x] = [];
-                for (let y = 0; y < BOARD_SIZE; y++) {
-                    const cube = cubesLocal.getSideCube({
-                        field,
-                        x,
-                        y,
-                    });
-
-                    const resultValue: SideFieldCubeStateValue = {
-                        color: cube.color.value(),
-                    };
-                    fieldValue[x][y] = resultValue;
-                }
-            }
-        }
-
-        mask.main = [];
-        for (let x = 0; x < BOARD_SIZE; x++) {
-            mask.main[x] = [];
-            for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal._getMainCube({
-                    x,
-                    y,
-                });
-
-                if (cube) {
-                    const resultValue: MainFieldCubeStateValue = {
-                        color: cube.color.value(),
-                        direction: cube.direction.value(),
-                        toMineOrder: cube.toMineOrder!,
-                    };
-                    mask.main[x][y] = resultValue;
-                } else {
-                    mask.main[x][y] = null;
-                }
-            }
-        }
-
-        return mask as CubesState;
     }
 
     private createCube(params: CubeAddress & {

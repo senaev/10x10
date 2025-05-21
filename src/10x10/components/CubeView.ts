@@ -11,11 +11,9 @@ import { CUBE_COLORS, CubeColor } from '../const/CUBE_COLORS';
 import {
     Direction, DIRECTION_TO_ARROW_ROTATE, DIRECTIONS,
 } from '../const/DIRECTIONS';
-import { Field } from '../const/FIELDS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAnimation } from '../js/createMoveMap';
 import { TenOnTen } from '../js/TenOnTen';
-import { reverseDirection } from '../utils/reverseDirection';
 
 export type CubeAnimations = {
     right: {};
@@ -49,7 +47,6 @@ export type Transition = Partial<{
 export class CubeView {
     public readonly direction = new Signal<Direction | null>(null);
     public readonly element: HTMLElement;
-    public readonly field: Signal<Field>;
     public readonly color: Signal<CubeColor>;
     public readonly readyToMove: Signal<boolean> = new Signal(false);
     private readonly container: HTMLElement;
@@ -57,10 +54,8 @@ export class CubeView {
     private readonly app: TenOnTen;
 
     public constructor(params: {
-        // ❗️ remove
-        field: Field;
         app: TenOnTen;
-        direction: Direction| null;
+        direction: Direction | null;
         color: CubeColor;
         container: HTMLElement;
         onClick: (cube: CubeView) => void;
@@ -68,7 +63,6 @@ export class CubeView {
     }) {
         this.container = params.container;
 
-        this.field = new Signal<Field>(params.field);
         // Указатель на игру, к которой кубик привязан
         this.app = params.app;
 
@@ -88,14 +82,9 @@ export class CubeView {
 
         const { signal: cubeVisualDirection } = combineSignalsIntoNewOne([
             this.direction,
-            this.field,
             this.readyToMove,
-        ], (direction, field, readyToMove) => {
+        ], (direction, readyToMove) => {
             if (readyToMove) {
-                return direction;
-            }
-
-            if (field === 'main') {
                 return direction;
             }
 
@@ -122,15 +111,7 @@ export class CubeView {
         });
 
         // Направление движения
-        if (params.direction) {
-            this.direction.next(params.direction);
-        } else {
-            const field = this.field.value();
-
-            if (field !== 'main') {
-                this.direction.next(reverseDirection(field));
-            }
-        }
+        this.direction.next(params.direction);
 
         this.color = new Signal<CubeColor>(params.color);
         subscribeSignalAndCallWithCurrentValue(this.color, (color) => {
@@ -160,7 +141,7 @@ export class CubeView {
     }
 
     public performIHavePawsAnimation() {
-        const scale = this.field.value() === 'left' || this.field.value() === 'right'
+        const scale = this.direction.value() === 'left' || this.direction.value() === 'right'
             ? [
                 0.8,
                 1.2,
@@ -203,21 +184,23 @@ export class CubeView {
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
     public async animate({ animation: action, steps }: CubeAnimateAction): Promise<void> {
-        const field = this.field.value();
+        const direction = this.direction.value();
+        const isVertical = direction === 'top' || direction === 'bottom';
+        const isTopOrLeft = direction === 'top' || direction === 'left';
 
         const nearer = async () => {
             await animateCubeMovement({
                 element: this.element,
-                isVertical: field === 'top' || field === 'bottom',
-                distance: (field === 'top' || field === 'left') ? steps : -steps,
+                isVertical,
+                distance: isTopOrLeft ? steps : -steps,
             });
         };
 
         const further = async () => {
             await animateCubeMovement({
                 element: this.element,
-                isVertical: field === 'top' || field === 'bottom',
-                distance: (field === 'top' || field === 'left') ? -steps : steps,
+                isVertical,
+                distance: isTopOrLeft ? -steps : steps,
             });
         };
 
@@ -306,13 +289,13 @@ export class CubeView {
 
     // Меняем параметры кубика, при этом его анимируем
     public changeColor(color: CubeColor): void {
-        const field = this.field.value();
+        const direction = this.direction.value();
 
         const animationDuration = ANIMATION_TIME * 8;
 
-        const transformType: PivotAnimationType = field === 'main'
+        const transformType: PivotAnimationType = direction === null
             ? 'rotate3d'
-            : (field === 'top' || field === 'bottom')
+            : (direction === 'top' || direction === 'bottom')
                 ? 'rotateX'
                 : 'rotateY';
 

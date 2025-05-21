@@ -634,26 +634,19 @@ export class TenOnTen {
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        const mainCubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
+        const cubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
 
-        if (mainCubeAddress) {
-            return;
+        if (!cubeAddress) {
+            throw new Error('cubeAddress of hovered cube is not found');
         }
 
-        const sideCubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
-
-        if (!sideCubeAddress) {
-            // cube could be removed from the board despite the fact that view is still there
+        if (!isSideCubeAddress(cubeAddress)) {
             return;
-        }
-
-        if (!isSideCubeAddress(sideCubeAddress)) {
-            throw new Error('sideCubeAddress of clicked cube is not found');
         }
 
         const startCubesParameters = getStartCubesParameters({
             mainFieldCubesState: this.mainFieldCubesState,
-            sideCubeAddress,
+            sideCubeAddress: cubeAddress,
         });
 
         if (!startCubesParameters) {

@@ -7,7 +7,6 @@ import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertO
 import { cloneObject } from 'senaev-utils/src/utils/Object/cloneObject/cloneObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
-import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
@@ -482,11 +481,7 @@ export class TenOnTen {
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.mainFieldCubesState,
-            sideFieldsCubesState: mapObjectValues(this.cubesViews.sideCubes, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cubesSet) => {
-                return {
-                    color: cubesSet.values().next().value!.color.value(),
-                };
-            }))),
+            sideFieldsCubesState: this.sideFieldCubesState,
         });
 
         const shiftedCubesToRemove: CubeView[] = [];
@@ -621,8 +616,12 @@ export class TenOnTen {
             return;
         }
 
-        const mainCubeAddress = this.cubesViews.getCubeAddress(cube);
-        if (mainCubeAddress) {
+        const cubeAddress = this.cubesViews.getCubeAddress(cube);
+        if (!cubeAddress) {
+            throw new Error('cubeAddress of clicked cube is not found');
+        }
+
+        if (!isSideCubeAddress(cubeAddress)) {
             animateCubeBump({
                 element: cube.element,
                 duration: ANIMATION_TIME * 2,
@@ -631,16 +630,7 @@ export class TenOnTen {
             return;
         }
 
-        const sideCubeAddress = this.cubesViews.getCubeAddress(cube);
-
-        if (!sideCubeAddress) {
-            throw new Error('sideCubeAddress of clicked cube is not found');
-        }
-
-        if (!isSideCubeAddress(sideCubeAddress)) {
-            throw new Error('sideCubeAddress of clicked cube is not found');
-        }
-        this.run(sideCubeAddress);
+        this.run(cubeAddress);
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {

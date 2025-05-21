@@ -36,6 +36,7 @@ function showInterstitial(playGamaBridge: PlayGamaBridge) {
 
     const isMockEnv = playGamaBridge.platform.id === 'mock';
     if (isMockEnv) {
+        // eslint-disable-next-line no-alert
         alert('showInterstitial');
         return;
     }

@@ -1,8 +1,13 @@
-import { DIRECTIONS } from './DIRECTIONS';
+import { getObjectKeys } from 'senaev-utils/src/utils/Object/getObjectKeys/getObjectKeys';
 
-export const FIELDS = [
-    'main',
-    ...DIRECTIONS,
-] as const;
+export const ALL_FIELDS_OBJECT = {
+    main: undefined,
+    left: undefined,
+    right: undefined,
+    top: undefined,
+    bottom: undefined,
+} as const;
 
-export type Field = (typeof FIELDS)[number];
+export const FIELDS = getObjectKeys(ALL_FIELDS_OBJECT);
+
+export type Field = keyof typeof ALL_FIELDS_OBJECT;

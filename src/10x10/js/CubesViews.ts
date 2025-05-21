@@ -4,9 +4,10 @@ import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/m
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
-import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
-import { Field } from '../const/FIELDS';
+import {
+    ALL_FIELDS_OBJECT, Field, FIELDS,
+} from '../const/FIELDS';
 
 export type CubesFieldOptional = (CubeView | null)[][];
 export type CubesFieldRequired = CubeView[][];
@@ -97,38 +98,19 @@ export function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<C
 }
 
 export class CubesViews {
-    public sideCubesMask: Record<Direction, FieldViewsMask>;
-    public readonly mainCubesSet: FieldViewsMask = createEmptyFieldViewsMask();
-
-    public constructor() {
-        this.sideCubesMask = mapObjectValues(DIRECTION_STEPS, createEmptyFieldViewsMask);
-    }
-
-    public clear() {
-        this.sideEach((cube) => {
-            cube?.removeElementFromDOM();
-        });
-
-        traverseFieldViewsMask(this.mainCubesSet, (cubes) => {
-            cubes.forEach((cube) => {
-                cube.removeElementFromDOM();
-            });
-
-            cubes.clear();
-        });
-    }
+    public sideCubes: Record<Field, FieldViewsMask> = mapObjectValues(ALL_FIELDS_OBJECT, createEmptyFieldViewsMask);
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
     public addSideCube(
         cube: CubeView,
         address: SideCubeAddress
     ) {
-        this.sideCubesMask[address.field][address.x][address.y].add(cube);
+        this.sideCubes[address.field][address.x][address.y].add(cube);
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
     public getSideCubeByAddress(address: SideCubeAddress): CubeView {
-        const cubesSet = this.sideCubesMask[address.field][address.x][address.y];
+        const cubesSet = this.sideCubes[address.field][address.x][address.y];
 
         if (cubesSet.size !== 1) {
             throw new Error('cannot get cube by address');
@@ -138,34 +120,19 @@ export class CubesViews {
     }
 
     public getMainCubeByAddress({ x, y }: CubeCoordinates): CubeView | undefined {
-        return this.mainCubesSet[x][y].values().next().value;
-    }
-
-    public getMainCubeAddress(cube: CubeView): CubeCoordinates | undefined {
-        let address: CubeCoordinates | undefined;
-
-        traverseFieldViewsMask(this.mainCubesSet, (cubes, x, y) => {
-            if (cubes.has(cube)) {
-                address = {
-                    x,
-                    y,
-                };
-            }
-        });
-
-        return address;
+        return this.sideCubes.main[x][y].values().next().value;
     }
 
     public _addMainCube({ x, y }: CubeCoordinates, cube: CubeView) {
-        this.mainCubesSet[x][y].add(cube);
+        this.sideCubes.main[x][y].add(cube);
     }
 
     public _removeMainCube({ x, y }: CubeCoordinates) {
-        const cube = this.mainCubesSet[x][y].values().next().value;
+        const cube = this.sideCubes.main[x][y].values().next().value;
 
         assertObject(cube, 'cannot delete cube from mainCubes');
 
-        this.mainCubesSet[x][y].delete(cube);
+        this.sideCubes.main[x][y].delete(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -174,7 +141,7 @@ export class CubesViews {
         y,
         field,
     }: SideCubeAddress, value: CubeView): void {
-        this.sideCubesMask[field][x][y].add(value);
+        this.sideCubes[field][x][y].add(value);
     }
 
     // Пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -183,7 +150,7 @@ export class CubesViews {
         DIRECTIONS.forEach((field) => {
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    const cubesSet = this.sideCubesMask[field][x][y];
+                    const cubesSet = this.sideCubes[field][x][y];
 
                     if (cubesSet.size !== 1) {
                         throw new Error('cannot sideEach');
@@ -195,11 +162,11 @@ export class CubesViews {
         });
     }
 
-    public getSideCubeAddress(cube: CubeView): SideCubeAddress | undefined {
-        let address: SideCubeAddress | undefined;
+    public getCubeAddress(cube: CubeView): CubeAddress | undefined {
+        let address: CubeAddress | undefined;
 
-        DIRECTIONS.forEach((field) => {
-            traverseFieldViewsMask(this.sideCubesMask[field], (cubes, x, y) => {
+        FIELDS.forEach((field) => {
+            traverseFieldViewsMask(this.sideCubes[field], (cubes, x, y) => {
                 if (cubes.has(cube)) {
                     address = {
                         x,

@@ -33,6 +33,7 @@ import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCube
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getStartCubesParameters } from '../utils/getStartCubesParameters';
+import { isSideCubeAddress } from '../utils/isSideCubeAddress';
 import { repaintDebugPanel } from '../utils/repaintDebugPanel';
 import { reverseDirection } from '../utils/reverseDirection';
 import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnTheField';
@@ -58,8 +59,6 @@ export type TenOnTenCallbacks = {
 
 // ширина приложения в кубиках 10 центральных + 3 * 2 по бокам и еще по 0.5 * 2 отступы
 const APP_WIDTH_IN_CUBES = 17;
-
-const START_LEVEL = 1;
 
 export type MainFieldCubeStateValue = {
     color: CubeColor;
@@ -483,7 +482,7 @@ export class TenOnTen {
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.mainFieldCubesState,
-            sideFieldsCubesState: mapObjectValues(this.cubesViews.sideCubesMask, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cubesSet) => {
+            sideFieldsCubesState: mapObjectValues(this.cubesViews.sideCubes, (cubesTable) => cubesTable.map((cubesRow) => cubesRow.map((cubesSet) => {
                 return {
                     color: cubesSet.values().next().value!.color.value(),
                 };
@@ -539,34 +538,34 @@ export class TenOnTen {
         });
 
         // пошаговый запуск анимации
-        animateMove({
+        await animateMove({
             animationScriptWithViews,
-        }).then(() => {
-            // разблокируем кнопку назад, если не случился переход на новый уровень
-            // иначе - блокируем
-            this.canUndo.next(this.end !== 'next_level');
+        });
 
-            if (this.end !== null) {
-                switch (this.end) {
-                case 'next_level':
-                    this.nextLevel();
-                    break;
-                case 'game_over':
-                    alert('game over');
-                    break;
-                default:
-                    throw new Error(`Неверное значение в app.end: ${this.end}`);
-                }
+        // разблокируем кнопку назад, если не случился переход на новый уровень
+        // иначе - блокируем
+        this.canUndo.next(this.end !== 'next_level');
+
+        if (this.end !== null) {
+            switch (this.end) {
+            case 'next_level':
+                this.nextLevel();
+                break;
+            case 'game_over':
+                alert('game over');
+                break;
+            default:
+                throw new Error(`Неверное значение в app.end: ${this.end}`);
             }
+        }
 
-            this.blockApp = false;
-
-            shiftedCubesToRemove.forEach((cube) => {
-                cube.removeElementFromDOM();
-            });
+        shiftedCubesToRemove.forEach((cube) => {
+            cube.removeElementFromDOM();
         });
 
         this.checkStepEnd();
+
+        this.blockApp = false;
 
         callFunctions(this.callbacks.onAfterMove);
     }
@@ -576,8 +575,6 @@ export class TenOnTen {
     }
 
     private applyCubesState(state: CubesState) {
-        this.cubesViews.clear();
-
         this.generateSideCubeViews();
 
         state.main.forEach((row, x) => {
@@ -624,7 +621,7 @@ export class TenOnTen {
             return;
         }
 
-        const mainCubeAddress = this.cubesViews.getMainCubeAddress(cube);
+        const mainCubeAddress = this.cubesViews.getCubeAddress(cube);
         if (mainCubeAddress) {
             animateCubeBump({
                 element: cube.element,
@@ -634,28 +631,34 @@ export class TenOnTen {
             return;
         }
 
-        const sideCubeAddress = this.cubesViews.getSideCubeAddress(cube);
+        const sideCubeAddress = this.cubesViews.getCubeAddress(cube);
 
         if (!sideCubeAddress) {
             throw new Error('sideCubeAddress of clicked cube is not found');
         }
 
-        // отправляем в путь-дорогу
+        if (!isSideCubeAddress(sideCubeAddress)) {
+            throw new Error('sideCubeAddress of clicked cube is not found');
+        }
         this.run(sideCubeAddress);
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        const mainCubeAddress = this.cubesViews.getMainCubeAddress(hoveredCube);
+        const mainCubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
 
         if (mainCubeAddress) {
             return;
         }
 
-        const sideCubeAddress = this.cubesViews.getSideCubeAddress(hoveredCube);
+        const sideCubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
 
         if (!sideCubeAddress) {
             // cube could be removed from the board despite the fact that view is still there
             return;
+        }
+
+        if (!isSideCubeAddress(sideCubeAddress)) {
+            throw new Error('sideCubeAddress of clicked cube is not found');
         }
 
         const startCubesParameters = getStartCubesParameters({

@@ -1,11 +1,12 @@
 import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
+import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
-import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 
 export type CubesFieldOptional = (CubeView | null)[][];
 export type CubesFieldRequired = CubeView[][];
@@ -87,7 +88,7 @@ function createEmptyFieldViewsMask(): FieldViewsMask {
         .map(() => createArray(BOARD_SIZE).map(() => new Set()));
 };
 
-function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<CubeView>, x: number, y: number) => void) {
+export function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<CubeView>, x: number, y: number) => void) {
     for (let x = 0; x < BOARD_SIZE; x++) {
         for (let y = 0; y < BOARD_SIZE; y++) {
             func(mask[x][y], x, y);
@@ -96,11 +97,11 @@ function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<CubeView
 }
 
 export class CubesViews {
-    public sideCubesMask: SideCubesMask;
+    public sideCubesMask: Record<Direction, FieldViewsMask>;
     public readonly mainCubesSet: FieldViewsMask = createEmptyFieldViewsMask();
 
     public constructor() {
-        this.sideCubesMask = createSideCubesMaskWithNullValues();
+        this.sideCubesMask = mapObjectValues(DIRECTION_STEPS, createEmptyFieldViewsMask);
     }
 
     public clear() {
@@ -118,23 +119,25 @@ export class CubesViews {
     }
 
     // добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    public _addSideCube(
+    public addSideCube(
         cube: CubeView,
-        {
-            field,
-        x,
-        y,
-        }: SideCubeAddress
+        address: SideCubeAddress
     ) {
-        this.sideCubesMask[field][x][y] = cube;
+        this.sideCubesMask[address.field][address.x][address.y].add(cube);
     }
 
     // берем значение клетки из коллекции по полю, иксу, игреку
-    public getSideCube(address: SideCubeAddress): CubeView {
-        return getSideCubeViewByAddress(this.sideCubesMask, address)!;
+    public getSideCubeByAddress(address: SideCubeAddress): CubeView {
+        const cubesSet = this.sideCubesMask[address.field][address.x][address.y];
+
+        if (cubesSet.size !== 1) {
+            throw new Error('cannot get cube by address');
+        }
+
+        return cubesSet.values().next().value!;
     }
 
-    public getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
+    public getMainCubeByAddress({ x, y }: CubeCoordinates): CubeView | undefined {
         return this.mainCubesSet[x][y].values().next().value;
     }
 
@@ -166,12 +169,12 @@ export class CubesViews {
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
-    public _setSideCube({
+    public setSideCube({
         x,
         y,
         field,
     }: SideCubeAddress, value: CubeView): void {
-        this.sideCubesMask[field][x][y] = value;
+        this.sideCubesMask[field][x][y].add(value);
     }
 
     // Пробегаемся по всем элементам боковых полей, выполняем переданную функцию
@@ -180,9 +183,33 @@ export class CubesViews {
         DIRECTIONS.forEach((field) => {
             for (let x = 0; x < BOARD_SIZE; x++) {
                 for (let y = 0; y < BOARD_SIZE; y++) {
-                    func(this.sideCubesMask[field][x][y]!, field, x, y);
+                    const cubesSet = this.sideCubesMask[field][x][y];
+
+                    if (cubesSet.size !== 1) {
+                        throw new Error('cannot sideEach');
+                    }
+
+                    func(cubesSet.values().next().value!, field, x, y);
                 }
             }
         });
     }
-};
+
+    public getSideCubeAddress(cube: CubeView): SideCubeAddress | undefined {
+        let address: SideCubeAddress | undefined;
+
+        DIRECTIONS.forEach((field) => {
+            traverseFieldViewsMask(this.sideCubesMask[field], (cubes, x, y) => {
+                if (cubes.has(cube)) {
+                    address = {
+                        x,
+                        y,
+                        field,
+                    };
+                }
+            });
+        });
+
+        return address;
+    }
+}

@@ -57,7 +57,7 @@ export class CubeView {
     private readonly app: TenOnTen;
 
     public constructor(params: {
-        appearWithAnimation: boolean;
+        // ❗️ remove
         field: Field;
         app: TenOnTen;
         direction: Direction| null;

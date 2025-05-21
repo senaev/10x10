@@ -1,10 +1,10 @@
+import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 
 import { CubeView } from '../components/CubeView';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { Field } from '../const/FIELDS';
-import { getCubeByCoordinates } from '../utils/getCubeByCoordinates';
 import { getSideCubeViewByAddress } from '../utils/getSideCubeViewByAddress';
 
 export type CubesFieldOptional = (CubeView | null)[][];
@@ -30,6 +30,8 @@ export type SideCubesMask = {
     readonly bottom: CubesFieldRequired;
     readonly left: CubesFieldRequired;
 };
+
+export type FieldViewsMask = Set<CubeView>[][];
 
 export function findCubeInSideCubes({
     cube,
@@ -80,9 +82,22 @@ export function createSideCubesMaskWithNullValues(): SideCubesMask {
     };
 }
 
+function createEmptyFieldViewsMask(): FieldViewsMask {
+    return createArray(BOARD_SIZE)
+        .map(() => createArray(BOARD_SIZE).map(() => new Set()));
+};
+
+function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<CubeView>, x: number, y: number) => void) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+        for (let y = 0; y < BOARD_SIZE; y++) {
+            func(mask[x][y], x, y);
+        }
+    }
+}
+
 export class CubesViews {
     public sideCubesMask: SideCubesMask;
-    public readonly mainCubesSet: Set<CubeView> = new Set();
+    public readonly mainCubesSet: FieldViewsMask = createEmptyFieldViewsMask();
 
     public constructor() {
         this.sideCubesMask = createSideCubesMaskWithNullValues();
@@ -93,8 +108,12 @@ export class CubesViews {
             cube?.removeElementFromDOM();
         });
 
-        this.mainCubesSet.forEach((cube) => {
-            cube.removeElementFromDOM();
+        traverseFieldViewsMask(this.mainCubesSet, (cubes) => {
+            cubes.forEach((cube) => {
+                cube.removeElementFromDOM();
+            });
+
+            cubes.clear();
         });
     }
 
@@ -115,26 +134,35 @@ export class CubesViews {
         return getSideCubeViewByAddress(this.sideCubesMask, address)!;
     }
 
-    public _getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
-        return getCubeByCoordinates({
-            x,
-            y,
-        }, this.mainCubesSet);
+    public getMainCube({ x, y }: CubeCoordinates): CubeView | undefined {
+        return this.mainCubesSet[x][y].values().next().value;
     }
 
-    public _addMainCube(cube: CubeView) {
-        this.mainCubesSet.add(cube);
+    public getMainCubeAddress(cube: CubeView): CubeCoordinates | undefined {
+        let address: CubeCoordinates | undefined;
+
+        traverseFieldViewsMask(this.mainCubesSet, (cubes, x, y) => {
+            if (cubes.has(cube)) {
+                address = {
+                    x,
+                    y,
+                };
+            }
+        });
+
+        return address;
+    }
+
+    public _addMainCube({ x, y }: CubeCoordinates, cube: CubeView) {
+        this.mainCubesSet[x][y].add(cube);
     }
 
     public _removeMainCube({ x, y }: CubeCoordinates) {
-        const cube = getCubeByCoordinates({
-            x,
-            y,
-        }, this.mainCubesSet);
+        const cube = this.mainCubesSet[x][y].values().next().value;
 
         assertObject(cube, 'cannot delete cube from mainCubes');
 
-        this.mainCubesSet.delete(cube);
+        this.mainCubesSet[x][y].delete(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек

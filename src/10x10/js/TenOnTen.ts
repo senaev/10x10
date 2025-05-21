@@ -3,6 +3,7 @@ import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/cal
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
 import { UnsignedInteger } from 'senaev-utils/src/utils/Number/UnsignedInteger';
+import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { cloneObject } from 'senaev-utils/src/utils/Object/cloneObject/cloneObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
@@ -478,12 +479,6 @@ export class TenOnTen {
 
         this.previousState = this.getState().current;
 
-        // Создаем массив из всех кубиков, которые есть на доске
-        const mainFieldCubes: CubeView[] = [];
-        this.cubesViews.mainCubesSet.forEach((cube) => {
-            mainFieldCubes.push(cube);
-        });
-
         const {
             animationsScript,
             mainFieldCubesState,
@@ -522,17 +517,27 @@ export class TenOnTen {
             cubeAddressString,
             animations,
         ]) => {
-            const address = parseCubeAddressString(cubeAddressString);
-            let cube: CubeView;
-            if (address.field === 'main') {
-                cube = this.cubesViews._getMainCube(address)!;
+            const {
+                x,
+                y,
+                field,
+            } = parseCubeAddressString(cubeAddressString);
+
+            let cube: CubeView | undefined;
+            if (field === 'main') {
+                cube = this.cubesViews.getMainCube({
+                    x,
+                    y,
+                });
             } else {
-                cube = this.cubesViews.getSideCube(address as SideCubeAddress);
+                cube = this.cubesViews.getSideCube({
+                    x,
+                    y,
+                    field,
+                });
             }
 
-            if (cube === undefined) {
-                debugger;
-            }
+            assertObject(cube, 'cube is undefined');
 
             animationScriptWithViews.set(cube, animations);
         });
@@ -627,8 +632,8 @@ export class TenOnTen {
             return;
         }
 
-        const isMainCube = this.cubesViews.mainCubesSet.has(cube);
-        if (isMainCube) {
+        const mainCubeAddress = this.cubesViews.getMainCubeAddress(cube);
+        if (mainCubeAddress) {
             animateCubeBump({
                 element: cube.element,
                 duration: ANIMATION_TIME * 2,
@@ -651,9 +656,9 @@ export class TenOnTen {
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        const isMainCube = this.cubesViews.mainCubesSet.has(hoveredCube);
+        const mainCubeAddress = this.cubesViews.getMainCubeAddress(hoveredCube);
 
-        if (isMainCube) {
+        if (mainCubeAddress) {
             return;
         }
 
@@ -689,7 +694,6 @@ export class TenOnTen {
     };
 
     private startNewGame() {
-        this.clearMainField();
         this.cubesViews.sideCubesMask = createSideCubesMaskWithNullValues();
 
         this.createSideCubes(generateRandomSideCubesForLevel(this.level));
@@ -704,13 +708,6 @@ export class TenOnTen {
         this.isNewLevel.next(true);
         this.canUndo.next(false);
         callFunctions(this.callbacks.onAfterNewGameStarted);
-    }
-
-    private clearMainField() {
-        this.cubesViews.mainCubesSet.forEach((cube) => {
-            cube.removeElementFromDOM();
-        });
-        this.cubesViews.mainCubesSet.clear();
     }
 
     // генерируем кубики на главном поле
@@ -751,7 +748,7 @@ export class TenOnTen {
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal._getMainCube({
+                const cube = cubesLocal.getMainCube({
                     x,
                     y,
                 });
@@ -822,7 +819,10 @@ export class TenOnTen {
         setCubeViewPositionOnTheField(cube, params);
 
         if (field === 'main') {
-            this.cubesViews._addMainCube(cube);
+            this.cubesViews._addMainCube({
+                x,
+                y,
+            }, cube);
         } else {
             this.cubesViews._addSideCube(cube, {
                 field,

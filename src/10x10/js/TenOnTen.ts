@@ -547,6 +547,7 @@ export class TenOnTen {
                 this.nextLevel();
                 break;
             case 'game_over':
+                // eslint-disable-next-line no-alert
                 alert('game over');
                 break;
             default:
@@ -666,7 +667,8 @@ export class TenOnTen {
     };
 
     private startNewGame() {
-        //
+        // eslint-disable-next-line no-alert
+        alert('start new game');
     }
 
     // генерируем кубики на главном поле

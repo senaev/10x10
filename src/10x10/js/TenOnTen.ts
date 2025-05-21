@@ -41,7 +41,6 @@ import {
     AnimationScriptWithViews, createMoveMap, CubeAnimation,
 } from './createMoveMap';
 import {
-    createSideCubesMaskWithNullValues,
     CubeAddress,
     CubeCoordinates,
     CubesViews,
@@ -589,9 +588,7 @@ export class TenOnTen {
                         y,
                         field: 'main',
                         color: cube.color,
-                        appearWithAnimation: false,
                         direction: cube.direction,
-                        toMineOrder: cube.toMineOrder,
                     });
                 }
             });
@@ -683,20 +680,7 @@ export class TenOnTen {
     };
 
     private startNewGame() {
-        this.cubesViews.sideCubesMask = createSideCubesMaskWithNullValues();
-
-        this.generateSideCubeViews();
-
-        this.setLevel(START_LEVEL);
-
-        this.mainFieldCubesState = generateRandomMainFieldState(this.level);
-        this.sideFieldCubesState = generateRandomSideCubesForLevel(this.level);
-        this.generateMainCubeViews();
-
-        this.previousState = null;
-        this.isNewLevel.next(true);
-        this.canUndo.next(false);
-        callFunctions(this.callbacks.onAfterNewGameStarted);
+        //
     }
 
     // генерируем кубики на главном поле

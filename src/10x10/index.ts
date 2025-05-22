@@ -66,10 +66,10 @@ function showInterstitial(playGamaBridge: PlayGamaBridge) {
 
     };
 
-    tenOnTen.on('onAfterMove', saveState);
-    tenOnTen.on('onAfterUndo', saveState);
-    tenOnTen.on('onAfterNextLevelRefresh', saveState);
-    tenOnTen.on('onAfterNewGameStarted', async () => {
+    tenOnTen.subscribe('onAfterMove', saveState);
+    tenOnTen.subscribe('onAfterUndo', saveState);
+    tenOnTen.subscribe('onAfterNextLevelRefresh', saveState);
+    tenOnTen.subscribe('onAfterNewGameStarted', async () => {
         saveState();
 
         // eslint-disable-next-line no-console
@@ -77,13 +77,13 @@ function showInterstitial(playGamaBridge: PlayGamaBridge) {
         await promiseTimeout(MILLISECONDS_IN_SECOND);
         showInterstitial(playGamaBridge);
     });
-    tenOnTen.on('onAfterOpenMenu', async () => {
+    tenOnTen.subscribe('onAfterOpenMenu', async () => {
         // eslint-disable-next-line no-console
         console.log('show ad onAfterOpenMenu');
         await promiseTimeout(MILLISECONDS_IN_SECOND);
         showInterstitial(playGamaBridge);
     });
-    tenOnTen.on('onAfterNextLevel', async () => {
+    tenOnTen.subscribe('onAfterNextLevel', async () => {
         saveState();
 
         // eslint-disable-next-line no-console

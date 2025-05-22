@@ -520,29 +520,6 @@ export class TenOnTen {
             animationScriptWithViews.set(cube, animations);
         });
 
-        // пошаговый запуск анимации
-        await animateMove({
-            animationScriptWithViews,
-        });
-
-        // разблокируем кнопку назад, если не случился переход на новый уровень
-        // иначе - блокируем
-        this.canUndo.next(this.end !== 'next_level');
-
-        if (this.end !== null) {
-            switch (this.end) {
-            case 'next_level':
-                this.nextLevel();
-                break;
-            case 'game_over':
-                // eslint-disable-next-line no-alert
-                alert('game over');
-                break;
-            default:
-                throw new Error(`Неверное значение в app.end: ${this.end}`);
-            }
-        }
-
         // Актуализируем положение вьюх кубиков на поле
         const movesWithExtractedCubes: (CubeMove & {cubeView: CubeView})[] = moves.map((move) => {
             return {
@@ -593,6 +570,29 @@ export class TenOnTen {
             });
         });
 
+        // пошаговый запуск анимации
+        await animateMove({
+            animationScriptWithViews,
+        });
+
+        // разблокируем кнопку назад, если не случился переход на новый уровень
+        // иначе - блокируем
+        this.canUndo.next(this.end !== 'next_level');
+
+        if (this.end !== null) {
+            switch (this.end) {
+            case 'next_level':
+                this.nextLevel();
+                break;
+            case 'game_over':
+                // eslint-disable-next-line no-alert
+                alert('game over');
+                break;
+            default:
+                throw new Error(`Неверное значение в app.end: ${this.end}`);
+            }
+        }
+
         this.checkStepEnd();
 
         checkStateAndViewsConsistence({
@@ -609,7 +609,7 @@ export class TenOnTen {
         callFunctions(this.callbacks.onAfterMove);
     }
 
-    public on(event: keyof TenOnTenCallbacks, callback: TenOnTenCallbacks[keyof TenOnTenCallbacks]) {
+    public subscribe(event: keyof TenOnTenCallbacks, callback: TenOnTenCallbacks[keyof TenOnTenCallbacks]) {
         this.callbacks[event].push(callback);
     }
 
@@ -678,6 +678,12 @@ export class TenOnTen {
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
+        if (this.blockApp) {
+            // На случай, если в моменте происходит анимация
+            // и элементы на поле могут не соответствовать стейту и не находиться в стейте
+            return;
+        }
+
         const cubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
 
         if (!cubeAddress) {
@@ -707,7 +713,7 @@ export class TenOnTen {
         for (const cube of allToFirstInLine) {
             assertObject(cube);
 
-            cube.setReadyToMove(isHovered);
+            cube.directionVisible.next(isHovered);
         }
     };
 
@@ -810,6 +816,10 @@ export class TenOnTen {
             onClick: this.handleCubeClick,
             onHover: this.handleHover,
         });
+
+        if (field === 'main') {
+            cube.directionVisible.next(true);
+        }
 
         setCubeViewPositionOnTheField(cube, params);
 

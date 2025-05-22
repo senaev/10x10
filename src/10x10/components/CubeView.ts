@@ -44,7 +44,7 @@ export class CubeView {
     public readonly direction = new Signal<Direction | null>(null);
     public readonly element: HTMLElement;
     public readonly color: Signal<CubeColor>;
-    public readonly readyToMove: Signal<boolean> = new Signal(false);
+    public readonly directionVisible: Signal<boolean> = new Signal(false);
     private readonly container: HTMLElement;
 
     public constructor(params: {
@@ -72,9 +72,9 @@ export class CubeView {
 
         const { signal: cubeVisualDirection } = combineSignalsIntoNewOne([
             this.direction,
-            this.readyToMove,
-        ], (direction, readyToMove) => {
-            if (readyToMove) {
+            this.directionVisible,
+        ], (direction, directionVisible) => {
+            if (directionVisible) {
                 return direction;
             }
 
@@ -124,10 +124,6 @@ export class CubeView {
         });
 
         this.container.appendChild(this.element);
-    }
-
-    public setReadyToMove(readyToMove: boolean) {
-        this.readyToMove.next(readyToMove);
     }
 
     public performIHavePawsAnimation() {

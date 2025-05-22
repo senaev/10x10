@@ -564,6 +564,11 @@ export class TenOnTen {
 
             if (move.type === 'move') {
                 this.cubesViews.addCubeView(move.cubeView, move.address);
+
+                if (isSideCubeAddress(move.address)) {
+                    move.cubeView.direction.next(reverseDirection(move.address.field));
+                }
+
                 return;
             }
 

@@ -13,17 +13,13 @@ import {
 } from '../const/DIRECTIONS';
 import arrowSvg from '../img/arrow.svg';
 import { CubeAnimation } from '../js/createMoveMap';
-import { TenOnTen } from '../js/TenOnTen';
 
 export type CubeAnimations = {
     right: {};
     left: {};
     top: {};
     bottom: {};
-    nearer: {};
-    further: {};
     boom: {};
-    remove: {};
 };
 
 export type CubeAnimationName = keyof CubeAnimations;
@@ -51,10 +47,7 @@ export class CubeView {
     public readonly readyToMove: Signal<boolean> = new Signal(false);
     private readonly container: HTMLElement;
 
-    private readonly app: TenOnTen;
-
     public constructor(params: {
-        app: TenOnTen;
         direction: Direction | null;
         color: CubeColor;
         container: HTMLElement;
@@ -62,9 +55,6 @@ export class CubeView {
         onHover: (cube: CubeView, isHovered: boolean) => void;
     }) {
         this.container = params.container;
-
-        // Указатель на игру, к которой кубик привязан
-        this.app = params.app;
 
         // Указатель на DOM-элемент кубика с прослушиванием событий
         this.element = document.createElement('div');
@@ -184,26 +174,6 @@ export class CubeView {
     // Сама функция анимации - в зависимости од переданного значения, выполняем те или иные
     // преобразования html-элемента кубика
     public async animate({ animation: action, steps }: CubeAnimateAction): Promise<void> {
-        const direction = this.direction.value();
-        const isVertical = direction === 'top' || direction === 'bottom';
-        const isTopOrLeft = direction === 'top' || direction === 'left';
-
-        const nearer = async () => {
-            await animateCubeMovement({
-                element: this.element,
-                isVertical,
-                distance: isTopOrLeft ? steps : -steps,
-            });
-        };
-
-        const further = async () => {
-            await animateCubeMovement({
-                element: this.element,
-                isVertical,
-                distance: isTopOrLeft ? -steps : steps,
-            });
-        };
-
         const boom = async () => {
             // console.log("boom:",cube.color, cube.x, cube.y);
             $(this.element).transition(
@@ -254,33 +224,9 @@ export class CubeView {
                 distance: - steps,
             });
             break;
-            // Передвигаем кубик в боковом поле ближе к mainField
-        case 'nearer':
-            await nearer();
-            break;
-            // Передвигаем кубик в боковой панели дальше от mainField
-        case 'further':
-            await further();
-            break;
             // Передвигаем кубик в боковой панели дальше от mainField
         case 'boom':
             await boom();
-            break;
-            // Уменьшаем и в конце удаляем
-        case 'remove':
-            $(this.element)
-                .transition(
-                    {
-                        scale: 0,
-                        opacity: 0,
-                        duration: steps * ANIMATION_TIME,
-                        easing: 'out',
-                    },
-                    () => {
-                        this.removeElementFromDOM();
-                    }
-                );
-            await promiseTimeout(steps * ANIMATION_TIME);
             break;
         default:
             throw new Error(`Неизвестная анимация: ${action}`);

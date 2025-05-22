@@ -811,7 +811,6 @@ export class TenOnTen {
 
         const cube = new CubeView({
             ...params,
-            app: this,
             container: this.cubesContainer,
             onClick: this.handleCubeClick,
             onHover: this.handleHover,

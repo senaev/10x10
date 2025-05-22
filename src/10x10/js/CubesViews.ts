@@ -1,5 +1,4 @@
 import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
-import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertObject';
 import { mapObjectValues } from 'senaev-utils/src/utils/Object/mapObjectValues/mapObjectValues';
 
 import { CubeView } from '../components/CubeView';
@@ -97,42 +96,68 @@ export function traverseFieldViewsMask(mask: FieldViewsMask, func: (cubes: Set<C
     }
 }
 
-export class CubesViews {
-    public views: Record<Field, FieldViewsMask> = mapObjectValues(ALL_FIELDS_OBJECT, createEmptyFieldViewsMask);
+export type CubesViewsStore = Record<Field, FieldViewsMask>;
 
-    // добавляем в коллекцию кубик(необходимо для инициализации приложения)
-    public addSideCube(
-        cube: CubeView,
-        address: SideCubeAddress
-    ) {
-        this.views[address.field][address.x][address.y].add(cube);
+export class CubesViews {
+    public store: CubesViewsStore = mapObjectValues(ALL_FIELDS_OBJECT, createEmptyFieldViewsMask);
+
+    public removeCube(cube: CubeView) {
+        const address = this.getCubeAddress(cube);
+
+        if (!address) {
+            return;
+        }
+
+        const set = this.store[address.field][address.x][address.y];
+
+        if (!set.has(cube)) {
+            throw new Error('cube to remove not found');
+        }
+
+        set.delete(cube);
     }
 
-    // берем значение клетки из коллекции по полю, иксу, игреку
-    public getSideCubeByAddress(address: SideCubeAddress): CubeView {
-        const cubesSet = this.views[address.field][address.x][address.y];
+    public getCubesSetByAddress(address: CubeAddress): Set<CubeView> {
+        return this.store[address.field][address.x][address.y];
+    }
+
+    public extractOneExistingCubeViewByAddress(address: CubeAddress): CubeView {
+        const cubesSet = this.getCubesSetByAddress(address);
 
         if (cubesSet.size !== 1) {
-            throw new Error('cannot get cube by address');
+            throw new Error(`cannot get one existing cube by address, size=${cubesSet.size}`);
+        }
+
+        const cube = cubesSet.values().next().value!;
+        cubesSet.delete(cube);
+
+        return cube;
+    }
+
+    public getOneExistingCubeViewByAddress(address: CubeAddress): CubeView {
+        const cubesSet = this.getCubesSetByAddress(address);
+
+        if (cubesSet.size !== 1) {
+            throw new Error(`cannot get one existing cube by address, size=${cubesSet.size}`);
         }
 
         return cubesSet.values().next().value!;
     }
 
-    public getMainCubeByAddress({ x, y }: CubeCoordinates): CubeView | undefined {
-        return this.views.main[x][y].values().next().value;
+    public getCubeViewByAddress(address: CubeAddress): CubeView | undefined {
+        const cubesSet = this.getCubesSetByAddress(address);
+
+        if (cubesSet.size > 1) {
+            throw new Error(`cannot get one by address, size=${cubesSet.size}`);
+        }
+
+        return cubesSet.values().next().value!;
     }
 
-    public _addMainCube({ x, y }: CubeCoordinates, cube: CubeView) {
-        this.views.main[x][y].add(cube);
-    }
+    public addCubeView(cube: CubeView, address: CubeAddress) {
+        const cubesSet = this.getCubesSetByAddress(address);
 
-    public _removeMainCube({ x, y }: CubeCoordinates) {
-        const cube = this.views.main[x][y].values().next().value;
-
-        assertObject(cube, 'cannot delete cube from mainCubes');
-
-        this.views.main[x][y].delete(cube);
+        cubesSet.add(cube);
     }
 
     // Устанавливаем значение клетки, переданной в объекте, содержащем поле, икс, игрек
@@ -141,32 +166,14 @@ export class CubesViews {
         y,
         field,
     }: SideCubeAddress, value: CubeView): void {
-        this.views[field][x][y].add(value);
-    }
-
-    // Пробегаемся по всем элементам боковых полей, выполняем переданную функцию
-    // с каждым кубиком
-    public sideEach(func: (cube: CubeView, field: Direction, x: number, y: number) => void) {
-        DIRECTIONS.forEach((field) => {
-            for (let x = 0; x < BOARD_SIZE; x++) {
-                for (let y = 0; y < BOARD_SIZE; y++) {
-                    const cubesSet = this.views[field][x][y];
-
-                    if (cubesSet.size !== 1) {
-                        throw new Error('cannot sideEach');
-                    }
-
-                    func(cubesSet.values().next().value!, field, x, y);
-                }
-            }
-        });
+        this.store[field][x][y].add(value);
     }
 
     public getCubeAddress(cube: CubeView): CubeAddress | undefined {
         let address: CubeAddress | undefined;
 
         FIELDS.forEach((field) => {
-            traverseFieldViewsMask(this.views[field], (cubes, x, y) => {
+            traverseFieldViewsMask(this.store[field], (cubes, x, y) => {
                 if (cubes.has(cube)) {
                     address = {
                         x,

@@ -11,6 +11,7 @@ import { assertNonEmptyString } from 'senaev-utils/src/utils/String/NonEmptyStri
 import { CubeAnimationName, CubeView } from '../components/CubeView';
 import { ALL_SIDE_LINES } from '../const/ALL_SIDE_LINES';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
+import { CubeColor } from '../const/CUBE_COLORS';
 import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { createEmptyFields } from '../utils/createEmptyFields';
 import {
@@ -62,6 +63,11 @@ export type ToSideAction = {
 export type AnimationScript = Record<CubeAddressString, CubeAnimation[]>;
 export type AnimationScriptWithViews = Map<CubeView, CubeAnimation[]>;
 
+export type UnshiftCube = {
+    initialAddress: CubeAddressString;
+    color: CubeColor;
+};
+
 export type CubeMove =
 /**
  * Кубик был передвинут
@@ -83,7 +89,7 @@ export type CubeMove =
      */
     | {
         type: 'shift';
-        initialAddress: SideCubeAddress;
+        initialAddress: CubeAddressString;
     };
 
 /**
@@ -94,15 +100,22 @@ export function createMoveMap ({
     sideFieldsCubesState,
     startCubesParameters,
     mainFieldCubesState,
+    colorsForUnshiftCubes,
 }: {
     startCubesParameters: StartCubesParameters;
     sideFieldsCubesState: SideFieldsCubesState;
     mainFieldCubesState: MainFieldCubesState;
+    /**
+     * Цвета кубиков, которые будут добавлены в начало боковой линии,
+     * с которой стартовали и в конце которой образуется пустота
+     */
+    colorsForUnshiftCubes: CubeColor[];
 }): {
         animationsScript: AnimationScript;
         sideFieldsCubesState: SideFieldsCubesState;
         mainFieldCubesState: MainFieldCubesState;
         moves: CubeMove[];
+        unshiftCubes: UnshiftCube[];
     } {
     // Собираем кубики, которые уже на главном поле
     const movingCubesInMainField: MovingCube[] = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
@@ -324,6 +337,7 @@ export function createMoveMap ({
         });
     });
 
+    const unshiftCubes: UnshiftCube[] = [];
     forOwn(ALL_SIDE_LINES, (sideLines) => {
         sideLines.forEach((sideCubesLineId) => {
             // Сколько кубиков со стороны главного поля отрезать (для линии, с которой стартовали)
@@ -358,26 +372,45 @@ export function createMoveMap ({
 
                     moves.push({
                         type: 'shift',
-                        initialAddress: initialSideCubeAddress,
+                        initialAddress: getCubeAddressString(initialSideCubeAddress),
                     });
                 }
             });
 
-            const resultShift = shifts - pops;
+            // Количество кубиков, которые нужно добавить в начало боковой линии после того,
+            // как стартовые кубики из нее уехали
+            // Может быть отрицательным, если кубики сдвигались обратно в ту же боковую линию
+            const unshiftCount = pops - shifts;
             sideLineCubeAddresses.forEach((cubeAddress, i) => {
                 const cube = sideLineCubes[i];
 
                 if (cube) {
                     nextSideFieldsCubesState[cubeAddress.field][cubeAddress.x][cubeAddress.y] = cube;
 
-                    if (resultShift > 0) {
-                        const initialCubeAddressString = getCubeAddressString(sideLineCubeAddresses[i + resultShift]);
+                    if (unshiftCount !== 0) {
+                        const initialAddress = getCubeAddressString(sideLineCubeAddresses[i - unshiftCount]);
 
                         moves.push({
                             type: 'move',
-                            initialAddress: initialCubeAddressString,
+                            initialAddress,
                             address: cubeAddress,
                         });
+                    }
+                } else {
+                    if (i < unshiftCount) {
+                        const color = colorsForUnshiftCubes.pop();
+
+                        assertNonEmptyString(color, 'not enough colors for unshift cubes');
+
+                        const initialAddress = getCubeAddressString(sideLineCubeAddresses[i]);
+                        unshiftCubes.push({
+                            initialAddress,
+                            color,
+                        });
+
+                        nextSideFieldsCubesState[cubeAddress.field][cubeAddress.x][cubeAddress.y] = {
+                            color,
+                        };
                     }
                 }
             });
@@ -389,5 +422,6 @@ export function createMoveMap ({
         sideFieldsCubesState: nextSideFieldsCubesState as SideFieldsCubesState,
         mainFieldCubesState: nextMainFieldCubesState,
         moves,
+        unshiftCubes,
     };
 }

@@ -1,4 +1,5 @@
 import { PixelSize } from 'senaev-utils/src/types/PixelSize';
+import { createArray } from 'senaev-utils/src/utils/Array/createArray/createArray';
 import { callFunctions } from 'senaev-utils/src/utils/Function/callFunctions/callFunctions';
 import { noop } from 'senaev-utils/src/utils/Function/noop';
 import { PositiveInteger } from 'senaev-utils/src/utils/Number/PositiveInteger';
@@ -7,7 +8,6 @@ import { assertObject } from 'senaev-utils/src/utils/Object/assertObject/assertO
 import { cloneObject } from 'senaev-utils/src/utils/Object/cloneObject/cloneObject';
 import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
-import { getRandomIntegerInARange } from 'senaev-utils/src/utils/random/getRandomIntegerInARange';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
 
@@ -21,15 +21,17 @@ import {
 import { ANIMATION_TIME } from '../const/ANIMATION_TIME';
 import { BOARD_SIZE } from '../const/BOARD_SIZE';
 import {
-    CUBE_COLORS_ARRAY, CubeColor,
+    CubeColor,
 } from '../const/CUBE_COLORS';
 import { Direction, DIRECTIONS } from '../const/DIRECTIONS';
 import { I18N_DICTIONARY } from '../const/I18N_DICTIONARY';
 import { animateMove } from '../utils/animateMove';
+import { checkStateAndViewsConsistence } from '../utils/checkStateAndViewsConsistence';
 import { parseCubeAddressString } from '../utils/CubeAddressString';
 import { generateRandomMainFieldState } from '../utils/generateRandomMainFieldState';
 import { generateRandomSideCubesForLevel } from '../utils/generateRandomSideCubesForLevel';
 import { getLevelColorsCount } from '../utils/getLevelColorsCount';
+import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getStartCubesParameters } from '../utils/getStartCubesParameters';
 import { isSideCubeAddress } from '../utils/isSideCubeAddress';
@@ -39,6 +41,7 @@ import { setCubeViewPositionOnTheField } from '../utils/setCubeViewPositionOnThe
 
 import {
     AnimationScriptWithViews, createMoveMap, CubeAnimation,
+    CubeMove,
 } from './createMoveMap';
 import {
     CubeAddress,
@@ -151,6 +154,15 @@ export class TenOnTen {
         this.tenOnTenContainer.classList.add('tenOnTenContainer');
         container.appendChild(this.tenOnTenContainer);
 
+        const background = document.createElement('div');
+        background.classList.add('backgroundField');
+        for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
+            const backgroundCube = document.createElement('div');
+            backgroundCube.classList.add('backgroundCube');
+            background.appendChild(backgroundCube);
+        }
+        this.tenOnTenContainer.appendChild(background);
+
         this.cubesContainer = document.createElement('div');
         this.cubesContainer.classList.add('cubesContainer');
         this.tenOnTenContainer.appendChild(this.cubesContainer);
@@ -217,16 +229,6 @@ export class TenOnTen {
 
         // датчик конца хода
         this.end = null;
-
-        const background = document.createElement('div');
-        background.classList.add('backgroundField');
-
-        for (let key = 0; key < BOARD_SIZE * BOARD_SIZE; key++) {
-            const backgroundCube = document.createElement('div');
-            backgroundCube.classList.add('backgroundCube');
-            background.appendChild(backgroundCube);
-        }
-        this.cubesContainer.appendChild(background);
 
         const levelInfoPanel = document.createElement('div');
         levelInfoPanel.classList.add('levelInfoPanel');
@@ -459,7 +461,8 @@ export class TenOnTen {
 
         // если пришел не массив - выполняем анимацию 🤷‍♂️ что ничего сделать нельзя
         if (startCubesParameters === undefined) {
-            const cube = this.cubesViews.getSideCubeByAddress(clickedSideCubeAddress);
+            const cube = this.cubesViews.getOneExistingCubeViewByAddress(clickedSideCubeAddress);
+            assertObject(cube);
 
             animateCubeBump({
                 isVertical: clickedSideCubeAddress.field === 'top' || clickedSideCubeAddress.field === 'bottom',
@@ -478,19 +481,12 @@ export class TenOnTen {
             mainFieldCubesState,
             sideFieldsCubesState,
             moves,
+            unshiftCubes,
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.mainFieldCubesState,
             sideFieldsCubesState: this.sideFieldCubesState,
-        });
-
-        const shiftedCubesToRemove: CubeView[] = [];
-        moves.forEach((move) => {
-            if (move.type === 'shift') {
-                const cube = this.cubesViews.getSideCubeByAddress(move.initialAddress);
-                shiftedCubesToRemove.push(cube);
-                return;
-            }
+            colorsForUnshiftCubes: createArray(BOARD_SIZE).map(() => getRandomColorForCubeLevel(this.level)),
         });
 
         this.sideFieldCubesState = sideFieldsCubesState;
@@ -513,19 +509,11 @@ export class TenOnTen {
                 field,
             } = parseCubeAddressString(cubeAddressString);
 
-            let cube: CubeView | undefined;
-            if (field === 'main') {
-                cube = this.cubesViews.getMainCubeByAddress({
-                    x,
-                    y,
-                });
-            } else {
-                cube = this.cubesViews.getSideCubeByAddress({
-                    x,
-                    y,
-                    field,
-                });
-            }
+            const cube = this.cubesViews.getOneExistingCubeViewByAddress({
+                x,
+                y,
+                field,
+            });
 
             assertObject(cube, 'cube is undefined');
 
@@ -555,11 +543,61 @@ export class TenOnTen {
             }
         }
 
-        shiftedCubesToRemove.forEach((cube) => {
-            cube.removeElementFromDOM();
+        // Актуализируем положение вьюх кубиков на поле
+        const movesWithExtractedCubes: (CubeMove & {cubeView: CubeView})[] = moves.map((move) => {
+            return {
+                ...move,
+                cubeView: this.cubesViews.extractOneExistingCubeViewByAddress(parseCubeAddressString(move.initialAddress)),
+            };
+        });
+
+        movesWithExtractedCubes.forEach((move) => {
+            if (move.type === 'shift') {
+                move.cubeView.removeElementFromDOM();
+                return;
+            }
+
+            if (move.type === 'explode') {
+                // already removed (extracted) from cubesViews
+                return;
+            }
+
+            if (move.type === 'move') {
+                this.cubesViews.addCubeView(move.cubeView, move.address);
+                return;
+            }
+
+            throw new Error('move type is not supported');
+        });
+
+        unshiftCubes.forEach(({ initialAddress, color }) => {
+            const {
+                x, y, field,
+            } = parseCubeAddressString(initialAddress);
+
+            if (field === 'main') {
+                throw new Error('unshift cube on main field');
+            }
+
+            this.createCubeViewAndAddToBoard({
+                x,
+                y,
+                field,
+                color,
+                direction: reverseDirection(field),
+            });
         });
 
         this.checkStepEnd();
+
+        checkStateAndViewsConsistence({
+            state: {
+                main: this.mainFieldCubesState,
+                ...this.sideFieldCubesState,
+            },
+            views: this.cubesViews.store,
+            cubesContainer: this.cubesContainer,
+        });
 
         this.blockApp = false;
 
@@ -659,9 +697,11 @@ export class TenOnTen {
         });
 
         const allToFirstInLine = allToFirstInLineAddresses
-            .map((address) => this.cubesViews.getSideCubeByAddress(address));
+            .map((address) => this.cubesViews.getOneExistingCubeViewByAddress(address));
 
         for (const cube of allToFirstInLine) {
+            assertObject(cube);
+
             cube.setReadyToMove(isHovered);
         }
     };
@@ -705,9 +745,10 @@ export class TenOnTen {
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal.getMainCubeByAddress({
+                const cube = cubesLocal.getCubeViewByAddress({
                     x,
                     y,
+                    field: 'main',
                 });
 
                 // если на поле еще остались кубики, уровень не завершен
@@ -744,19 +785,19 @@ export class TenOnTen {
 
     // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля
     private plusColor() {
-        const colorsCount = getLevelColorsCount(this.level);
-        const newColor = CUBE_COLORS_ARRAY[colorsCount - 1];
-        this.cubesViews.sideEach((cube) => {
-            if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
-                cube.changeColor(newColor);
-            }
-        });
+        // const colorsCount = getLevelColorsCount(this.level);
+        // const newColor = CUBE_COLORS_ARRAY[colorsCount - 1];
+        // this.cubesViews.sideEach((cube) => {
+        //     if (getRandomIntegerInARange(0, colorsCount - 1) === 0) {
+        //         cube.changeColor(newColor);
+        //     }
+        // });
     }
 
     private createCubeViewAndAddToBoard(params: CubeAddress & {
         color: CubeColor;
         direction: Direction | null;
-    }) {
+    }): void {
         const {
             field,
             x,
@@ -773,20 +814,10 @@ export class TenOnTen {
 
         setCubeViewPositionOnTheField(cube, params);
 
-        if (field === 'main') {
-            this.cubesViews._addMainCube({
-                x,
-                y,
-            }, cube);
-        } else {
-            this.cubesViews.addSideCube(cube, {
-                field,
-                x,
-                y,
-            });
-        }
-
-        return cube;
+        this.cubesViews.addCubeView(cube, {
+            field,
+            x,
+            y,
+        });
     }
-
 }

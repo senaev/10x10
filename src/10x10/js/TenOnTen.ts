@@ -744,17 +744,12 @@ export class TenOnTen {
      * game_over - конец игры,
      * next_level - конец уровня, переход на следующий
      */
-        const cubesLocal = this.cubesViews;
         let game_over = true;
         let next_level = true;
 
         for (let x = 0; x < BOARD_SIZE; x++) {
             for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = cubesLocal.getCubeViewByAddress({
-                    x,
-                    y,
-                    field: 'main',
-                });
+                const cube = this.mainFieldCubesState[x][y];
 
                 // если на поле еще остались кубики, уровень не завершен
                 if (cube) {

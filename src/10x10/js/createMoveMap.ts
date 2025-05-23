@@ -77,13 +77,6 @@ export type CubeMove =
         type: 'move';
         initialAddress: CubeAddressString;
         address: CubeAddress;
-    }
-    /**
-     * Кубик был сдвинут из боковой линии за пределы поля
-     */
-    | {
-        type: 'shift';
-        initialAddress: CubeAddressString;
     };
 
 /**
@@ -109,8 +102,19 @@ export function createMoveMap ({
         sideFieldsCubesState: SideFieldsCubesState;
         mainFieldCubesState: MainFieldCubesState;
         moves: CubeMove[];
+        /**
+         * Кубики, которые будут добавлены в начало боковой линии,
+         * с которой стартовали и в конце которой образуется пустота
+         */
         unshiftCubes: UnshiftCube[];
+        /**
+         * Кубики, которые взорвались
+         */
         explodedCubes: CubeAddress[];
+        /**
+         * Кубики, которые были сдвинуты из боковой линии за пределы поля
+         */
+        shiftCubes: SideCubeAddress[];
     } {
     // Собираем кубики, которые уже на главном поле
     const movingCubesInMainField: MovingCube[] = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
@@ -331,6 +335,7 @@ export function createMoveMap ({
     });
 
     const unshiftCubes: UnshiftCube[] = [];
+    const shiftCubes: SideCubeAddress[] = [];
     forOwn(ALL_SIDE_LINES, (sideLines) => {
         sideLines.forEach((sideCubesLineId) => {
             // Сколько кубиков со стороны главного поля отрезать (для линии, с которой стартовали)
@@ -363,10 +368,7 @@ export function createMoveMap ({
                     // Где этот кубик находился изначально
                     const initialSideCubeAddress = sideLineCubeAddresses[shiftIndex - pops];
 
-                    moves.push({
-                        type: 'shift',
-                        initialAddress: getCubeAddressString(initialSideCubeAddress),
-                    });
+                    shiftCubes.push(initialSideCubeAddress);
                 }
             });
 
@@ -417,5 +419,6 @@ export function createMoveMap ({
         moves,
         unshiftCubes,
         explodedCubes,
+        shiftCubes,
     };
 }

@@ -481,6 +481,7 @@ export class TenOnTen {
             sideFieldsCubesState,
             moves,
             unshiftCubes,
+            shiftCubes,
             explodedCubes,
         } = createMoveMap({
             startCubesParameters,
@@ -520,8 +521,12 @@ export class TenOnTen {
             animationScriptWithViews.set(cube, animations);
         });
 
-        // Удаляем кубики, которые взорвались
-        const explodedCubesViews = explodedCubes.map((address) => this.cubesViews.extractOneExistingCubeViewByAddress(address));
+        // Удаляем кубики, которые удалились, а после анимации удалим вьюшки из DOM
+        const removedCubes = [
+            ...explodedCubes,
+            ...shiftCubes,
+        ];
+        const removedCubesViews = removedCubes.map((address) => this.cubesViews.extractOneExistingCubeViewByAddress(address));
 
         // Актуализируем положение вьюх кубиков на поле
         const movesWithExtractedCubes: (CubeMove & {cubeView: CubeView})[] = moves.map((move) => {
@@ -532,11 +537,6 @@ export class TenOnTen {
         });
 
         movesWithExtractedCubes.forEach((move) => {
-            if (move.type === 'shift') {
-                move.cubeView.removeElementFromDOM();
-                return;
-            }
-
             if (move.type === 'move') {
                 this.cubesViews.addCubeView(move.cubeView, move.address);
                 return;
@@ -566,7 +566,7 @@ export class TenOnTen {
             animationScriptWithViews,
         });
 
-        explodedCubesViews.forEach((cubeView) => {
+        removedCubesViews.forEach((cubeView) => {
             cubeView.removeElementFromDOM();
         });
 

@@ -35,6 +35,7 @@ import { getLevelColorsCount } from '../utils/getLevelColorsCount';
 import { getRandomColorForCubeLevel } from '../utils/getRandomColorForCubeLevel';
 import { getStartCubesByStartCubesParameters } from '../utils/getStartCubesByStartCubesParameters';
 import { getStartCubesParameters } from '../utils/getStartCubesParameters';
+import { getStepEndConsequence } from '../utils/getStepEndConsequence';
 import { isSideCubeAddress } from '../utils/isSideCubeAddress';
 import { repaintDebugPanel } from '../utils/repaintDebugPanel';
 import { reverseDirection } from '../utils/reverseDirection';
@@ -102,8 +103,6 @@ export class TenOnTen {
 
     public level: number;
     public readonly cubesViews: CubesViews;
-
-    public end: string | null;
 
     private readonly undoButton: UndoButton;
     private readonly refreshButton: RefreshButton;
@@ -227,9 +226,6 @@ export class TenOnTen {
 
         // язык
         this.lang = 'en';
-
-        // датчик конца хода
-        this.end = null;
 
         const levelInfoPanel = document.createElement('div');
         levelInfoPanel.classList.add('levelInfoPanel');
@@ -386,11 +382,15 @@ export class TenOnTen {
         // );
     };
 
-    // переводим игру на следующий уровень
+    /**
+     * Переводим игру на следующий уровень
+     */
     public nextLevel() {
+        // ❗️
+        const nextLevel = this.level + 1;
         const colorsCount = getLevelColorsCount(this.level);
 
-        this.setLevel(this.level + 1);
+        this.setLevel(nextLevel);
 
         if (getLevelColorsCount(this.level) > colorsCount) {
             this.plusColor();
@@ -566,26 +566,6 @@ export class TenOnTen {
             }
         });
 
-        // разблокируем кнопку назад, если не случился переход на новый уровень
-        // иначе - блокируем
-        this.canUndo.next(this.end !== 'next_level');
-
-        if (this.end !== null) {
-            switch (this.end) {
-            case 'next_level':
-                this.nextLevel();
-                break;
-            case 'game_over':
-                // eslint-disable-next-line no-alert
-                alert('game over');
-                break;
-            default:
-                throw new Error(`Неверное значение в app.end: ${this.end}`);
-            }
-        }
-
-        this.checkStepEnd();
-
         checkStateAndViewsConsistence({
             state: {
                 main: this.mainFieldCubesState,
@@ -594,6 +574,26 @@ export class TenOnTen {
             views: this.cubesViews.store,
             cubesContainer: this.cubesContainer,
         });
+
+        const endState = getStepEndConsequence(this.mainFieldCubesState);
+
+        // разблокируем кнопку назад, если не случился переход на новый уровень
+        // иначе - блокируем
+        this.canUndo.next(endState !== 'next_level');
+
+        if (endState !== null) {
+            switch (endState) {
+            case 'next_level':
+                this.nextLevel();
+                break;
+            case 'game_over':
+                // eslint-disable-next-line no-alert
+                alert('game over');
+                break;
+            default:
+                throw new Error(`Неверное значение в app.end: ${endState}`);
+            }
+        }
 
         this.isAppBlocked.next(false);
 
@@ -761,56 +761,6 @@ export class TenOnTen {
                 }
             });
         });
-    }
-
-    // проверяем в конце хода на конец уровня или конец игры
-    private checkStepEnd() {
-    /**
-     * если нет - заканчиваем ход
-     * и проверяем, это просто ход или пользователь проиграл или
-     * пользователь перешел на новый уровень
-     * записываем в this.end:
-     * null - просто ход,
-     * game_over - конец игры,
-     * next_level - конец уровня, переход на следующий
-     */
-        let game_over = true;
-        let next_level = true;
-
-        for (let x = 0; x < BOARD_SIZE; x++) {
-            for (let y = 0; y < BOARD_SIZE; y++) {
-                const cube = this.mainFieldCubesState[x][y];
-
-                // если на поле еще остались кубики, уровень не завершен
-                if (cube) {
-                    next_level = false;
-                }
-
-                // если все крайние панели заполнены - конец игры,
-                // если хоть один пустой - игра продолжается
-                if (
-                    x === 0 || y === 0 || x === BOARD_SIZE - 1 || y === BOARD_SIZE - 1
-                ) {
-                    if (!cube) {
-                        game_over = false;
-                    }
-                }
-            }
-            if (!next_level && !game_over) {
-                break;
-            }
-        }
-
-        if (next_level) {
-            // меняем датчик на следующий уровень
-            this.end = 'next_level';
-        } else if (game_over) {
-            // меняем датчик на конец игры
-            this.end = 'game_over';
-        } else {
-            // иначе - ничего не делаем
-            this.end = null;
-        }
     }
 
     // при переходе на уровень с большим количеством цветов, добавляем кубики с новыми цветами в боковые поля

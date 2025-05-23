@@ -354,23 +354,6 @@ export class TenOnTen {
         };
     }
 
-    public setState(state: TenOnTenState) {
-        this.mainFieldCubesState = state.current.main;
-        this.sideFieldCubesState = {
-            left: state.current.left,
-            right: state.current.right,
-            top: state.current.top,
-            bottom: state.current.bottom,
-        };
-
-        this.setLevel(state.level);
-        this.isNewLevel.next(state.isNewLevel);
-
-        this.previousState = state.previous;
-
-        this.applyNewCubesState(state.current);
-    }
-
     // Даем возможность пользователю при переходе на новый уровень выбрать из случайных
     // комбинаций начальных кубиков
     public refreshMainCubesOnTheStartOfTheLevel = () => {

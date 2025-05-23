@@ -193,6 +193,24 @@ export class CubesViews {
         }
     }
 
+    public mainEach(func: (params: {
+        cube: CubeView | undefined;
+        x: number;
+        y: number;
+    }) => void) {
+        traverseFieldViewsMask(this.store.main, (cubes, x, y) => {
+            if (cubes.size > 1) {
+                throw new Error(`mainEach: cannot get one cube by address=[${x}, ${y}], size=${cubes.size}`);
+            }
+
+            func({
+                cube: cubes.values().next().value!,
+                x,
+                y,
+            });
+        });
+    }
+
     public getCubeAddress(cube: CubeView): CubeAddress | undefined {
         let address: CubeAddress | undefined;
 

@@ -615,23 +615,13 @@ export class TenOnTen {
     }
 
     private applyCubesState(state: CubesState) {
-        // ❗️
-        // this.generateSideCubeViews();
-
-        // state.main.forEach((row, x) => {
-        //     row.forEach((cube, y) => {
-        //         if (cube) {
-        //             this.createCubeViewAndAddToBoard({
-        //                 x,
-        //                 y,
-        //                 field: 'main',
-        //                 color: cube.color,
-        //                 direction: cube.direction,
-        //             });
-        //         }
-        //     });
-        // });
-
+        this.mainFieldCubesState = state.main;
+        this.sideFieldCubesState = {
+            left: state.left,
+            right: state.right,
+            top: state.top,
+            bottom: state.bottom,
+        };
         this.cubesViews.sideEach(({
             cube,
             field,
@@ -641,6 +631,49 @@ export class TenOnTen {
             const { color } = state[field][x][y];
 
             cube.color.next(color);
+        });
+
+        this.cubesViews.mainEach(({
+            cube,
+            x,
+            y,
+        }) => {
+            const cubeState = state.main[x][y];
+
+            if (!cubeState) {
+                if (cube) {
+                    this.cubesViews.extractOneExistingCubeViewByAddress({
+                        x,
+                        y,
+                        field: 'main',
+                    });
+                    cube.removeElementFromDOM();
+                }
+                return;
+            }
+
+            if (!cube) {
+                this.createCubeViewAndAddToBoard({
+                    x,
+                    y,
+                    field: 'main',
+                    color: cubeState.color,
+                    direction: cubeState.direction,
+                });
+                return;
+            }
+
+            cube.color.next(cubeState.color);
+            cube.direction.next(cubeState.direction);
+        });
+
+        checkStateAndViewsConsistence({
+            state: {
+                main: this.mainFieldCubesState,
+                ...this.sideFieldCubesState,
+            },
+            views: this.cubesViews.store,
+            cubesContainer: this.cubesContainer,
         });
     }
 

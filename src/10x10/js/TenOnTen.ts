@@ -368,7 +368,7 @@ export class TenOnTen {
 
         this.previousState = state.previous;
 
-        this.applyCubesState(state.current);
+        this.applyNewCubesState(state.current);
     }
 
     // Даем возможность пользователю при переходе на новый уровень выбрать из случайных
@@ -441,7 +441,14 @@ export class TenOnTen {
         assertObject(previousState, 'previousState is undefined');
         this.previousState = null;
 
-        this.applyCubesState(previousState);
+        this.mainFieldCubesState = previousState.main;
+        this.sideFieldCubesState = {
+            left: previousState.left,
+            right: previousState.right,
+            top: previousState.top,
+            bottom: previousState.bottom,
+        };
+        this.applyNewCubesState();
 
         await promiseTimeout(ANIMATION_TIME * 4);
 
@@ -614,21 +621,14 @@ export class TenOnTen {
         this.callbacks[event].push(callback);
     }
 
-    private applyCubesState(state: CubesState) {
-        this.mainFieldCubesState = state.main;
-        this.sideFieldCubesState = {
-            left: state.left,
-            right: state.right,
-            top: state.top,
-            bottom: state.bottom,
-        };
+    private applyNewCubesState() {
         this.cubesViews.sideEach(({
             cube,
             field,
             x,
             y,
         }) => {
-            const { color } = state[field][x][y];
+            const { color } = this.sideFieldCubesState[field][x][y];
 
             cube.color.next(color);
         });
@@ -638,7 +638,7 @@ export class TenOnTen {
             x,
             y,
         }) => {
-            const cubeState = state.main[x][y];
+            const cubeState = this.mainFieldCubesState[x][y];
 
             if (!cubeState) {
                 if (cube) {

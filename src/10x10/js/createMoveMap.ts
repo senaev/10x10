@@ -69,15 +69,10 @@ export type UnshiftCube = {
     color: CubeColor;
 };
 
-export type CubeMove =
-/**
- * Кубик был передвинут
- */
-    | {
-        type: 'move';
-        initialAddress: CubeAddressString;
-        address: CubeAddress;
-    };
+export type CubeMove = {
+    initialAddress: CubeAddress;
+    newAddress: CubeAddress;
+};
 
 /**
  * На вход дается текущий стейт и параметры хода
@@ -101,7 +96,7 @@ export function createMoveMap ({
         animationsScript: AnimationScript;
         sideFieldsCubesState: SideFieldsCubesState;
         mainFieldCubesState: MainFieldCubesState;
-        moves: CubeMove[];
+        movedCubes: CubeMove[];
         /**
          * Кубики, которые будут добавлены в начало боковой линии,
          * с которой стартовали и в конце которой образуется пустота
@@ -291,6 +286,7 @@ export function createMoveMap ({
         toMineOrder,
         initialAddress,
     }) => {
+        const initialAddressParsed = parseCubeAddressString(initialAddress);
         const cubeIsStillOnMainField = x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
         if (cubeIsStillOnMainField) {
             // Кубик остается на главном поле
@@ -301,9 +297,8 @@ export function createMoveMap ({
             };
 
             moves.push({
-                type: 'move',
-                initialAddress,
-                address: {
+                initialAddress: initialAddressParsed,
+                newAddress: {
                     x,
                     y,
                     field: 'main',
@@ -313,7 +308,7 @@ export function createMoveMap ({
         }
 
         if (x === -1 && y === -1) {
-            explodedCubes.push(parseCubeAddressString(initialAddress));
+            explodedCubes.push(initialAddressParsed);
             // Кубик взорван
             return;
         }
@@ -328,9 +323,8 @@ export function createMoveMap ({
         };
 
         moves.push({
-            type: 'move',
-            initialAddress,
-            address: sideAddress,
+            initialAddress: initialAddressParsed,
+            newAddress: sideAddress,
         });
     });
 
@@ -383,12 +377,11 @@ export function createMoveMap ({
                     nextSideFieldsCubesState[cubeAddress.field][cubeAddress.x][cubeAddress.y] = cube;
 
                     if (unshiftCount !== 0) {
-                        const initialAddress = getCubeAddressString(sideLineCubeAddresses[i - unshiftCount]);
+                        const initialAddress = sideLineCubeAddresses[i - unshiftCount];
 
                         moves.push({
-                            type: 'move',
                             initialAddress,
-                            address: cubeAddress,
+                            newAddress: cubeAddress,
                         });
                     }
                 } else {
@@ -416,7 +409,7 @@ export function createMoveMap ({
         animationsScript,
         sideFieldsCubesState: nextSideFieldsCubesState as SideFieldsCubesState,
         mainFieldCubesState: nextMainFieldCubesState,
-        moves,
+        movedCubes: moves,
         unshiftCubes,
         explodedCubes,
         shiftCubes,

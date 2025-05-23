@@ -479,7 +479,7 @@ export class TenOnTen {
             animationsScript,
             mainFieldCubesState,
             sideFieldsCubesState,
-            moves,
+            movedCubes: moves,
             unshiftCubes,
             shiftCubes,
             explodedCubes,
@@ -532,15 +532,12 @@ export class TenOnTen {
         const movesWithExtractedCubes: (CubeMove & {cubeView: CubeView})[] = moves.map((move) => {
             return {
                 ...move,
-                cubeView: this.cubesViews.extractOneExistingCubeViewByAddress(parseCubeAddressString(move.initialAddress)),
+                cubeView: this.cubesViews.extractOneExistingCubeViewByAddress(move.initialAddress),
             };
         });
 
         movesWithExtractedCubes.forEach((move) => {
-            if (move.type === 'move') {
-                this.cubesViews.addCubeView(move.cubeView, move.address);
-                return;
-            }
+            this.cubesViews.addCubeView(move.cubeView, move.newAddress);
         });
 
         unshiftCubes.forEach(({ initialAddress, color }) => {
@@ -571,15 +568,10 @@ export class TenOnTen {
         });
 
         // Меняем визуальное направление у кубиков, перемещенных в боковые поля
-        movesWithExtractedCubes.forEach((move) => {
-            if (move.type !== 'move') {
-                return;
-            }
-
-            const { address, cubeView } = move;
-
-            if (isSideCubeAddress(address)) {
-                cubeView.direction.next(reverseDirection(address.field));
+        // TODO: делать это анимацией в момент вхождения кубика в боковое поле
+        movesWithExtractedCubes.forEach(({ newAddress, cubeView }) => {
+            if (isSideCubeAddress(newAddress)) {
+                cubeView.direction.next(reverseDirection(newAddress.field));
                 cubeView.directionVisible.next(false);
             }
         });

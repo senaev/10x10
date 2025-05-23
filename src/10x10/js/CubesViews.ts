@@ -169,6 +169,30 @@ export class CubesViews {
         this.store[field][x][y].add(value);
     }
 
+    public sideEach(func: (params: {
+        cube: CubeView;
+        field: Direction;
+        x: number;
+        y: number;
+    }) => void) {
+        for (const field of DIRECTIONS) {
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                for (let y = 0; y < BOARD_SIZE; y++) {
+                    func({
+                        cube: this.getOneExistingCubeViewByAddress({
+                            x,
+                            y,
+                            field,
+                        }),
+                        field,
+                        x,
+                        y,
+                    });
+                }
+            }
+        }
+    }
+
     public getCubeAddress(cube: CubeView): CubeAddress | undefined {
         let address: CubeAddress | undefined;
 

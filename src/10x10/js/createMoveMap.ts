@@ -16,6 +16,7 @@ import { DIRECTION_STEPS } from '../const/DIRECTION_STEPS';
 import { createEmptyFields } from '../utils/createEmptyFields';
 import {
     CubeAddressString, getCubeAddressString,
+    parseCubeAddressString,
 } from '../utils/CubeAddressString';
 import { generateMoveSteps } from '../utils/generateMoveSteps';
 import { getCubeAddressInSideFieldInOrderFromMain } from '../utils/getCubeAddressInSideFieldInOrderFromMain';
@@ -78,13 +79,6 @@ export type CubeMove =
         address: CubeAddress;
     }
     /**
-     * Кубик был взорван
-     */
-    | {
-        type: 'explode';
-        initialAddress: CubeAddressString;
-    }
-    /**
      * Кубик был сдвинут из боковой линии за пределы поля
      */
     | {
@@ -116,6 +110,7 @@ export function createMoveMap ({
         mainFieldCubesState: MainFieldCubesState;
         moves: CubeMove[];
         unshiftCubes: UnshiftCube[];
+        explodedCubes: CubeAddress[];
     } {
     // Собираем кубики, которые уже на главном поле
     const movingCubesInMainField: MovingCube[] = getMainFieldCubesWithCoordinatesFromState(mainFieldCubesState)
@@ -279,6 +274,7 @@ export function createMoveMap ({
 
     // Заполняем данные о изменениях кубиков
     const moves: CubeMove[] = [];
+    const explodedCubes: CubeAddress[] = [];
 
     // Высчитываем новый стейт приложения
     const nextMainFieldCubesState: MainFieldCubesState = createEmptyFields();
@@ -313,10 +309,7 @@ export function createMoveMap ({
         }
 
         if (x === -1 && y === -1) {
-            moves.push({
-                type: 'explode',
-                initialAddress,
-            });
+            explodedCubes.push(parseCubeAddressString(initialAddress));
             // Кубик взорван
             return;
         }
@@ -423,5 +416,6 @@ export function createMoveMap ({
         mainFieldCubesState: nextMainFieldCubesState,
         moves,
         unshiftCubes,
+        explodedCubes,
     };
 }

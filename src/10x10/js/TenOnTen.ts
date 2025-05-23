@@ -10,6 +10,7 @@ import { deepEqual } from 'senaev-utils/src/utils/Object/deepEqual/deepEqual';
 import { getObjectEntries } from 'senaev-utils/src/utils/Object/getObjectEntries/getObjectEntries';
 import { randomBoolean } from 'senaev-utils/src/utils/random/randomBoolean';
 import { Signal } from 'senaev-utils/src/utils/Signal/Signal';
+import { promiseTimeout } from 'senaev-utils/src/utils/timers/promiseTimeout/promiseTimeout';
 
 import { animateCubeBump } from '../animations/animateCubeBump';
 import { CubeView } from '../components/CubeView';
@@ -109,7 +110,7 @@ export class TenOnTen {
     private readonly levelElement: HTMLElement;
 
     private readonly lang: keyof (typeof I18N_DICTIONARY)[keyof typeof I18N_DICTIONARY];
-    private blockApp: boolean;
+    private readonly isAppBlocked: Signal<boolean> = new Signal(false);
 
     private mainFieldCubesState: MainFieldCubesState;
     private sideFieldCubesState: SideFieldsCubesState;
@@ -219,7 +220,7 @@ export class TenOnTen {
         });
 
         // индикатор состояния приложения - разрешены какие-либо действия пользователя или нет
-        this.blockApp = false;
+        this.isAppBlocked.next(false);
 
         // уровень 1-10 11-60(16-65)
         this.level = 1;
@@ -429,26 +430,24 @@ export class TenOnTen {
     }
 
     // делаем возврат хода
-    public readonly undo = () => {
+    public readonly undo = async () => {
         // блокируем приложение до тех пор, пока не закончим анимацию
-        this.blockApp = true;
-        setTimeout(
-            () => {
-                this.blockApp = false;
-
-                callFunctions(this.callbacks.onAfterUndo);
-            },
-            ANIMATION_TIME * 4
-        );
+        this.isAppBlocked.next(true);
 
         this.canUndo.next(false);
 
         // пробегаем в массиве по каждому кубику предыдущего массива
-        const previousStepMap = this.previousState!;
-
-        this.applyCubesState(previousStepMap);
-
+        const previousState = this.previousState;
+        assertObject(previousState, 'previousState is undefined');
         this.previousState = null;
+
+        this.applyCubesState(previousState);
+
+        await promiseTimeout(ANIMATION_TIME * 4);
+
+        callFunctions(this.callbacks.onAfterUndo);
+
+        this.isAppBlocked.next(false);
     };
 
     public async run(clickedSideCubeAddress: SideCubeAddress) {
@@ -482,6 +481,7 @@ export class TenOnTen {
             sideFieldsCubesState,
             moves,
             unshiftCubes,
+            explodedCubes,
         } = createMoveMap({
             startCubesParameters,
             mainFieldCubesState: this.mainFieldCubesState,
@@ -495,7 +495,7 @@ export class TenOnTen {
 
         // блокируем приложение от начала до конца анимации
         // минус один - потому, что в последний такт обычно анимация чисто символическая
-        this.blockApp = true;
+        this.isAppBlocked.next(true);
 
         const animationScriptWithViews: AnimationScriptWithViews = new Map<CubeView, CubeAnimation[]>();
 
@@ -520,6 +520,9 @@ export class TenOnTen {
             animationScriptWithViews.set(cube, animations);
         });
 
+        // Удаляем кубики, которые взорвались
+        const explodedCubesViews = explodedCubes.map((address) => this.cubesViews.extractOneExistingCubeViewByAddress(address));
+
         // Актуализируем положение вьюх кубиков на поле
         const movesWithExtractedCubes: (CubeMove & {cubeView: CubeView})[] = moves.map((move) => {
             return {
@@ -534,22 +537,10 @@ export class TenOnTen {
                 return;
             }
 
-            if (move.type === 'explode') {
-                // already removed (extracted) from cubesViews
-                return;
-            }
-
             if (move.type === 'move') {
                 this.cubesViews.addCubeView(move.cubeView, move.address);
-
-                if (isSideCubeAddress(move.address)) {
-                    move.cubeView.direction.next(reverseDirection(move.address.field));
-                }
-
                 return;
             }
-
-            throw new Error('move type is not supported');
         });
 
         unshiftCubes.forEach(({ initialAddress, color }) => {
@@ -573,6 +564,24 @@ export class TenOnTen {
         // пошаговый запуск анимации
         await animateMove({
             animationScriptWithViews,
+        });
+
+        explodedCubesViews.forEach((cubeView) => {
+            cubeView.removeElementFromDOM();
+        });
+
+        // Меняем визуальное направление у кубиков, перемещенных в боковые поля
+        movesWithExtractedCubes.forEach((move) => {
+            if (move.type !== 'move') {
+                return;
+            }
+
+            const { address, cubeView } = move;
+
+            if (isSideCubeAddress(address)) {
+                cubeView.direction.next(reverseDirection(address.field));
+                cubeView.directionVisible.next(false);
+            }
         });
 
         // разблокируем кнопку назад, если не случился переход на новый уровень
@@ -604,7 +613,7 @@ export class TenOnTen {
             cubesContainer: this.cubesContainer,
         });
 
-        this.blockApp = false;
+        this.isAppBlocked.next(false);
 
         callFunctions(this.callbacks.onAfterMove);
     }
@@ -614,20 +623,32 @@ export class TenOnTen {
     }
 
     private applyCubesState(state: CubesState) {
-        this.generateSideCubeViews();
+        // ❗️
+        // this.generateSideCubeViews();
 
-        state.main.forEach((row, x) => {
-            row.forEach((cube, y) => {
-                if (cube) {
-                    this.createCubeViewAndAddToBoard({
-                        x,
-                        y,
-                        field: 'main',
-                        color: cube.color,
-                        direction: cube.direction,
-                    });
-                }
-            });
+        // state.main.forEach((row, x) => {
+        //     row.forEach((cube, y) => {
+        //         if (cube) {
+        //             this.createCubeViewAndAddToBoard({
+        //                 x,
+        //                 y,
+        //                 field: 'main',
+        //                 color: cube.color,
+        //                 direction: cube.direction,
+        //             });
+        //         }
+        //     });
+        // });
+
+        this.cubesViews.sideEach(({
+            cube,
+            field,
+            x,
+            y,
+        }) => {
+            const { color } = state[field][x][y];
+
+            cube.color.next(color);
         });
     }
 
@@ -656,7 +677,7 @@ export class TenOnTen {
 
     private readonly handleCubeClick = (cube: CubeView) => {
         // Если стоит блокировка событий приложения - не даём пользователю ничего сделать
-        if (this.blockApp) {
+        if (this.isAppBlocked.value()) {
             return;
         }
 
@@ -678,16 +699,11 @@ export class TenOnTen {
     };
 
     private readonly handleHover = (hoveredCube: CubeView, isHovered: boolean) => {
-        if (this.blockApp) {
-            // На случай, если в моменте происходит анимация
+        const cubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
+        if (!cubeAddress) {
+            // Не бросаем ошибку на случай, если в моменте происходит анимация
             // и элементы на поле могут не соответствовать стейту и не находиться в стейте
             return;
-        }
-
-        const cubeAddress = this.cubesViews.getCubeAddress(hoveredCube);
-
-        if (!cubeAddress) {
-            throw new Error('cubeAddress of hovered cube is not found');
         }
 
         if (!isSideCubeAddress(cubeAddress)) {

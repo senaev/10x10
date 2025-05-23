@@ -172,17 +172,12 @@ export class CubeView {
     public async animate({ animation: action, steps }: CubeAnimateAction): Promise<void> {
         const boom = async () => {
             // console.log("boom:",cube.color, cube.x, cube.y);
-            $(this.element).transition(
-                {
-                    scale: 1.5,
-                    opacity: 0,
-                    duration: ANIMATION_TIME,
-                    easing: 'out',
-                },
-                () => {
-                    this.removeElementFromDOM();
-                }
-            );
+            $(this.element).transition({
+                scale: 1.5,
+                opacity: 0,
+                duration: ANIMATION_TIME,
+                easing: 'out',
+            });
 
             await promiseTimeout(ANIMATION_TIME);
         };
